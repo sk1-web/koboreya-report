@@ -1314,14 +1314,106 @@ function switchStoreMonth(store, month) {
   renderAdvice();
 }
 
-function renderAdvice() {
-  const stores = getStores();
-  const priorityLabel = { high:'🔴 優先度：高', medium:'🟡 優先度：中', low:'🟢 優先度：低' };
-  const priorityColor = { high:'#ef4444', medium:'#f59e0b', low:'#22c55e' };
-  const evalData = loadEval();
-  const monthList = buildAdviceMonthList();
+function buildMonthlyAnalysis(store, month) {
+  // Filter tabelog reviews for this store and month
+  var reviews = TABELOG_REVIEWS.filter(function(r) { return r[0] === store && r[1] === month; });
 
-  let html = '';
+  // Survey/Google comments for this store
+  var storeComments = COMMENTS[store] || {};
+  var catSummary = [];
+  var totalComments = 0;
+  var surveyCount = 0;
+  var googleCount = 0;
+  Object.keys(storeComments).forEach(function(cat) {
+    var items = storeComments[cat] || [];
+    if(items.length === 0) return;
+    var sv = items.filter(function(c){ return c.src === 'survey'; }).length;
+    var gv = items.filter(function(c){ return c.src === 'google'; }).length;
+    surveyCount += sv;
+    googleCount += gv;
+    totalComments += items.length;
+    catSummary.push({ cat: cat, count: items.length, sv: sv, gv: gv, items: items });
+  });
+
+  var html = '';
+
+  // ── 食べログ月次データ ──
+  html += '<div style="margin-bottom:14px;">'
+    + '<div style="font-size:13px;font-weight:700;color:#c62828;margin-bottom:8px;display:flex;align-items:center;gap:6px;">'
+    + '<span style="background:#c62828;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;">食べログ</span>'
+    + month + ' の投稿</div>';
+
+  if(reviews.length === 0) {
+    html += '<div style="font-size:13px;color:#888;padding:6px 10px;background:#f5f5f5;border-radius:6px;">この月の食べログ投稿データはありません。</div>';
+  } else {
+    var scores = reviews.filter(function(r){ return r[3] && r[3] !== ''; }).map(function(r){ return parseFloat(r[3]); });
+    var avgScore = scores.length > 0 ? (scores.reduce(function(a,b){return a+b;},0)/scores.length).toFixed(1) : null;
+    var dayCount = reviews.filter(function(r){ return r[4]==='昼'; }).length;
+    var nightCount = reviews.filter(function(r){ return r[4]==='夜'; }).length;
+    var pos = reviews.filter(function(r){ return parseFloat(r[3]) >= 4; }).length;
+    var neg = reviews.filter(function(r){ return parseFloat(r[3]) < 3.5; }).length;
+
+    html += '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">'
+      + '<span style="font-size:13px;background:#fff3e0;padding:4px 12px;border-radius:12px;font-weight:600;">投稿数：' + reviews.length + '件</span>'
+      + (avgScore ? '<span style="font-size:13px;background:#fff3e0;padding:4px 12px;border-radius:12px;font-weight:600;">平均評価：★' + avgScore + '</span>' : '')
+      + (dayCount > 0 ? '<span style="font-size:13px;background:#e3f2fd;padding:4px 12px;border-radius:12px;">昼：' + dayCount + '件</span>' : '')
+      + (nightCount > 0 ? '<span style="font-size:13px;background:#e8f5e9;padding:4px 12px;border-radius:12px;">夜：' + nightCount + '件</span>' : '')
+      + '</div>';
+
+    // Positive reviews excerpt
+    var posRevs = reviews.filter(function(r){ return parseFloat(r[3]) >= 4 && r[5]; });
+    var negRevs = reviews.filter(function(r){ return parseFloat(r[3]) < 3.5 && r[5]; });
+
+    if(posRevs.length > 0) {
+      html += '<div style="font-size:12px;font-weight:700;color:#2e7d32;margin-bottom:4px;">👍 高評価コメント（' + pos + '件）</div>';
+      posRevs.slice(0,2).forEach(function(r) {
+        html += '<div style="font-size:13px;color:#333;background:#f1f8e9;padding:7px 10px;border-radius:6px;margin-bottom:4px;line-height:1.6;border-left:3px solid #66bb6a;">'
+          + (r[5]||'').slice(0,100) + (r[5] && r[5].length > 100 ? '…' : '') + '</div>';
+      });
+    }
+    if(negRevs.length > 0) {
+      html += '<div style="font-size:12px;font-weight:700;color:#c62828;margin-bottom:4px;margin-top:8px;">⚠️ 改善が必要な点（' + neg + '件）</div>';
+      negRevs.slice(0,2).forEach(function(r) {
+        html += '<div style="font-size:13px;color:#333;background:#fff3f3;padding:7px 10px;border-radius:6px;margin-bottom:4px;line-height:1.6;border-left:3px solid #ef5350;">'
+          + (r[5]||'').slice(0,100) + (r[5] && r[5].length > 100 ? '…' : '') + '</div>';
+      });
+    }
+  }
+  html += '</div>';
+
+  // ── アンケート・Google口コミ（全期間） ──
+  if(totalComments > 0) {
+    html += '<div style="padding-top:12px;border-top:1px solid #e8e0d5;">'
+      + '<div style="font-size:13px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;">'
+      + (surveyCount > 0 ? '<span style="background:#1a73e8;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;">アンケート</span>' : '')
+      + (googleCount > 0 ? '<span style="background:#34a853;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;">Google口コミ</span>' : '')
+      + '<span style="color:#555;">全期間の課題（' + totalComments + '件）</span></div>';
+
+    catSummary.forEach(function(cs) {
+      var neg = cs.items.filter(function(c){ return c.s != null && c.s < 50; });
+      var topItem = cs.items[0];
+      html += '<div style="margin-bottom:8px;display:flex;align-items:flex-start;gap:8px;">'
+        + '<span style="min-width:70px;font-size:12px;background:#f0e8de;padding:2px 8px;border-radius:10px;font-weight:600;text-align:center;">' + cs.cat + '</span>'
+        + '<div><span style="font-size:13px;color:#555;">' + cs.count + '件'
+        + (cs.sv > 0 ? ' / アンケート' + cs.sv + '件' : '')
+        + (cs.gv > 0 ? ' / Google' + cs.gv + '件' : '') + '</span>'
+        + (topItem ? '<div style="font-size:12px;color:#888;margin-top:2px;">' + (topItem.t||'').slice(0,60) + (topItem.t && topItem.t.length > 60 ? '…' : '') + '</div>' : '')
+        + '</div></div>';
+    });
+    html += '</div>';
+  }
+
+  return html;
+}
+
+function renderAdvice() {
+  var stores = getStores();
+  var priorityLabel = { high:'🔴 優先度：高', medium:'🟡 優先度：中', low:'🟢 優先度：低' };
+  var priorityColor = { high:'#ef4444', medium:'#f59e0b', low:'#22c55e' };
+  var evalData = loadEval();
+  var monthList = buildAdviceMonthList();
+
+  var html = '';
 
   stores.forEach(function(s) {
     var d = STORE_ADVICE[s];
@@ -1330,7 +1422,8 @@ function renderAdvice() {
     var selMonth = getStoreMonth(s);
     var ext = EXT[s] || {};
     var ratingInfo = ext.google
-      ? '<span style="font-size:13px;color:#555;margin-left:12px;">Google ★' + ext.google + '（' + (ext.googleCnt || '-') + '件）</span>'
+      ? '<span style="font-size:13px;color:#555;margin-left:12px;">Google ★' + ext.google + '（' + (ext.googleCnt||'-') + '件）</span>'
+      + (ext.tabelog ? '<span style="font-size:13px;color:#555;margin-left:8px;">食べログ ★' + ext.tabelog + '（' + (ext.tabelogCnt||'-') + '件）</span>' : '')
       : '';
 
     // Month tabs
@@ -1358,42 +1451,48 @@ function renderAdvice() {
 
     html += '<div class="card" style="margin-bottom:20px;border-left:4px solid ' + priorityColor[d.priority] + ';">'
 
-      // Header
-      + '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">'
+      // ── ヘッダー ──
+      + '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px;">'
       + '<h3 style="font-size:18px;font-weight:700;color:var(--text);margin:0;">' + s + '</h3>'
       + '<span style="background:' + priorityColor[d.priority] + ';color:#fff;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;">' + priorityLabel[d.priority] + '</span>'
       + ratingInfo
       + '</div>'
 
-      // ── 分析ベース総評（常に表示） ──
-      + '<div style="background:#f8f8f8;border-radius:8px;padding:14px 16px;margin-bottom:16px;border-left:3px solid var(--primary);">'
-      + '<div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:8px;">📊 分析ベース総評</div>'
+      // ── 全体総評（静的・常に表示） ──
+      + '<div style="background:#f8f5f0;border-radius:8px;padding:14px 16px;margin-bottom:16px;border-left:3px solid var(--primary);">'
+      + '<div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:8px;">📊 全体総評</div>'
       + '<div style="font-size:14px;color:var(--text);line-height:1.7;">' + d.overall + '</div>'
       + '</div>'
 
-      // ── 改善ポイント + アドバイス ──
-      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">'
+      // ── 改善ポイント + アドバイス（静的） ──
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">'
       + '<div><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #eee;">⚠️ 改善ポイント</div>' + improvements + '</div>'
       + '<div><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #eee;">💡 アドバイス</div>' + advices + '</div>'
       + '</div>'
 
-      // ── 月次総評エリア ──
+      // ── 月次データ分析エリア ──
       + '<div style="border-top:2px solid #e8e0d5;padding-top:16px;">'
-      + '<div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px;">📅 月次総評・アクションプラン</div>'
+      + '<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px;">📅 月次分析・総評</div>'
 
       // Month tabs
       + '<div class="store-month-tabs">' + monthTabs + '</div>'
 
-      // Monthly textarea
-      + '<div style="margin-bottom:12px;">'
-      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'
-      + '<div style="font-size:13px;font-weight:600;color:var(--primary);">📝 ' + selMonth + ' の月次総評メモ</div>'
-      + '<button id="meval_btn_' + s + '" onclick="saveMonthlyEval(\'' + s + '\',\'' + selMonth + '\')" style="padding:5px 14px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">保存</button>'
-      + '</div>'
-      + '<textarea id="meval_' + s + '" rows="3" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;line-height:1.6;box-sizing:border-box;resize:vertical;" placeholder="' + selMonth + 'の総評・メモを入力…">' + savedEval + '</textarea>'
+      // ── 分析ベース総評（月別データから生成・常に表示） ──
+      + '<div style="background:#fafafa;border:1px solid #e8e0d5;border-radius:10px;padding:14px 16px;margin-bottom:14px;">'
+      + '<div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:10px;">📊 分析ベース総評（' + selMonth + '）</div>'
+      + buildMonthlyAnalysis(s, selMonth)
       + '</div>'
 
-      // Action plans
+      // ── 月次総評コメント欄（アクションプランの上） ──
+      + '<div style="margin-bottom:14px;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'
+      + '<div style="font-size:13px;font-weight:600;color:var(--text);">📝 ' + selMonth + ' の月次総評メモ</div>'
+      + '<button id="meval_btn_' + s + '" onclick="saveMonthlyEval(\'' + s + '\',\'' + selMonth + '\')" style="padding:5px 14px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">保存</button>'
+      + '</div>'
+      + '<textarea id="meval_' + s + '" rows="4" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;line-height:1.6;box-sizing:border-box;resize:vertical;" placeholder="' + selMonth + 'の総評・所感を入力…">' + savedEval + '</textarea>'
+      + '</div>'
+
+      // ── アクションプラン ──
       + '<div id="ap_' + s + '"></div>'
       + '</div>'
       + '</div>';
@@ -1404,12 +1503,12 @@ function renderAdvice() {
   renderAllActionPlans();
 }
 function renderAllActionPlans() {
-  const stores = getStores();
-  stores.forEach(s => renderActionPlan(s));
+  var stores = getStores();
+  stores.forEach(function(s) { renderActionPlan(s); });
 }
 
 
-// ========== アクションプラン ==========
+
 const EMOJIS = ['👍','🙏','💪','✅','🔥','❤️','😊','👏'];
 
 function loadAP() {
