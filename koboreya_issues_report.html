@@ -1323,71 +1323,77 @@ function renderAdvice() {
 
   let html = '';
 
-  stores.forEach(s => {
-    const d = STORE_ADVICE[s];
+  stores.forEach(function(s) {
+    var d = STORE_ADVICE[s];
     if(!d) return;
 
-    const selMonth = getStoreMonth(s);
-    const ext = EXT[s] || {};
-    const ratingInfo = ext.google
+    var selMonth = getStoreMonth(s);
+    var ext = EXT[s] || {};
+    var ratingInfo = ext.google
       ? '<span style="font-size:13px;color:#555;margin-left:12px;">Google ★' + ext.google + '（' + (ext.googleCnt || '-') + '件）</span>'
       : '';
 
-    // Month tabs for this store
-    const monthTabs = monthList.map(m =>
-      '<button class="store-month-tab' + (m === selMonth ? ' active' : '') + '" onclick="switchStoreMonth(\'' + s + '\',\'' + m + '\')">' + m + '</button>'
-    ).join('');
+    // Month tabs
+    var monthTabs = monthList.map(function(m) {
+      return '<button class="store-month-tab' + (m === selMonth ? ' active' : '') + '" onclick="switchStoreMonth(\'' + s + '\',\'' + m + '\')">' + m + '</button>';
+    }).join('');
 
-    const improvements = d.improvements.map((item, i) =>
-      '<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">'
-      + '<span style="background:' + priorityColor[d.priority] + ';color:#fff;border-radius:50%;width:22px;height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">' + (i+1) + '</span>'
-      + '<span style="font-size:14px;color:var(--text);line-height:1.5;">' + item + '</span>'
-      + '</div>'
-    ).join('');
+    // Improvements list
+    var improvements = d.improvements.map(function(item, i) {
+      return '<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">'
+        + '<span style="background:' + priorityColor[d.priority] + ';color:#fff;border-radius:50%;width:22px;height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">' + (i+1) + '</span>'
+        + '<span style="font-size:14px;color:var(--text);line-height:1.5;">' + item + '</span>'
+        + '</div>';
+    }).join('');
 
-    const advices = d.advice.map(item =>
-      '<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;">'
-      + '<span style="font-size:16px;flex-shrink:0;">✅</span>'
-      + '<span style="font-size:14px;color:var(--text);line-height:1.5;">' + item + '</span>'
-      + '</div>'
-    ).join('');
+    // Advice list
+    var advices = d.advice.map(function(item) {
+      return '<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;">'
+        + '<span style="font-size:16px;flex-shrink:0;">✅</span>'
+        + '<span style="font-size:14px;color:var(--text);line-height:1.5;">' + item + '</span>'
+        + '</div>';
+    }).join('');
 
-    const savedEval = (evalData[s] && evalData[s][selMonth]) || '';
+    var savedEval = (evalData[s] && evalData[s][selMonth]) ? evalData[s][selMonth] : '';
 
     html += '<div class="card" style="margin-bottom:20px;border-left:4px solid ' + priorityColor[d.priority] + ';">'
+
+      // Header
       + '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">'
       + '<h3 style="font-size:18px;font-weight:700;color:var(--text);margin:0;">' + s + '</h3>'
       + '<span style="background:' + priorityColor[d.priority] + ';color:#fff;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;">' + priorityLabel[d.priority] + '</span>'
       + ratingInfo
       + '</div>'
 
-      // Month tabs
-      + '<div class="store-month-tabs">' + monthTabs + '</div>'
-
-      // Monthly eval
-      + '<div style="margin-bottom:16px;">'
-      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
-      + '<div style="font-size:13px;font-weight:700;color:var(--primary);">📝 ' + selMonth + ' の月次総評</div>'
-      + '<button id="meval_btn_' + s + '" onclick="saveMonthlyEval(\'' + s + '\',\'' + selMonth + '\')" style="padding:5px 14px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">保存</button>'
-      + '</div>'
-      + '<textarea id="meval_' + s + '" rows="4" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;line-height:1.6;box-sizing:border-box;resize:vertical;" placeholder="' + selMonth + 'の総評・コメントを入力してください…">' + savedEval + '</textarea>'
-      + '</div>'
-
-      // Static analysis (collapsible)
-      + '<details style="margin-bottom:16px;">'
-      + '<summary style="font-size:13px;font-weight:700;color:var(--text-light);cursor:pointer;padding:8px 0;border-top:1px solid var(--border);">📊 分析ベース総評（参考・クリックで展開）</summary>'
-      + '<div style="background:#f8f8f8;border-radius:8px;padding:14px 16px;margin-top:10px;border-left:3px solid var(--primary);">'
+      // ── 分析ベース総評（常に表示） ──
+      + '<div style="background:#f8f8f8;border-radius:8px;padding:14px 16px;margin-bottom:16px;border-left:3px solid var(--primary);">'
+      + '<div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:8px;">📊 分析ベース総評</div>'
       + '<div style="font-size:14px;color:var(--text);line-height:1.7;">' + d.overall + '</div>'
-      + '</div></details>'
+      + '</div>'
 
-      // Improvements + Advice grid
+      // ── 改善ポイント + アドバイス ──
       + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">'
       + '<div><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #eee;">⚠️ 改善ポイント</div>' + improvements + '</div>'
       + '<div><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #eee;">💡 アドバイス</div>' + advices + '</div>'
       + '</div>'
 
+      // ── 月次総評エリア ──
+      + '<div style="border-top:2px solid #e8e0d5;padding-top:16px;">'
+      + '<div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px;">📅 月次総評・アクションプラン</div>'
+
+      // Month tabs
+      + '<div class="store-month-tabs">' + monthTabs + '</div>'
+
+      // Monthly textarea
+      + '<div style="margin-bottom:12px;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'
+      + '<div style="font-size:13px;font-weight:600;color:var(--primary);">📝 ' + selMonth + ' の月次総評メモ</div>'
+      + '<button id="meval_btn_' + s + '" onclick="saveMonthlyEval(\'' + s + '\',\'' + selMonth + '\')" style="padding:5px 14px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">保存</button>'
+      + '</div>'
+      + '<textarea id="meval_' + s + '" rows="3" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;line-height:1.6;box-sizing:border-box;resize:vertical;" placeholder="' + selMonth + 'の総評・メモを入力…">' + savedEval + '</textarea>'
+      + '</div>'
+
       // Action plans
-      + '<div style="border-top:2px dashed #e8e0d5;padding-top:16px;">'
       + '<div id="ap_' + s + '"></div>'
       + '</div>'
       + '</div>';
@@ -1609,19 +1615,21 @@ function submitAPModal() {
 }
 
 // ========== 初期化 ==========
-renderOverview();
-
-// Close modal on backdrop click (deferred until DOM ready)
-document.addEventListener('DOMContentLoaded', function() {
+function _initApp() {
+  renderOverview();
   const _apModal = document.getElementById('apModal');
   if(_apModal) _apModal.addEventListener('click', function(e) {
     if(e.target === this) closeAPModal();
   });
-});
-// Close on Escape key
-document.addEventListener('keydown', function(e) {
-  if(e.key === 'Escape') closeAPModal();
-});
+  document.addEventListener('keydown', function(e) {
+    if(e.key === 'Escape') closeAPModal();
+  });
+}
+if(document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _initApp);
+} else {
+  _initApp();
+}
 </script>
 
 <!-- ===== Action Plan Modal ===== -->
