@@ -165,6 +165,26 @@
   #aiInput{flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;}
   #aiSend{padding:8px 14px;background:var(--primary);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;}
   @media(max-width:640px){#aiMascotPanel{width:calc(100vw - 40px);right:20px;}}
+
+  /* ===== Action Plan Modal ===== */
+  #apModal{display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.45);align-items:center;justify-content:center;}
+  #apModal.open{display:flex;}
+  #apModalBox{background:#fff;border-radius:16px;width:min(540px,95vw);max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);display:flex;flex-direction:column;}
+  #apModalHead{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--primary);border-radius:16px 16px 0 0;}
+  #apModalTitle{font-size:15px;font-weight:700;color:#fff;}
+  #apModalClose{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1;opacity:.8;}
+  #apModalClose:hover{opacity:1;}
+  #apModalBody{padding:20px;display:flex;flex-direction:column;gap:14px;}
+  .ap-form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .ap-form-field label{display:block;font-size:12px;font-weight:700;color:var(--text-light);margin-bottom:5px;}
+  .ap-form-field input,.ap-form-field textarea,.ap-form-field select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;transition:border .15s;}
+  .ap-form-field input:focus,.ap-form-field textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(198,133,78,.15);}
+  .ap-form-field textarea{resize:vertical;min-height:90px;line-height:1.6;}
+  #apModalFoot{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;}
+  .ap-modal-cancel{padding:9px 20px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:14px;color:var(--text-light);}
+  .ap-modal-submit{padding:9px 24px;border:none;border-radius:8px;background:var(--primary);color:#fff;cursor:pointer;font-size:14px;font-weight:700;}
+  .ap-modal-submit:hover{opacity:.9;}
+  @media(max-width:640px){.ap-form-row{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -1102,75 +1122,117 @@ function srcBadge(src) {
   return '<span class="source-tag tag-s">アンケート</span>';
 }
 
+// キーワードで食べログ口コミをカテゴリに割り当て
+const CAT_KEYWORDS = {
+  '提供速度': /待つ|待ち|遅い|速い|時間がかか|提供|すぐに|なかなか来|来るのが/,
+  '接客':     /接客|店員|スタッフ|丁寧|愛想|態度|挨拶|サービス|対応|声をかけ|案内/,
+  '料理':     /料理|もんじゃ|お好み|味|美味し|おいし|メニュー|焼き|鉄板|うまい|旨い|食材|具材/,
+  '清潔感':   /清潔|汚|綺麗|きれい|衛生|匂い|臭い/,
+  '再来店意欲':/また来|リピ|おすすめ|また行|再訪|次回|絶対|来たい|通いたい|大好き/
+};
+
+function getTabelogForCat(cat, filteredReviews) {
+  const re = CAT_KEYWORDS[cat];
+  if(!re) return [];
+  return filteredReviews.filter(r => re.test(r[5]));
+}
+
 function renderComments() {
   const stores = getStores();
+  const hasGenderFilter = currentGender !== 'all';
+  const tReviews = tabelogFiltered(); // 全フィルター適用済みの食べログデータ
+
+  // フィルターボタン更新
+  const _btn = document.getElementById('filterResultBtn');
+  const _hasF = currentDateStart || currentDateEnd || currentTime!=='all' || hasGenderFilter;
+  if(_btn) {
+    _btn.style.display = _hasF ? 'inline-block' : 'none';
+    if(_hasF) _btn.textContent = `🍽️ 食べログ ${tReviews.length}件表示中`;
+  }
+
   let html = '';
 
-  // Update filter result button
-const _cnt = tabelogFiltered().length;
-const _btn = document.getElementById('filterResultBtn');
-const _hasF = currentDateStart || currentDateEnd || currentTime!=='all' || currentGender!=='all';
-if(_btn) { _btn.style.display = _hasF ? 'inline-block' : 'none'; if(_hasF) _btn.textContent = `🍽️ 食べログ ${_cnt}件表示中`; }
-// --- アンケート・Google口コミ ---
+  // 性別フィルター中の注記
+  if(hasGenderFilter) {
+    const gLabel = currentGender === '' ? '未回答' : currentGender;
+    html += `<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#92400e;">
+      👤 性別フィルター「<strong>${gLabel}</strong>」が適用中です。食べログ口コミは${gLabel}のみ表示、アンケート・Googleは性別情報がないため全件表示しています。
+    </div>`;
+  }
+
   CATS.forEach(cat => {
     const info = CAT_INFO[cat];
-    let cards = '';
+
+    // ── アンケート・Google口コミ ──
+    let surveyCards = '';
     stores.forEach(s => {
       const cms = COMMENTS[s] && COMMENTS[s][cat] ? COMMENTS[s][cat] : [];
       if(cms.length === 0) return;
       const qs = cms.map(c => {
         const badge = srcBadge(c.src || 'survey');
-        const scorePart = (c.s != null) ? `${c.s}点 / ` : '';
-        return `
-        <div class="quote">
-          <div class="qmeta">【${s}】${scorePart}${c.i} ${badge}</div>
-          ${c.t}
-        </div>`;
+        const scorePart = (c.s != null) ? c.s + '点 / ' : '';
+        const genderNote = hasGenderFilter
+          ? ' <span style="font-size:10px;color:#aaa;background:#f5f5f5;padding:1px 5px;border-radius:4px;">性別不明</span>'
+          : '';
+        return '<div class="quote"><div class="qmeta">【' + s + '】' + scorePart + c.i + ' ' + badge + genderNote + '</div>' + c.t + '</div>';
       }).join('');
-      cards += `<div style="margin-bottom:12px;"><div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:6px;">${s}</div><div class="quote-list">${qs}</div></div>`;
+      surveyCards += '<div style="margin-bottom:12px;"><div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:6px;">' + s + '</div><div class="quote-list">' + qs + '</div></div>';
     });
 
-    if(!cards) return;
-    html += `
-    <div class="cat-block" style="margin-bottom:20px;">
-      <div class="cat-block-head" style="margin-bottom:12px;">
-        <div class="cat-icon" style="background:${info.bg}">${info.icon}</div>
-        <h3 style="font-size:16px;color:var(--text);">${cat}　<span style="font-size:13px;color:var(--text-light);font-weight:400;">${info.desc}</span></h3>
-      </div>
-      ${cards}
-    </div>`;
+    // ── 食べログ口コミ（カテゴリキーワードマッチ） ──
+    const catTabelog = getTabelogForCat(cat, tReviews);
+    let tabelogCards = '';
+    if(catTabelog.length > 0) {
+      const byStore = {};
+      catTabelog.forEach(r => { if(!byStore[r[0]]) byStore[r[0]]=[]; byStore[r[0]].push(r); });
+      stores.forEach(s => {
+        if(!byStore[s] || byStore[s].length === 0) return;
+        const qs = byStore[s].slice(0,20).map(r => {
+          const sc  = r[3] !== '' ? '★' + r[3] + ' ' : '';
+          const gd  = r[2] ? '<span style="font-size:11px;background:#f3e8ff;color:#7c3aed;padding:1px 5px;border-radius:4px;margin-left:4px;">' + r[2] + '</span>' : '<span style="font-size:10px;color:#aaa;background:#f5f5f5;padding:1px 5px;border-radius:4px;margin-left:4px;">性別不明</span>';
+          const nd  = r[4] ? '<span style="font-size:11px;color:#888;margin-left:4px;">' + r[4] + '</span>' : '';
+          const mo  = r[1] ? '<span style="font-size:11px;color:#aaa;margin-left:4px;">' + r[1] + '</span>' : '';
+          return '<div class="quote"><div class="qmeta">【' + s + '】' + sc + '<span class="badge-tabelog">食べログ</span>' + gd + nd + mo + '</div>' + r[5] + '</div>';
+        }).join('');
+        tabelogCards += '<div style="margin-bottom:12px;"><div style="font-size:13px;font-weight:700;color:#7c3aed;margin-bottom:6px;">' + s + ' <span style="font-size:12px;font-weight:400;color:#888;">食べログ ' + byStore[s].length + '件</span></div><div class="quote-list">' + qs + '</div></div>';
+      });
+    }
+
+    if(!surveyCards && !tabelogCards) return;
+
+    const totalCnt = catTabelog.length;
+    html += '<div class="cat-block" style="margin-bottom:20px;"><div class="cat-block-head" style="margin-bottom:12px;"><div class="cat-icon" style="background:' + info.bg + '">' + info.icon + '</div><h3 style="font-size:16px;color:var(--text);">' + cat + '　<span style="font-size:13px;color:var(--text-light);font-weight:400;">' + info.desc + (totalCnt ? ' ／ 食べログ' + totalCnt + '件' : '') + '</span></h3></div>' + surveyCards + tabelogCards + '</div>';
   });
+
+  // ── 食べログ全般（どのカテゴリにもマッチしなかった口コミ） ──
+  const categorized = new Set();
+  CATS.forEach(cat => getTabelogForCat(cat, tReviews).forEach(r => categorized.add(r)));
+  const uncategorized = tReviews.filter(r => !categorized.has(r));
+  if(uncategorized.length > 0) {
+    const byStore = {};
+    uncategorized.forEach(r => { if(!byStore[r[0]]) byStore[r[0]]=[]; byStore[r[0]].push(r); });
+    let uCards = '';
+    stores.forEach(s => {
+      if(!byStore[s] || !byStore[s].length) return;
+      const qs = byStore[s].slice(0,20).map(r => {
+        const sc = r[3] !== '' ? '★' + r[3] + ' ' : '';
+        const gd = r[2] ? '<span style="font-size:11px;background:#f3e8ff;color:#7c3aed;padding:1px 5px;border-radius:4px;margin-left:4px;">' + r[2] + '</span>' : '<span style="font-size:10px;color:#aaa;background:#f5f5f5;padding:1px 5px;border-radius:4px;margin-left:4px;">性別不明</span>';
+        const nd = r[4] ? '<span style="font-size:11px;color:#888;margin-left:4px;">' + r[4] + '</span>' : '';
+        const mo = r[1] ? '<span style="font-size:11px;color:#aaa;margin-left:4px;">' + r[1] + '</span>' : '';
+        return '<div class="quote"><div class="qmeta">【' + s + '】' + sc + '<span class="badge-tabelog">食べログ</span>' + gd + nd + mo + '</div>' + r[5] + '</div>';
+      }).join('');
+      uCards += '<div style="margin-bottom:12px;"><div style="font-size:13px;font-weight:700;color:#7c3aed;margin-bottom:6px;">' + s + ' <span style="font-size:12px;font-weight:400;color:#888;">' + byStore[s].length + '件</span></div><div class="quote-list">' + qs + '</div></div>';
+    });
+    if(uCards) {
+      html += '<div class="cat-block" style="margin-bottom:20px;"><div class="cat-block-head" style="margin-bottom:12px;"><div class="cat-icon" style="background:#f3e8ff;">🍽️</div><h3 style="font-size:16px;color:var(--text);">食べログ 全般口コミ　<span style="font-size:13px;color:var(--text-light);font-weight:400;">特定カテゴリに分類されなかった口コミ</span></h3></div>' + uCards + '</div>';
+    }
+  }
 
   document.getElementById('commentsBlocks').innerHTML = html || '<div class="alert-box blue" style="margin:0"><span>ℹ️</span><div>選択した店舗のコメントデータはありません。</div></div>';
 
-  // --- 食べログ口コミ ---
-  const tReviews = tabelogFiltered();
-  let tHtml = '';
-  if(tReviews.length > 0) {
-    // Group by store
-    const byStore = {};
-    tReviews.forEach(r => { if(!byStore[r[0]]) byStore[r[0]]=[];  byStore[r[0]].push(r); });
-    const avgByStore = {};
-    Object.keys(byStore).forEach(s => {
-      const scored = byStore[s].filter(r=>r[3]!=='');
-      avgByStore[s] = scored.length ? (scored.reduce((a,r)=>a+r[3],0)/scored.length).toFixed(1) : null;
-    });
-    tHtml = Object.keys(byStore).map(s => {
-      const avg = avgByStore[s];
-      const qs = byStore[s].slice(0,30).map(r => {
-        const sc = r[3]!=='' ? `★${r[3]} ` : '';
-        const gd = r[2] ? ` <span style="font-size:11px;color:#888;">(${r[2]})</span>` : '';
-        const nd = r[4] ? ` <span style="font-size:11px;color:#888;">${r[4]}</span>` : '';
-        const mo = r[1] ? ` <span style="font-size:11px;color:#aaa;">${r[1]}</span>` : '';
-        return `<div class="quote"><div class="qmeta">【${s}】${sc}<span class="badge-tabelog">食べログ</span>${gd}${nd}${mo}</div>${r[5]}</div>`;
-      }).join('');
-      return `<div style="margin-bottom:12px;"><div style="font-size:13px;font-weight:700;color:#7c3aed;margin-bottom:6px;">${s}${avg?` <span style="font-size:12px;font-weight:400;color:#666;">平均 ★${avg}</span>`:''}（${byStore[s].length}件）</div><div class="quote-list">${qs}</div></div>`;
-    }).join('');
-  }
+  // 別エリアは不要になったのでクリア
   const tSection = document.getElementById('tabelogSection');
-  if(tSection) tSection.innerHTML = tReviews.length
-    ? `<div style="font-size:14px;font-weight:700;color:#7c3aed;margin-bottom:8px;">🍽️ 食べログ口コミ（${tReviews.length}件）</div>${tHtml}`
-    : '<div class="alert-box blue" style="margin:0"><span>ℹ️</span><div>条件に合う食べログ口コミはありません。</div></div>';
+  if(tSection) tSection.innerHTML = '';
 }
 
 // ========== 総評・改善提案 ==========
@@ -1339,25 +1401,22 @@ function switchMonth(store, month) {
   if(el) { el.dataset.month = month; renderActionPlan(store); }
 }
 
+// Modal state
+let _apModalStore = '', _apModalMonth = '', _apModalEditIdx = -1;
+
 function addThread(store) {
   const el = document.getElementById('ap_' + store);
-  const month = el ? el.dataset.month : '';
-  const data = loadAP();
-  if(!data[store]) data[store] = {};
-  if(!data[store][month]) data[store][month] = [];
-
-  const date  = prompt('記載日（例：2026/03/11）','');
-  if(date===null) return;
-  const person= prompt('担当者名','');
-  if(person===null) return;
-  const action= prompt('対策内容','');
-  if(action===null || !action.trim()) return;
-  const due   = prompt('完了予定日（例：2026/04/30）','');
-  if(due===null) return;
-
-  data[store][month].push({ date, person, action, due, reactions:{}, replies:[] });
-  saveAP(data);
-  renderActionPlan(store);
+  _apModalStore = store;
+  _apModalMonth = el ? el.dataset.month : '';
+  _apModalEditIdx = -1;
+  // Reset form
+  document.getElementById('apf_date').value   = new Date().toISOString().slice(0,10);
+  document.getElementById('apf_person').value  = '';
+  document.getElementById('apf_action').value  = '';
+  document.getElementById('apf_due').value     = '';
+  document.getElementById('apModalTitle').textContent = '📌 アクションプランを追加 — ' + store;
+  document.getElementById('apModal').classList.add('open');
+  document.getElementById('apf_person').focus();
 }
 
 function toggleReaction(store, month, ti, emoji) {
@@ -1394,17 +1453,16 @@ function editThread(store, month, ti) {
   const data = loadAP();
   const th = data[store]?.[month]?.[ti];
   if(!th) return;
-  const date   = prompt('記載日', th.date   || '');
-  if(date   === null) return;
-  const person = prompt('担当者名', th.person || '');
-  if(person === null) return;
-  const action = prompt('対策内容', th.action || '');
-  if(action === null || !action.trim()) { alert('対策内容を入力してください'); return; }
-  const due    = prompt('完了予定日', th.due   || '');
-  if(due    === null) return;
-  data[store][month][ti] = { ...th, date, person, action, due };
-  saveAP(data);
-  renderActionPlan(store);
+  _apModalStore   = store;
+  _apModalMonth   = month;
+  _apModalEditIdx = ti;
+  document.getElementById('apf_date').value   = th.date   || '';
+  document.getElementById('apf_person').value  = th.person || '';
+  document.getElementById('apf_action').value  = th.action || '';
+  document.getElementById('apf_due').value     = th.due    || '';
+  document.getElementById('apModalTitle').textContent = '✏️ アクションプランを編集 — ' + store;
+  document.getElementById('apModal').classList.add('open');
+  document.getElementById('apf_action').focus();
 }
 
 function deleteThread(store, month, ti) {
@@ -1428,9 +1486,88 @@ function deleteReply(store, month, ti, ri) {
   }
 }
 
+
+function closeAPModal() {
+  document.getElementById('apModal').classList.remove('open');
+}
+
+function submitAPModal() {
+  const date   = document.getElementById('apf_date').value.trim();
+  const person = document.getElementById('apf_person').value.trim();
+  const action = document.getElementById('apf_action').value.trim();
+  const due    = document.getElementById('apf_due').value.trim();
+  if(!action) {
+    document.getElementById('apf_action').focus();
+    document.getElementById('apf_action').style.borderColor = '#e55';
+    return;
+  }
+  document.getElementById('apf_action').style.borderColor = '';
+
+  const data = loadAP();
+  if(!data[_apModalStore]) data[_apModalStore] = {};
+  if(!data[_apModalStore][_apModalMonth]) data[_apModalStore][_apModalMonth] = [];
+
+  if(_apModalEditIdx >= 0) {
+    // Edit existing
+    const th = data[_apModalStore][_apModalMonth][_apModalEditIdx];
+    data[_apModalStore][_apModalMonth][_apModalEditIdx] = { ...th, date, person, action, due };
+  } else {
+    // Add new
+    data[_apModalStore][_apModalMonth].push({ date, person, action, due, reactions:{}, replies:[] });
+  }
+  saveAP(data);
+  closeAPModal();
+  renderActionPlan(_apModalStore);
+}
+
+// Close modal on backdrop click
+document.getElementById('apModal').addEventListener('click', function(e) {
+  if(e.target === this) closeAPModal();
+});
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+  if(e.key === 'Escape') closeAPModal();
+});
+
 // ========== 初期化 ==========
 renderOverview();
 </script>
+
+<!-- ===== Action Plan Modal ===== -->
+<div id="apModal">
+  <div id="apModalBox">
+    <div id="apModalHead">
+      <span id="apModalTitle">📌 アクションプランを追加</span>
+      <button id="apModalClose" onclick="closeAPModal()">✕</button>
+    </div>
+    <div id="apModalBody">
+      <div class="ap-form-row">
+        <div class="ap-form-field">
+          <label>📅 記載日</label>
+          <input type="date" id="apf_date">
+        </div>
+        <div class="ap-form-field">
+          <label>👤 担当者名</label>
+          <input type="text" id="apf_person" placeholder="例：田中">
+        </div>
+      </div>
+      <div class="ap-form-field">
+        <label>⚡ 対策内容</label>
+        <textarea id="apf_action" placeholder="具体的な対策・改善内容を入力してください"></textarea>
+      </div>
+      <div class="ap-form-row">
+        <div class="ap-form-field">
+          <label>🎯 完了予定日</label>
+          <input type="date" id="apf_due">
+        </div>
+      </div>
+    </div>
+    <div id="apModalFoot">
+      <button class="ap-modal-cancel" onclick="closeAPModal()">キャンセル</button>
+      <button class="ap-modal-submit" onclick="submitAPModal()">保存する</button>
+    </div>
+  </div>
+</div>
 
 <!-- ===== AI Mascot ===== -->
 <div id="aiMascot">
