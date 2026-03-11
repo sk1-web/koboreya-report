@@ -206,9 +206,9 @@
 <div class="filter-bar" id="filterBar">
   <div class="filter-group">
     <label>📅 期間：</label>
-    <input type="month" id="filterDateStart" onchange="applyFilters()" title="開始月">
+    <input type="date" id="filterDateStart" onchange="applyFilters()" title="開始日">
     <span style="font-size:12px;color:#999;">〜</span>
-    <input type="month" id="filterDateEnd" onchange="applyFilters()" title="終了月">
+    <input type="date" id="filterDateEnd" onchange="applyFilters()" title="終了日">
   </div>
   <div class="filter-group">
     <label>🕐 来店時間：</label>
@@ -228,7 +228,7 @@
     </select>
   </div>
   <button onclick="resetFilters()" style="padding:4px 12px;border:1px solid var(--border);border-radius:6px;background:#fff;cursor:pointer;font-size:12px;color:var(--text-light);">リセット</button>
-  <span id="filterStatus" style="font-size:12px;color:var(--primary);font-weight:600;"></span>
+  <button onclick="goToComments()" id="filterResultBtn" style="display:none;padding:4px 14px;border:none;border-radius:6px;background:var(--primary);color:#fff;cursor:pointer;font-size:12px;font-weight:600;"></button>
 </div>
 </div>
 
@@ -791,9 +791,24 @@ function applyFilters() {
   currentDateEnd   = document.getElementById('filterDateEnd').value   || '';
   currentTime      = document.getElementById('filterTime').value;
   currentGender    = document.getElementById('filterGender').value;
-  updateFilterStatus();
+  // Re-render current section
   const active = document.querySelector('.section.active');
   if(active) renderSection(active.id);
+  // Update the result button
+  const count = tabelogFiltered().length;
+  const btn = document.getElementById('filterResultBtn');
+  const hasFilter = currentDateStart || currentDateEnd || currentTime!=='all' || currentGender!=='all';
+  if(hasFilter && btn) {
+    btn.style.display='inline-block';
+    btn.textContent = `🍽️ 食べログ ${count}件 →コメントで確認`;
+  } else if(btn) {
+    btn.style.display='none';
+  }
+}
+
+function goToComments() {
+  const btn = document.querySelector('.nav-btn[onclick*="comments"]');
+  showSection('comments', btn);
 }
 
 function resetFilters() {
@@ -801,25 +816,21 @@ function resetFilters() {
   document.getElementById('filterTime').value='all';
   document.getElementById('filterGender').value='all';
   currentDateStart=''; currentDateEnd=''; currentTime='all'; currentGender='all';
-  updateFilterStatus();
+  const btn = document.getElementById('filterResultBtn');
+  if(btn) btn.style.display='none';
   const active = document.querySelector('.section.active');
   if(active) renderSection(active.id);
 }
 
-function updateFilterStatus() {
-  const parts=[];
-  if(currentDateStart||currentDateEnd) parts.push(`期間:${currentDateStart||'〜'}〜${currentDateEnd||'〜'}`);
-  if(currentTime!=='all') parts.push(currentTime==='昼'?'ランチ':'ディナー');
-  if(currentGender!=='all') parts.push(currentGender||'未回答');
-  document.getElementById('filterStatus').textContent = parts.length ? '▶ '+parts.join(' | ') : '';
-}
-
 function tabelogFiltered() {
   const stores = getStores();
+  // Convert YYYY-MM-DD date filter to month format YYYY/MM
+  const dStart = currentDateStart ? currentDateStart.substring(0,7).replace('-','/') : '';
+  const dEnd   = currentDateEnd   ? currentDateEnd.substring(0,7).replace('-','/') : '';
   return TABELOG_REVIEWS.filter(r => {
     if(!stores.includes(r[0])) return false;
-    if(currentDateStart && r[1] < currentDateStart) return false;
-    if(currentDateEnd   && r[1] > currentDateEnd)   return false;
+    if(dStart && r[1] < dStart) return false;
+    if(dEnd   && r[1] > dEnd)   return false;
     if(currentTime!=='all' && r[4]!==currentTime)   return false;
     if(currentGender!=='all' && r[2]!==currentGender) return false;
     return true;
@@ -1095,7 +1106,12 @@ function renderComments() {
   const stores = getStores();
   let html = '';
 
-  // --- アンケート・Google口コミ ---
+  // Update filter result button
+const _cnt = tabelogFiltered().length;
+const _btn = document.getElementById('filterResultBtn');
+const _hasF = currentDateStart || currentDateEnd || currentTime!=='all' || currentGender!=='all';
+if(_btn) { _btn.style.display = _hasF ? 'inline-block' : 'none'; if(_hasF) _btn.textContent = `🍽️ 食べログ ${_cnt}件表示中`; }
+// --- アンケート・Google口コミ ---
   CATS.forEach(cat => {
     const info = CAT_INFO[cat];
     let cards = '';
@@ -1284,17 +1300,28 @@ function buildThreadHtml(store, month, ti, th) {
     `<button class="ap-reaction-btn ${(reactions[e]||[]).length?'active':''}" onclick="toggleReaction('${store}','${month}',${ti},'${e}')">${e} ${(reactions[e]||[]).length||''}</button>`
   ).join('');
 
-  const repliesHtml = (th.replies||[]).map(rp =>
-    `<div class="ap-reply"><div class="ap-reply-meta">${rp.name} · ${rp.date}</div>${rp.text}</div>`
+  const repliesHtml = (th.replies||[]).map((rp,ri) =>
+    `<div class="ap-reply">
+      <div class="ap-reply-meta">${rp.name} · ${rp.date}
+        <button onclick="deleteReply('${store}','${month}',${ti},${ri})" style="margin-left:8px;padding:1px 6px;border:1px solid #ddd;border-radius:4px;background:#fff;cursor:pointer;font-size:10px;color:#e55;">削除</button>
+      </div>
+      <div>${rp.text}</div>
+    </div>`
   ).join('');
 
   return `
   <div class="ap-thread" id="apt_${store}_${month}_${ti}">
-    <div class="ap-thread-head">
-      <div class="ap-thread-field"><span>📅 記載日</span><strong>${th.date||''}</strong></div>
-      <div class="ap-thread-field"><span>👤 担当者</span><strong>${th.person||''}</strong></div>
-      <div class="ap-thread-field" style="grid-column:1/-1"><span>⚡ 対策</span><strong>${th.action||''}</strong></div>
-      <div class="ap-thread-field"><span>🎯 完了予定日</span><strong>${th.due||''}</strong></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+      <div class="ap-thread-head" style="flex:1;">
+        <div class="ap-thread-field"><span>📅 記載日</span><strong>${th.date||''}</strong></div>
+        <div class="ap-thread-field"><span>👤 担当者</span><strong>${th.person||''}</strong></div>
+        <div class="ap-thread-field" style="grid-column:1/-1"><span>⚡ 対策</span><strong>${th.action||''}</strong></div>
+        <div class="ap-thread-field"><span>🎯 完了予定日</span><strong>${th.due||''}</strong></div>
+      </div>
+      <div style="display:flex;gap:6px;margin-left:10px;flex-shrink:0;">
+        <button onclick="editThread('${store}','${month}',${ti})" style="padding:4px 10px;border:1px solid var(--primary);border-radius:6px;background:#fff;cursor:pointer;font-size:12px;color:var(--primary);font-weight:600;">✏️ 編集</button>
+        <button onclick="deleteThread('${store}','${month}',${ti})" style="padding:4px 10px;border:1px solid #e55;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;color:#e55;font-weight:600;">🗑️ 削除</button>
+      </div>
     </div>
     <div class="ap-action-text">${th.action||''}</div>
     <div class="ap-reactions">${reactionBtns}</div>
@@ -1361,6 +1388,44 @@ function sendReply(store, month, ti) {
   th.replies.push({ name, text, date: now.toLocaleDateString('ja-JP') });
   saveAP(data);
   renderActionPlan(store);
+}
+
+function editThread(store, month, ti) {
+  const data = loadAP();
+  const th = data[store]?.[month]?.[ti];
+  if(!th) return;
+  const date   = prompt('記載日', th.date   || '');
+  if(date   === null) return;
+  const person = prompt('担当者名', th.person || '');
+  if(person === null) return;
+  const action = prompt('対策内容', th.action || '');
+  if(action === null || !action.trim()) { alert('対策内容を入力してください'); return; }
+  const due    = prompt('完了予定日', th.due   || '');
+  if(due    === null) return;
+  data[store][month][ti] = { ...th, date, person, action, due };
+  saveAP(data);
+  renderActionPlan(store);
+}
+
+function deleteThread(store, month, ti) {
+  if(!confirm('このアクションプランを削除しますか？')) return;
+  const data = loadAP();
+  if(data[store]?.[month]) {
+    data[store][month].splice(ti, 1);
+    saveAP(data);
+    renderActionPlan(store);
+  }
+}
+
+function deleteReply(store, month, ti, ri) {
+  if(!confirm('この返信を削除しますか？')) return;
+  const data = loadAP();
+  const th = data[store]?.[month]?.[ti];
+  if(th?.replies) {
+    th.replies.splice(ri, 1);
+    saveAP(data);
+    renderActionPlan(store);
+  }
 }
 
 // ========== 初期化 ==========
