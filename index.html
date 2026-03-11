@@ -2,852 +2,854 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>店舗営業部 ポータル｜こぼれや</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --sidebar-bg:#1a2744;
-  --sidebar-hover:#2a3d6e;
-  --sidebar-active:#3b5bdb;
-  --primary:#3b5bdb;
-  --primary-dark:#2f4ac4;
-  --accent:#f59e0b;
-  --danger:#ef4444;
-  --success:#22c55e;
-  --bg:#f5f6fa;
-  --card:#fff;
-  --text:#1e293b;
-  --text-light:#64748b;
-  --border:#e2e8f0;
-  --shadow:0 1px 4px rgba(0,0,0,.08);
+  --sb:#1a2744;--sb-hover:#2a3d6e;--sb-active:#3b5bdb;
+  --primary:#3b5bdb;--primary-d:#2f4ac4;--accent:#f59e0b;
+  --danger:#ef4444;--success:#22c55e;--warn:#f59e0b;
+  --bg:#f5f6fa;--card:#fff;--text:#1e293b;--light:#64748b;
+  --border:#e2e8f0;--shadow:0 1px 4px rgba(0,0,0,.08);
 }
 body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
-
-/* ── Sidebar ── */
-#sidebar{
-  width:220px;min-width:220px;background:var(--sidebar-bg);
-  display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;
-  transition:width .2s;overflow:hidden;
-}
-.sb-logo{
-  padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.1);
-}
+/* Sidebar */
+#sidebar{width:220px;min-width:220px;background:var(--sb);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow:hidden;}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.1);}
 .sb-logo-title{font-size:15px;font-weight:800;color:#fff;letter-spacing:.05em;}
-.sb-logo-sub{font-size:10px;color:rgba(255,255,255,.5);margin-top:2px;}
+.sb-logo-sub{font-size:10px;color:rgba(255,255,255,.45);margin-top:2px;}
 .sb-nav{flex:1;overflow-y:auto;padding:8px 0;}
 .sb-nav::-webkit-scrollbar{width:4px;}
 .sb-nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:2px;}
-.sb-group-label{
-  font-size:9px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.12em;
-  padding:14px 16px 5px;text-transform:uppercase;
-}
-.sb-item{
-  display:flex;align-items:center;gap:10px;padding:9px 16px;
-  color:rgba(255,255,255,.72);font-size:13px;font-weight:500;cursor:pointer;
-  border-left:3px solid transparent;transition:all .15s;user-select:none;
-}
-.sb-item:hover{background:var(--sidebar-hover);color:#fff;}
-.sb-item.active{background:rgba(59,91,219,.25);color:#fff;border-left-color:var(--sidebar-active);}
-.sb-item .sb-icon{font-size:16px;width:20px;text-align:center;}
-
-/* ── Main ── */
+.sb-group{font-size:9px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.12em;padding:14px 16px 5px;text-transform:uppercase;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 16px;color:rgba(255,255,255,.72);font-size:13px;font-weight:500;cursor:pointer;border-left:3px solid transparent;transition:all .15s;user-select:none;}
+.sb-item:hover{background:var(--sb-hover);color:#fff;}
+.sb-item.active{background:rgba(59,91,219,.25);color:#fff;border-left-color:var(--sb-active);}
+.sb-icon{font-size:16px;width:20px;text-align:center;}
+/* Main */
 #main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
-.topbar{
-  background:#fff;border-bottom:1px solid var(--border);
-  padding:0 28px;height:56px;display:flex;align-items:center;
-  justify-content:space-between;position:sticky;top:0;z-index:50;
-}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.topbar-left{display:flex;align-items:center;gap:14px;}
 .topbar-title{font-size:16px;font-weight:700;color:var(--text);}
-.topbar-date{font-size:13px;color:var(--text-light);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.topbar-date{font-size:13px;color:var(--light);}
+/* Edit mode toggle */
+.edit-toggle{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-size:12px;font-weight:700;color:var(--light);font-family:inherit;transition:all .15s;}
+.edit-toggle:hover{border-color:var(--primary);color:var(--primary);}
+.edit-toggle.on{background:var(--primary);color:#fff;border-color:var(--primary);}
 .content{padding:24px 28px;flex:1;}
-
-/* ── Pages ── */
-.page{display:none;}
-.page.active{display:block;}
+/* Pages */
+.page{display:none;}.page.active{display:block;}
 .page-header{margin-bottom:20px;}
 .page-header h2{font-size:20px;font-weight:800;color:var(--text);}
-.page-header p{font-size:13px;color:var(--text-light);margin-top:4px;}
-
-/* ── Cards ── */
+.page-header p{font-size:13px;color:var(--light);margin-top:4px;}
+/* Cards */
 .card{background:var(--card);border-radius:10px;padding:18px 20px;box-shadow:var(--shadow);border:1px solid var(--border);}
-.card-title{font-size:13px;font-weight:700;color:var(--text-light);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;}
-.card-value{font-size:28px;font-weight:800;color:var(--text);}
-.card-sub{font-size:12px;color:var(--text-light);margin-top:2px;}
 .grid{display:grid;gap:16px;}
-.grid-2{grid-template-columns:repeat(2,1fr);}
-.grid-3{grid-template-columns:repeat(3,1fr);}
-.grid-4{grid-template-columns:repeat(4,1fr);}
-@media(max-width:900px){.grid-4{grid-template-columns:repeat(2,1fr);}.grid-3{grid-template-columns:1fr 1fr;}.grid-2{grid-template-columns:1fr;}}
-
-/* ── Table ── */
-.table-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border);}
+.g2{grid-template-columns:repeat(2,1fr);}
+.g3{grid-template-columns:repeat(3,1fr);}
+.g4{grid-template-columns:repeat(4,1fr);}
+@media(max-width:900px){.g4{grid-template-columns:repeat(2,1fr);}.g3{grid-template-columns:1fr 1fr;}.g2{grid-template-columns:1fr;}}
+/* Table */
+.tw{overflow-x:auto;border-radius:8px;border:1px solid var(--border);}
 table{width:100%;border-collapse:collapse;font-size:13px;}
 th{background:#f8fafc;font-weight:700;color:var(--text);padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);white-space:nowrap;}
 td{padding:9px 14px;border-bottom:1px solid #f1f5f9;vertical-align:top;line-height:1.5;}
 tr:hover td{background:#fafbff;}
 tr:last-child td{border-bottom:none;}
-
-/* ── Badges ── */
+/* Badges */
 .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;}
-.badge-blue{background:#dbeafe;color:#1d4ed8;}
-.badge-green{background:#dcfce7;color:#166534;}
-.badge-red{background:#fee2e2;color:#991b1b;}
-.badge-yellow{background:#fef9c3;color:#854d0e;}
-.badge-gray{background:#f1f5f9;color:#475569;}
-.badge-orange{background:#fff7ed;color:#9a3412;}
-.badge-purple{background:#f3e8ff;color:#7e22ce;}
-
-/* ── Search ── */
-.search-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
-.search-bar input, .search-bar select{
-  padding:8px 12px;border:1px solid var(--border);border-radius:8px;
-  font-size:13px;font-family:inherit;outline:none;background:#fff;
-}
-.search-bar input{flex:1;min-width:180px;}
-.search-bar input:focus, .search-bar select:focus{border-color:var(--primary);}
-
-/* ── Dashboard quick links ── */
-.quick-links{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.b-blue{background:#dbeafe;color:#1d4ed8;}.b-green{background:#dcfce7;color:#166534;}
+.b-red{background:#fee2e2;color:#991b1b;}.b-yellow{background:#fef9c3;color:#854d0e;}
+.b-gray{background:#f1f5f9;color:#475569;}.b-orange{background:#fff7ed;color:#9a3412;}
+.b-purple{background:#f3e8ff;color:#7e22ce;}
+/* Search bar */
+.sbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.sbar input,.sbar select{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff;}
+.sbar input{flex:1;min-width:180px;}
+.sbar input:focus,.sbar select:focus{border-color:var(--primary);}
+/* Quick links */
+.ql-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
 .ql{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all .15s;text-align:center;}
 .ql:hover{border-color:var(--primary);transform:translateY(-1px);box-shadow:0 4px 12px rgba(59,91,219,.12);}
-.ql .ql-icon{font-size:28px;margin-bottom:6px;}
-.ql .ql-label{font-size:12px;font-weight:700;color:var(--text);}
-@media(max-width:900px){.quick-links{grid-template-columns:repeat(2,1fr);}}
-
-/* ── Meeting cards ── */
-.meeting-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;}
-.meeting-card h3{font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px;}
-.meeting-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
-.week-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px;}
-.week-col{background:#f8fafc;border-radius:8px;padding:10px;font-size:12px;line-height:1.5;}
-.week-col-title{font-size:11px;font-weight:700;color:var(--primary);margin-bottom:6px;}
-@media(max-width:900px){.week-grid{grid-template-columns:1fr 1fr;}}
-
-/* ── Role cards ── */
+.ql-icon{font-size:28px;margin-bottom:6px;}
+.ql-label{font-size:12px;font-weight:700;color:var(--text);}
+@media(max-width:900px){.ql-grid{grid-template-columns:repeat(2,1fr);}}
+/* Meeting */
+.meet-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;}
+.wk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px;}
+.wk-col{background:#f8fafc;border-radius:8px;padding:10px;font-size:12px;line-height:1.5;}
+.wk-title{font-size:11px;font-weight:700;color:var(--primary);margin-bottom:6px;}
+@media(max-width:900px){.wk-grid{grid-template-columns:1fr 1fr;}}
+/* Role */
 .role-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:14px;}
-.role-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;}
-.role-title{font-size:15px;font-weight:800;color:var(--text);}
 .role-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
-.role-section-title{font-size:11px;font-weight:700;color:var(--text-light);margin-bottom:6px;text-transform:uppercase;}
+.role-sec{font-size:11px;font-weight:700;color:var(--light);margin-bottom:6px;text-transform:uppercase;}
 .role-list{list-style:none;padding:0;}
-.role-list li{font-size:12px;padding:3px 0;border-bottom:1px solid #f1f5f9;color:var(--text);line-height:1.4;}
+.role-list li{font-size:12px;padding:3px 0;border-bottom:1px solid #f1f5f9;line-height:1.4;}
 .role-list li::before{content:"·";color:var(--primary);margin-right:5px;}
 @media(max-width:900px){.role-cols{grid-template-columns:1fr;}}
-
-/* ── Training ── */
-.training-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;}
-.training-card h3{font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;}
-.training-content{font-size:12px;color:var(--text-light);line-height:1.6;max-height:80px;overflow:hidden;transition:max-height .3s;}
-.training-content.expanded{max-height:500px;}
-.expand-btn{font-size:11px;color:var(--primary);cursor:pointer;margin-top:6px;background:none;border:none;font-family:inherit;padding:0;}
-
-/* ── Review ── */
-.review-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;border-left:3px solid var(--danger);}
-.review-card.strategy-done{border-left-color:var(--success);}
-.review-meta{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;}
-.star-bad{color:var(--danger);font-weight:700;}
-
-/* ── Rule card ── */
-.rule-row{cursor:pointer;}
-.rule-content{display:none;background:#f8fafc;padding:10px 14px;font-size:12px;line-height:1.7;white-space:pre-wrap;border-top:1px solid var(--border);}
-
-/* ── Complaint ── */
-.complaint-section{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;}
-.complaint-header{padding:12px 16px;font-weight:700;font-size:13px;background:#fef2f2;color:#991b1b;cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
-.complaint-body{display:none;padding:12px 16px;font-size:12px;color:var(--text);line-height:1.7;white-space:pre-wrap;border-top:1px solid #fee2e2;}
-
-/* ── Schedule ── */
-.sched-table td{white-space:normal;}
-
-/* ── Link tile ── */
-.link-tile{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;border-radius:12px;padding:22px;cursor:pointer;text-decoration:none;display:block;transition:all .2s;}
+/* Training */
+.tr-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;}
+.tr-content{font-size:12px;color:var(--light);line-height:1.6;max-height:72px;overflow:hidden;transition:max-height .3s;}
+.tr-content.open{max-height:600px;}
+/* Review */
+.rv-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;border-left:3px solid var(--danger);}
+/* Complaint */
+.cp-sec{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;}
+.cp-hd{padding:12px 16px;font-weight:700;font-size:13px;background:#fef2f2;color:#991b1b;cursor:pointer;display:flex;justify-content:space-between;}
+.cp-bd{display:none;padding:12px 16px;font-size:12px;line-height:1.7;white-space:pre-wrap;border-top:1px solid #fee2e2;}
+/* Tab */
+.tab-bar{display:flex;gap:4px;margin-bottom:16px;background:#f1f5f9;padding:4px;border-radius:10px;}
+.tab-btn{padding:7px 16px;border-radius:7px;border:none;background:transparent;cursor:pointer;font-size:13px;font-weight:600;color:var(--light);font-family:inherit;transition:all .15s;}
+.tab-btn.active{background:#fff;color:var(--primary);box-shadow:0 1px 4px rgba(0,0,0,.08);}
+.tab-pane{display:none;}.tab-pane.active{display:block;}
+/* Section divider */
+.sec-div{font-size:14px;font-weight:700;color:var(--text);margin:20px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:8px;}
+/* Stat */
+.stat-row{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;flex:1;min-width:140px;}
+.stat-num{font-size:26px;font-weight:800;color:var(--primary);}
+.stat-lbl{font-size:11px;color:var(--light);margin-top:2px;}
+/* Link tile */
+.link-tile{background:linear-gradient(135deg,var(--primary),var(--primary-d));color:#fff;border-radius:12px;padding:22px;cursor:pointer;display:block;transition:all .2s;border:none;text-align:left;font-family:inherit;width:100%;}
 .link-tile:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(59,91,219,.35);}
 .link-tile h3{font-size:17px;font-weight:800;margin-bottom:6px;}
 .link-tile p{font-size:12px;opacity:.85;line-height:1.5;}
-.link-tile .tile-arrow{font-size:22px;margin-top:12px;display:block;}
-
-.link-tile-orange{background:linear-gradient(135deg,#f59e0b,#d97706);}
-.link-tile-green{background:linear-gradient(135deg,#22c55e,#16a34a);}
-.link-tile-red{background:linear-gradient(135deg,#ef4444,#dc2626);}
-
-/* ── Tabs ── */
-.tab-bar{display:flex;gap:4px;margin-bottom:16px;background:#f1f5f9;padding:4px;border-radius:10px;flex-wrap:wrap;}
-.tab-btn{padding:7px 16px;border-radius:7px;border:none;background:transparent;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-light);font-family:inherit;transition:all .15s;}
-.tab-btn.active{background:#fff;color:var(--primary);box-shadow:0 1px 4px rgba(0,0,0,.08);}
-.tab-panel{display:none;}
-.tab-panel.active{display:block;}
-
-/* ── Contact ── */
-.contact-group{margin-bottom:20px;}
-.contact-group-title{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--primary);display:inline-block;}
-
-/* ── Scroll ── */
+.link-tile .ta{font-size:22px;margin-top:12px;display:block;}
+.lt-o{background:linear-gradient(135deg,#f59e0b,#d97706);}
+/* Contact */
+.cg-title{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--primary);display:inline-block;}
+/* Scrollbar */
 ::-webkit-scrollbar{width:6px;height:6px;}
 ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px;}
 
-/* ── Stats row ── */
-.stat-row{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
-.stat-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;flex:1;min-width:140px;}
-.stat-box-num{font-size:26px;font-weight:800;color:var(--primary);}
-.stat-box-label{font-size:11px;color:var(--text-light);margin-top:2px;}
-
-/* ── Section divider ── */
-.sec-divider{font-size:14px;font-weight:700;color:var(--text);margin:20px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:8px;}
-
-/* ── Filters ── */
-.filter-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
-.chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:#fff;font-size:12px;font-weight:600;cursor:pointer;color:var(--text-light);transition:all .15s;}
-.chip.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+/* ── EDIT MODE ── */
+.edit-mode .editable{outline:1.5px dashed var(--primary);border-radius:4px;cursor:text;min-width:40px;padding:2px 4px;background:rgba(59,91,219,.04);}
+.edit-mode .editable:focus{outline:2px solid var(--primary);background:#fff;}
+.edit-mode .editable:empty:before{content:attr(data-ph);color:#aaa;font-style:italic;}
+.edit-btn{display:none;padding:3px 10px;border-radius:6px;border:1px solid var(--primary);background:#fff;color:var(--primary);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;}
+.edit-mode .edit-btn{display:inline-flex;align-items:center;gap:4px;}
+.del-btn{display:none;padding:3px 8px;border-radius:6px;border:1px solid var(--danger);background:#fff;color:var(--danger);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;}
+.edit-mode .del-btn{display:inline-flex;}
+.add-row-btn{display:none;margin-top:10px;padding:7px 16px;border-radius:8px;border:1.5px dashed var(--primary);background:rgba(59,91,219,.04);color:var(--primary);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;}
+.edit-mode .add-row-btn{display:flex;align-items:center;justify-content:center;gap:6px;}
+.row-actions{display:none;gap:4px;align-items:center;}
+.edit-mode .row-actions{display:flex;}
+.edit-save-banner{display:none;position:fixed;bottom:20px;right:20px;z-index:200;background:var(--primary);color:#fff;padding:12px 22px;border-radius:10px;font-size:13px;font-weight:700;box-shadow:0 4px 16px rgba(59,91,219,.4);cursor:pointer;transition:all .2s;}
+.edit-save-banner:hover{background:var(--primary-d);}
+.edit-mode ~ #save-banner{display:flex;align-items:center;gap:8px;}
 </style>
 </head>
 <body>
-
-<!-- SIDEBAR -->
 <nav id="sidebar">
   <div class="sb-logo">
     <div class="sb-logo-title">🍽️ こぼれや</div>
     <div class="sb-logo-sub">店舗営業部ポータル</div>
   </div>
-  <div class="sb-nav">
-    <div class="sb-group-label">メイン</div>
-    <div class="sb-item active" onclick=\"showPage('dashboard',this)\"><span class="sb-icon">🏠</span>ダッシュボード</div>
-    
-    <div class="sb-group-label">運営管理</div>
-    <div class="sb-item" onclick=\"showPage('tasks',this)\"><span class="sb-icon">📋</span>業務一覧</div>
-    <div class="sb-item" onclick=\"showPage('schedule',this)\"><span class="sb-icon">📅</span>年間スケジュール</div>
-    <div class="sb-item" onclick=\"showPage('meetings',this)\"><span class="sb-icon">🤝</span>会議体</div>
-    <div class="sb-item" onclick=\"showPage('roles',this)\"><span class="sb-icon">👥</span>ロール定義</div>
-
-    <div class="sb-group-label">店舗情報</div>
-    <div class="sb-item" onclick=\"showPage('rules',this)\"><span class="sb-icon">📜</span>店舗ルール</div>
-    <div class="sb-item" onclick=\"showPage('contacts',this)\"><span class="sb-icon">📞</span>連絡先一覧</div>
-
-    <div class="sb-group-label">教育・品質</div>
-    <div class="sb-item" onclick=\"showPage('training',this)\"><span class="sb-icon">🎓</span>研修ライブラリ</div>
-    <div class="sb-item" onclick=\"showPage('reviews',this)\"><span class="sb-icon">⭐</span>口コミ管理</div>
-    <div class="sb-item" onclick=\"showPage('complaints',this)\"><span class="sb-icon">⚠️</span>サービス改善集</div>
-
-    <div class="sb-group-label">分析</div>
-    <div class="sb-item" onclick="openReport()"><span class="sb-icon">📊</span>課題分析レポート</div>
+  <div class="sb-nav" id="sb-nav">
+    <div class="sb-group">メイン</div>
+    <div class="sb-item active" data-page="dashboard"><span class="sb-icon">🏠</span>ダッシュボード</div>
+    <div class="sb-group">運営管理</div>
+    <div class="sb-item" data-page="tasks"><span class="sb-icon">📋</span>業務一覧</div>
+    <div class="sb-item" data-page="schedule"><span class="sb-icon">📅</span>年間スケジュール</div>
+    <div class="sb-item" data-page="meetings"><span class="sb-icon">🤝</span>会議体</div>
+    <div class="sb-item" data-page="roles"><span class="sb-icon">👥</span>ロール定義</div>
+    <div class="sb-group">店舗情報</div>
+    <div class="sb-item" data-page="rules"><span class="sb-icon">📜</span>店舗ルール</div>
+    <div class="sb-item" data-page="contacts"><span class="sb-icon">📞</span>連絡先一覧</div>
+    <div class="sb-group">教育・品質</div>
+    <div class="sb-item" data-page="training"><span class="sb-icon">🎓</span>研修ライブラリ</div>
+    <div class="sb-item" data-page="reviews"><span class="sb-icon">⭐</span>口コミ管理</div>
+    <div class="sb-item" data-page="complaints"><span class="sb-icon">⚠️</span>サービス改善集</div>
+    <div class="sb-group">分析</div>
+    <div class="sb-item" data-page="report"><span class="sb-icon">📊</span>課題分析レポート</div>
   </div>
 </nav>
-
-<!-- MAIN -->
 <div id="main">
   <div class="topbar">
-    <div class="topbar-title" id="topbar-title">ダッシュボード</div>
-    <div class="topbar-date" id="topbar-date"></div>
+    <div class="topbar-left">
+      <div class="topbar-title" id="topbar-title">ダッシュボード</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-date" id="topbar-date"></div>
+      <button class="edit-toggle" id="edit-toggle" title="編集モード切り替え">✏️ 編集モード</button>
+    </div>
   </div>
   <div class="content">
 
-    <!-- ── DASHBOARD ── -->
+    <!-- DASHBOARD -->
     <div id="page-dashboard" class="page active">
-      <div class="page-header">
-        <h2>🏠 ダッシュボード</h2>
-        <p>店舗営業部ポータル — 各セクションへのクイックアクセス</p>
-      </div>
-
-      <div class="grid grid-4" style="margin-bottom:24px;" id="kpi-summary"></div>
-
-      <div class="sec-divider">🔗 クイックアクセス</div>
-      <div class="quick-links" id="quick-links"></div>
-
-      <div class="grid grid-2" style="margin-bottom:24px;">
+      <div class="page-header"><h2>🏠 ダッシュボード</h2><p>店舗営業部ポータル — 各セクションへのクイックアクセス</p></div>
+      <div class="grid g4" style="margin-bottom:24px;" id="kpi-cards"></div>
+      <div class="sec-div">🔗 クイックアクセス</div>
+      <div class="ql-grid" id="quick-links"></div>
+      <div class="grid g2" style="margin-bottom:24px;">
         <div>
-          <div class="sec-divider">📅 直近の店長会スケジュール</div>
-          <div id="upcoming-schedule"></div>
+          <div class="sec-div">📅 直近の店長会</div>
+          <div id="upcoming-sched"></div>
         </div>
         <div>
-          <div class="sec-divider">⭐ 最近の悪評（要対応）</div>
+          <div class="sec-div">⭐ 未対策の悪評</div>
           <div id="recent-reviews"></div>
         </div>
       </div>
-
-      <div class="sec-divider">🔍 分析レポートへ</div>
-      <div class="grid grid-2">
-        <a class="link-tile" onclick="openReport()">
+      <div class="sec-div">🔍 分析レポート</div>
+      <div class="grid g2">
+        <button class="link-tile" id="btn-report">
           <h3>📊 課題分析レポート</h3>
           <p>アンケート・Google口コミ・食べログデータをもとに店舗ごとの課題を分析</p>
-          <span class="tile-arrow">→ レポートを開く</span>
-        </a>
-        <a class="link-tile link-tile-orange" onclick=\"showPage('reviews',this)\">
+          <span class="ta">→ レポートを開く</span>
+        </button>
+        <button class="link-tile lt-o" id="btn-reviews">
           <h3>⭐ 悪評管理</h3>
           <p>過去の食べログ悪評リスト・対策状況・サービス改善集</p>
-          <span class="tile-arrow">→ 口コミ管理を開く</span>
-        </a>
+          <span class="ta">→ 口コミ管理を開く</span>
+        </button>
       </div>
     </div>
 
-    <!-- ── 業務一覧 ── -->
+    <!-- 業務一覧 -->
     <div id="page-tasks" class="page">
-      <div class="page-header">
-        <h2>📋 業務一覧</h2>
-        <p>店舗営業部の全業務・担当者・頻度の一覧</p>
+      <div class="page-header"><h2>📋 業務一覧</h2><p>店舗営業部の全業務・担当者・頻度（編集モードで内容を変更できます）</p></div>
+      <div class="sbar">
+        <input type="text" id="task-q" placeholder="業務名・担当者で検索…">
+        <select id="task-cat"><option value="">全カテゴリ</option></select>
+        <select id="task-person"><option value="">全担当者</option></select>
       </div>
-      <div class="search-bar">
-        <input type="text" id="task-search" placeholder="業務名・担当者で検索…" oninput="filterTasks()">
-        <select id="task-cat" onchange="filterTasks()">
-          <option value="">全カテゴリ</option>
-        </select>
-        <select id="task-person" onchange="filterTasks()">
-          <option value="">全担当者</option>
-        </select>
+      <div class="tw">
+        <table><thead><tr><th>大分類</th><th>分類</th><th>業務</th><th>頻度</th><th>管理部門</th><th>担当</th><th class="edit-btn" style="display:none;"></th></tr></thead>
+        <tbody id="tasks-body"></tbody></table>
       </div>
-      <div class="table-wrap">
-        <table id="tasks-table">
-          <thead><tr><th>大分類</th><th>分類</th><th>業務</th><th>頻度</th><th>管理部門</th><th>担当</th></tr></thead>
-          <tbody id="tasks-body"></tbody>
-        </table>
-      </div>
+      <button class="add-row-btn" id="tasks-add">＋ 業務を追加</button>
     </div>
 
-    <!-- ── 年間スケジュール ── -->
+    <!-- スケジュール -->
     <div id="page-schedule" class="page">
-      <div class="page-header">
-        <h2>📅 年間スケジュール・店長会</h2>
-        <p>年間イベント・評価・清掃スケジュールおよび店長会日程</p>
-      </div>
+      <div class="page-header"><h2>📅 年間スケジュール・店長会</h2><p>年間イベント・評価・清掃スケジュールおよび店長会日程</p></div>
       <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('sched','annual',this)">年間スケジュール</button>
-        <button class="tab-btn" onclick="switchTab('sched','storemgr',this)">店長会スケジュール</button>
+        <button class="tab-btn active" data-tab="sched-annual">年間スケジュール</button>
+        <button class="tab-btn" data-tab="sched-storemgr">店長会スケジュール</button>
       </div>
-      <div id="sched-annual" class="tab-panel active">
-        <div class="table-wrap">
-          <table class="sched-table">
-            <thead><tr><th>期</th><th>Q</th><th>月</th><th>社内イベント</th><th>研修</th><th>人事評価</th><th>AB評価</th><th>清掃</th><th>その他</th></tr></thead>
-            <tbody id="annual-body"></tbody>
-          </table>
-        </div>
+      <div id="sched-annual" class="tab-pane active">
+        <div class="tw"><table id="annual-tbl">
+          <thead><tr><th>期</th><th>Q</th><th>月</th><th>社内イベント</th><th>研修</th><th>人事評価</th><th>AB評価</th><th>清掃</th><th>その他</th></tr></thead>
+          <tbody id="annual-body"></tbody>
+        </table></div>
       </div>
-      <div id="sched-storemgr" class="tab-panel">
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>日付</th><th>週</th><th>研修内容</th></tr></thead>
-            <tbody id="storemgr-body"></tbody>
-          </table>
-        </div>
+      <div id="sched-storemgr" class="tab-pane">
+        <div class="tw"><table>
+          <thead><tr><th>日付</th><th>週</th><th>研修内容</th></tr></thead>
+          <tbody id="storemgr-body"></tbody>
+        </table></div>
+        <button class="add-row-btn" id="storemgr-add">＋ 日程を追加</button>
       </div>
     </div>
 
-    <!-- ── 会議体 ── -->
+    <!-- 会議体 -->
     <div id="page-meetings" class="page">
-      <div class="page-header">
-        <h2>🤝 会議体</h2>
-        <p>定例会議の構成・アジェンダ</p>
-      </div>
+      <div class="page-header"><h2>🤝 会議体</h2><p>定例会議の構成・アジェンダ（編集モードで各週のアジェンダを編集できます）</p></div>
       <div id="meetings-content"></div>
     </div>
 
-    <!-- ── ロール定義 ── -->
+    <!-- ロール定義 -->
     <div id="page-roles" class="page">
-      <div class="page-header">
-        <h2>👥 ロール定義</h2>
-        <p>各職位の役割・ミッション・KPI定義</p>
-      </div>
+      <div class="page-header"><h2>👥 ロール定義</h2><p>各職位の役割・ミッション・KPI</p></div>
       <div id="roles-content"></div>
     </div>
 
-    <!-- ── 店舗ルール ── -->
+    <!-- 店舗ルール -->
     <div id="page-rules" class="page">
-      <div class="page-header">
-        <h2>📜 店舗ルール</h2>
-        <p>全店舗・店舗別ルール一覧（クリックで詳細展開）</p>
+      <div class="page-header"><h2>📜 店舗ルール</h2><p>全店舗・店舗別ルール一覧（クリックで詳細展開）</p></div>
+      <div class="sbar">
+        <input type="text" id="rules-q" placeholder="キーワードで検索…">
+        <select id="rules-store"><option value="">全店舗</option></select>
       </div>
-      <div class="search-bar">
-        <input type="text" id="rules-search" placeholder="キーワードで検索…" oninput="filterRules()">
-        <select id="rules-store" onchange="filterRules()">
-          <option value="">全店舗</option>
-        </select>
-      </div>
-      <div class="table-wrap">
-        <table id="rules-table">
-          <thead><tr><th>No.</th><th>項目</th><th>対象店舗</th><th>担当部門</th><th>運用責任者</th></tr></thead>
-          <tbody id="rules-body"></tbody>
-        </table>
-      </div>
+      <div id="rules-list"></div>
+      <button class="add-row-btn" id="rules-add">＋ ルールを追加</button>
     </div>
 
-    <!-- ── 連絡先 ── -->
+    <!-- 連絡先 -->
     <div id="page-contacts" class="page">
-      <div class="page-header">
-        <h2>📞 連絡先一覧</h2>
-        <p>取引先・各店舗・社内担当の連絡先</p>
-      </div>
-      <div class="search-bar">
-        <input type="text" id="contact-search" placeholder="名前・電話番号で検索…" oninput="filterContacts()">
-      </div>
+      <div class="page-header"><h2>📞 連絡先一覧</h2><p>取引先・各店舗・社内担当の連絡先</p></div>
+      <div class="sbar"><input type="text" id="contact-q" placeholder="名前・電話番号で検索…"></div>
       <div id="contacts-content"></div>
+      <button class="add-row-btn" id="contacts-add">＋ 連絡先を追加</button>
     </div>
 
-    <!-- ── 研修 ── -->
+    <!-- 研修 -->
     <div id="page-training" class="page">
-      <div class="page-header">
-        <h2>🎓 研修ライブラリ</h2>
-        <p>マネジメント研修・エピソード動画一覧</p>
-      </div>
+      <div class="page-header"><h2>🎓 研修ライブラリ</h2><p>マネジメント研修・エピソード動画</p></div>
       <div id="training-content"></div>
+      <button class="add-row-btn" id="training-add">＋ 研修を追加</button>
     </div>
 
-    <!-- ── 口コミ管理 ── -->
+    <!-- 口コミ -->
     <div id="page-reviews" class="page">
-      <div class="page-header">
-        <h2>⭐ 口コミ管理</h2>
-        <p>過去の悪評リスト・対策管理</p>
-      </div>
-      <div class="search-bar">
-        <input type="text" id="review-search" placeholder="キーワードで検索…" oninput="filterReviews()">
-        <select id="review-store" onchange="filterReviews()">
-          <option value="">全店舗</option>
-          <option value="本店">本店</option>
-          <option value="結">結</option>
-          <option value="囲">囲</option>
-          <option value="別邸">別邸</option>
-          <option value="二番街">二番街</option>
-          <option value="縁">縁</option>
-          <option value="浅草">浅草</option>
-        </select>
-        <select id="review-media" onchange="filterReviews()">
-          <option value="">全媒体</option>
-          <option value="食べログ">食べログ</option>
-          <option value="Google">Google</option>
-        </select>
+      <div class="page-header"><h2>⭐ 口コミ管理</h2><p>過去の悪評リスト・対策管理（対策欄を直接入力して保存できます）</p></div>
+      <div class="sbar">
+        <input type="text" id="rv-q" placeholder="キーワードで検索…">
+        <select id="rv-store"><option value="">全店舗</option><option>本店</option><option>結</option><option>囲</option><option>別邸</option><option>二番街</option><option>縁</option><option>浅草</option></select>
+        <select id="rv-media"><option value="">全媒体</option><option>食べログ</option><option>Google</option></select>
       </div>
       <div id="reviews-content"></div>
+      <button class="add-row-btn" id="reviews-add">＋ 口コミを追加</button>
     </div>
 
-    <!-- ── サービス改善集 ── -->
+    <!-- 改善集 -->
     <div id="page-complaints" class="page">
-      <div class="page-header">
-        <h2>⚠️ サービス改善集</h2>
-        <p>よくあるサービスの悪評と改善対策</p>
-      </div>
+      <div class="page-header"><h2>⚠️ サービス改善集</h2><p>よくある悪評と対策（編集モードで内容を変更できます）</p></div>
       <div id="complaints-content"></div>
     </div>
 
-  </div><!-- /content -->
-</div><!-- /main -->
+  </div>
+</div>
+
+<!-- 保存バナー -->
+<div class="edit-save-banner" id="save-banner">💾 変更を保存</div>
 
 <script>
-const DATA = {"tasks": [{"cat1": "全体戦略", "cat2": "営業戦略策定", "task": "営業戦略策定", "freq": "年次", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "全体戦略", "cat2": "店舗人事戦略策定", "task": "店舗人事戦略策定", "freq": "年次", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "チーム管理", "cat2": "業務企画チーム管理", "task": "業務企画チーム戦略策定", "freq": "-", "mgmt": "部長", "dept": "業務企画", "person": "中島"}, {"cat1": "チーム管理", "cat2": "", "task": "業務管理", "freq": "-", "mgmt": "部長", "dept": "部長", "person": "佐藤"}, {"cat1": "チーム管理", "cat2": "", "task": "定例会議運営主管", "freq": "週2回", "mgmt": "部長", "dept": "業務企画", "person": "中島"}, {"cat1": "チーム管理", "cat2": "トレーナーチーム管理", "task": "トレーナーチーム戦略策定", "freq": "-", "mgmt": "副部長", "dept": "トレーナー", "person": "久野"}, {"cat1": "チーム管理", "cat2": "", "task": "業務管理", "freq": "-", "mgmt": "副部長", "dept": "副部長", "person": "久野"}, {"cat1": "チーム管理", "cat2": "", "task": "定例会議運営主管", "freq": "週次", "mgmt": "副部長", "dept": "トレーナー", "person": "平川"}, {"cat1": "チーム管理", "cat2": "設備・修繕・害虫チーム管理", "task": "設備・修繕・害虫チーム戦略策定", "freq": "-", "mgmt": "SV", "dept": "設備・修繕・害虫", "person": "小澤"}, {"cat1": "チーム管理", "cat2": "", "task": "業務管理", "freq": "-", "mgmt": "部長", "dept": "部長", "person": "佐藤"}, {"cat1": "チーム管理", "cat2": "", "task": "定例会議運営主管", "freq": "月2回", "mgmt": "SV", "dept": "設備・修繕・害虫", "person": "小澤"}, {"cat1": "チーム管理", "cat2": "セントラルキッチン管理", "task": "セントラルキッチン戦略", "freq": "-", "mgmt": "部長", "dept": "セントラル", "person": "中島"}, {"cat1": "チーム管理", "cat2": "", "task": "業務管理", "freq": "", "mgmt": "部長", "dept": "部長", "person": "佐藤"}, {"cat1": "チーム管理", "cat2": "", "task": "定例会議運営主管", "freq": "週次", "mgmt": "部長", "dept": "セントラル", "person": "中島"}, {"cat1": "会議体", "cat2": "店舗マネジメント定例会議", "task": "運営主管", "freq": "-", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "会議体", "cat2": "店長会", "task": "運営主管", "freq": "-", "mgmt": "副部長", "dept": "SV", "person": "小澤"}, {"cat1": "会議体", "cat2": "店舗全体会議", "task": "運営主管", "freq": "-", "mgmt": "副部長", "dept": "SV", "person": "小澤"}, {"cat1": "会議体", "cat2": "トレーナーチーム会議", "task": "運営主管", "freq": "-", "mgmt": "副部長", "dept": "トレーナー", "person": "平川"}, {"cat1": "会議体", "cat2": "設備・修繕・害虫チーム会議", "task": "運営主管", "freq": "-", "mgmt": "部長", "dept": "設備・修繕・害虫", "person": "小澤"}, {"cat1": "会議体", "cat2": "業務企画会議", "task": "運営主管", "freq": "-", "mgmt": "部長", "dept": "業務企画", "person": "富田"}, {"cat1": "会議体", "cat2": "セントラルキッチン会議", "task": "運営主管", "freq": "-", "mgmt": "部長", "dept": "セントラル", "person": "中島"}, {"cat1": "会議体", "cat2": "会議体管理", "task": "会議体適正化", "freq": "-", "mgmt": "部長", "dept": "副部長", "person": "久野"}, {"cat1": "売上管理", "cat2": "売上予算策定", "task": "期初予算策定", "freq": "年次", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "売上管理", "cat2": "", "task": "下期修正予算策定", "freq": "半期毎", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "売上管理", "cat2": "", "task": "月次修正予算策定", "freq": "月次", "mgmt": "部長", "dept": "業務企画", "person": "富田"}, {"cat1": "売上管理", "cat2": "売上進捗表更新", "task": "月次更新", "freq": "月次", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "売上管理", "cat2": "", "task": "日次更新", "freq": "日次", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "売上管理", "cat2": "売上施策立案", "task": "営業時間決定", "freq": "月次", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "売上管理", "cat2": "", "task": "客数増加施策立案", "freq": "-", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "売上管理", "cat2": "", "task": "客単価上昇施策立案", "freq": "-", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "予約管理", "cat2": "予約設計変更", "task": "予約戦略策定", "freq": "-", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "予約管理", "cat2": "", "task": "予約設計作成", "freq": "-", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "予約管理", "cat2": "", "task": "「予約設計表」更新", "freq": "-", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "", "task": "「グルメサイト設定シート」更新", "freq": "-", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "", "task": "グルメサイト更新", "freq": "-", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "", "task": "ebica更新", "freq": "-", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "", "task": "全社案内", "freq": "-", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "予約管理", "cat2": "営業時間変更", "task": "Google更新", "freq": "-", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "", "task": "グルメサイト更新", "freq": "-", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "", "task": "ebica更新", "freq": "-", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "", "task": "全社案内", "freq": "-", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "予約管理", "cat2": "団タメ！", "task": "契約対応", "freq": "-", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "", "task": "コース設定", "freq": "-", "mgmt": "SV", "dept": "SV", "person": "久野"}, {"cat1": "予約管理", "cat2": "", "task": "予約受付対応", "freq": "-", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "", "task": "支払い対応", "freq": "-", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "その他予約対応", "task": "リクエスト予約対応", "freq": "日次", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "", "task": "予約エラー対応", "freq": "日次", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "コスト管理", "cat2": "コスト予算策定", "task": "期初予算策定", "freq": "年次", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "コスト管理", "cat2": "", "task": "予算外の起案", "freq": "-", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "コスト管理", "cat2": "", "task": "下期修正予算策定", "freq": "半期毎", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "コスト管理", "cat2": "コスト進捗確認", "task": "予算進捗確認", "freq": "-", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "コスト管理", "cat2": "コスト対策", "task": "食材費管理", "freq": "-", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "コスト管理", "cat2": "", "task": "人件費管理", "freq": "-", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "コスト管理", "cat2": "", "task": "備品管理", "freq": "-", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "コスト管理", "cat2": "", "task": "その他コスト管理", "freq": "-", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "食材費管理", "cat2": "食材費管理", "task": "「食材棚卸し」更新", "freq": "月次", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "食材費管理", "cat2": "", "task": "「理論-実績原価差異」更新", "freq": "月次", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "食材費管理", "cat2": "", "task": "商品情報(POS)更新", "freq": "-", "mgmt": "部長", "dept": "業務企画", "person": "富田"}, {"cat1": "人件費管理", "cat2": "人件費管理", "task": "「店舗営業部共通」予算決定", "freq": "月次", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "人件費管理", "cat2": "", "task": "シフト管理", "freq": "-", "mgmt": "SV", "dept": "店長", "person": "店長"}, {"cat1": "人件費管理", "cat2": "シフト管理", "task": "シフト枠(予算)作成", "freq": "月次", "mgmt": "SV", "dept": "業務企画", "person": "中島"}, {"cat1": "人件費管理", "cat2": "", "task": "シフト枠(予算)承認", "freq": "月次", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "人件費管理", "cat2": "", "task": "社員基本シフト作成", "freq": "", "mgmt": "SV", "dept": "店長", "person": "店長"}, {"cat1": "人件費管理", "cat2": "", "task": "シフト作成", "freq": "", "mgmt": "SV", "dept": "店長", "person": "店長"}, {"cat1": "人件費管理", "cat2": "", "task": "シフト承認会議", "freq": "", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "人件費管理", "cat2": "", "task": "シフト公開", "freq": "", "mgmt": "SV", "dept": "SV", "person": "久野"}, {"cat1": "人件費管理", "cat2": "", "task": "欠員等対応", "freq": "", "mgmt": "SV", "dept": "店長", "person": "店長"}, {"cat1": "人件費管理", "cat2": "勤怠管理", "task": "日次勤怠承認", "freq": "", "mgmt": "SV", "dept": "店長", "person": "店長"}, {"cat1": "人件費管理", "cat2": "", "task": "「勤怠管理」更新", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "人件費管理", "cat2": "", "task": "「残業管理」更新", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "人件費管理", "cat2": "", "task": "「退職者一覧」更新", "freq": "", "mgmt": "SV", "dept": "SV", "person": "久野"}, {"cat1": "人件費管理", "cat2": "", "task": "休暇管理", "freq": "", "mgmt": "SV", "dept": "SV", "person": "久野"}, {"cat1": "稟議対応", "cat2": "稟議承認", "task": "各種申請承認", "freq": "", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "稟議対応", "cat2": "", "task": "支払依頼承認", "freq": "", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "稟議対応", "cat2": "", "task": "経費精算承認", "freq": "", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "小口現金管理", "cat2": "小口現金管理", "task": "小口受取", "freq": "", "mgmt": "SV", "dept": "店長", "person": "店長"}, {"cat1": "小口現金管理", "cat2": "", "task": "小口精算", "freq": "", "mgmt": "SV", "dept": "店長", "person": "店長"}, {"cat1": "小口現金管理", "cat2": "", "task": "小口申請", "freq": "", "mgmt": "SV", "dept": "店長", "person": "店長"}, {"cat1": "小口現金管理", "cat2": "", "task": "小口承認", "freq": "", "mgmt": "事業部長", "dept": "SV", "person": "久野"}, {"cat1": "小口現金管理", "cat2": "", "task": "小口返金", "freq": "", "mgmt": "SV", "dept": "店長", "person": "店長"}, {"cat1": "人材管理", "cat2": "社員採用", "task": "採用計画立案", "freq": "", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "人材管理", "cat2": "", "task": "面接対応", "freq": "", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "人材管理", "cat2": "", "task": "採用判断", "freq": "", "mgmt": "事業部長", "dept": "SV", "person": "久野"}, {"cat1": "人材管理", "cat2": "", "task": "社員受入対応", "freq": "", "mgmt": "SV", "dept": "SV", "person": "久野"}, {"cat1": "人材管理", "cat2": "社員採用", "task": "採用計画立案", "freq": "", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "人材管理", "cat2": "", "task": "面接対応", "freq": "", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "人材管理", "cat2": "", "task": "採用判断", "freq": "", "mgmt": "事業部長", "dept": "SV", "person": "久野"}, {"cat1": "人材管理", "cat2": "アルバイト採用", "task": "採用計画立案", "freq": "", "mgmt": "SV", "dept": "SV", "person": "久野"}, {"cat1": "人材管理", "cat2": "", "task": "求人サイト掲載", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "人材管理", "cat2": "", "task": "書類選考", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "人材管理", "cat2": "", "task": "面接日程調整", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "人材管理", "cat2": "", "task": "面接対応", "freq": "", "mgmt": "SV", "dept": "トレーナー", "person": "平川"}, {"cat1": "人材管理", "cat2": "", "task": "採用判断", "freq": "", "mgmt": "SV", "dept": "トレーナー", "person": "平川"}, {"cat1": "人材管理", "cat2": "", "task": "入社手続き", "freq": "", "mgmt": "SV", "dept": "トレーナー", "person": "平川"}, {"cat1": "人材管理", "cat2": "", "task": "社員受入対応", "freq": "", "mgmt": "SV", "dept": "店長", "person": "店長"}, {"cat1": "人材管理", "cat2": "体制決定", "task": "SV配置決定", "freq": "", "mgmt": "", "dept": "", "person": ""}, {"cat1": "人材管理", "cat2": "", "task": "店長配置決定", "freq": "", "mgmt": "", "dept": "", "person": ""}, {"cat1": "人材管理", "cat2": "", "task": "社員配置決定", "freq": "", "mgmt": "", "dept": "", "person": ""}, {"cat1": "人材管理", "cat2": "", "task": "スタッフ配置決定", "freq": "", "mgmt": "", "dept": "", "person": ""}, {"cat1": "トレーナーG", "cat2": "", "task": "Google進捗管理", "freq": "", "mgmt": "トレーナー", "dept": "業務企画", "person": "富田"}, {"cat1": "備品発注", "cat2": "", "task": "藤本商会、アスクル発注", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "", "cat2": "", "task": "シフト会議", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "", "cat2": "", "task": "ポイント集計", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "", "cat2": "", "task": "おしぼり集計", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "セントラル業務改善", "task": "セントラル清掃スケジュール組", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "セントラルカーテン設置", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "ネズミ取り設置", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "セントラル清掃道具選定", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "セントラル清掃人件費", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "仕込み時間が正しくない→精査し直しが必要", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "ゴム手袋使い捨てロングに", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "エアコンの結露が垂れてて食品にかかっている", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "前のお店の備品がある清掃が必要", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "店舗備品とセントラル備品を仕分けをしたい", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "椅子が欲しい", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "セントラル専用ユニフォーム", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "新しく入る子に衛生講習をした方がいい", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "セントラル水道", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "セントラルライト", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "仕込みマニュアルの貼り出し", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "機材消毒方法検討、落とし込み", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "床用の洗剤", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "必要備品検討", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "スポット依頼業務", "cat2": "", "task": "別邸地下ガラスシート", "freq": "", "mgmt": "", "dept": "業務企画", "person": "富田"}, {"cat1": "", "cat2": "", "task": "大学求人掲示板問い合わせ", "freq": "", "mgmt": "", "dept": "業務企画", "person": "富田"}, {"cat1": "", "cat2": "", "task": "103万円の壁問い合わせ", "freq": "", "mgmt": "", "dept": "業務企画", "person": "富田"}, {"cat1": "", "cat2": "", "task": "別邸地下事務所整理", "freq": "", "mgmt": "", "dept": "業務企画", "person": "富田"}, {"cat1": "", "cat2": "", "task": "浅草ホテル・観光スポットリスト化", "freq": "", "mgmt": "", "dept": "業務企画", "person": "富田"}, {"cat1": "", "cat2": "", "task": "浅草特化インフルエンサーリスト化", "freq": "", "mgmt": "", "dept": "業務企画", "person": "富田"}, {"cat1": "", "cat2": "", "task": "修繕表更新", "freq": "", "mgmt": "", "dept": "", "person": ""}, {"cat1": "", "cat2": "", "task": "時給のリスト", "freq": "", "mgmt": "", "dept": "", "person": ""}, {"cat1": "", "cat2": "", "task": "売上表数字打ち込み", "freq": "", "mgmt": "", "dept": "", "person": ""}, {"cat1": "", "cat2": "", "task": "人事評価数字集計", "freq": "", "mgmt": "", "dept": "", "person": ""}, {"cat1": "e", "cat2": "e", "task": "e", "freq": "e", "mgmt": "e", "dept": "e", "person": "e"}], "schedule": [{"period": "上期", "q": "1Q", "month": "10月", "event": "店舗会", "training": "火災・衛生研修", "hr": "自己評価面談・評価資料提出期間", "ab_eval": "評価期間", "clean": "鉄板裏清掃", "misc": ""}, {"period": "", "q": "", "month": "11月", "event": "", "training": "", "hr": "", "ab_eval": "グレード改定", "clean": "業者清掃", "misc": ""}, {"period": "", "q": "", "month": "12月", "event": "店長会", "training": "", "hr": "評価確定", "ab_eval": "", "clean": "エアコン・換気扇清掃", "misc": "年末年始ゴミ回収申請"}, {"period": "", "q": "2Q", "month": "1月", "event": "", "training": "", "hr": "", "ab_eval": "", "clean": "", "misc": ""}, {"period": "", "q": "", "month": "2月", "event": "", "training": "", "hr": "", "ab_eval": "", "clean": "", "misc": ""}, {"period": "", "q": "", "month": "3月", "event": "店長会", "training": "", "hr": "", "ab_eval": "", "clean": "", "misc": ""}, {"period": "下期", "q": "3Q", "month": "4月", "event": "", "training": "火災・衛生研修", "hr": "自己評価面談・評価資料提出期間", "ab_eval": "評価期間", "clean": "鉄板裏清掃", "misc": ""}, {"period": "", "q": "", "month": "5月", "event": "", "training": "", "hr": "", "ab_eval": "グレード改定", "clean": "業者清掃", "misc": ""}, {"period": "", "q": "", "month": "6月", "event": "店長会", "training": "", "hr": "評価確定", "ab_eval": "", "clean": "エアコン・換気扇清掃", "misc": ""}, {"period": "", "q": "4Q", "month": "7月", "event": "", "training": "", "hr": "", "ab_eval": "", "clean": "", "misc": ""}, {"period": "", "q": "", "month": "8月", "event": "", "training": "", "hr": "", "ab_eval": "", "clean": "", "misc": ""}, {"period": "", "q": "", "month": "9 月", "event": "店長会", "training": "", "hr": "", "ab_eval": "", "clean": "", "misc": ""}], "roles": [{"role": "階層", "dept": "職種", "manager": "管理者", "responsible": "実務責任者", "scope": "管轄範囲", "duties": ["主な責務"], "mission": ["ミッション"], "kpi": ["数値責任（KPI例）"], "quant": ["定量評価項目（例）"], "qual": ["定性評価項目（例）"]}, {"role": "店舗営業部長/副部長\\n（最高店舗統括）", "dept": "本部", "manager": "部長", "responsible": "部長\\n副部長", "scope": "全店舗", "duties": ["・年間営業計画", "・店舗標準化", "・幹部育成", "・本部・現場連携", "・ステークホルダー対応(主要取引先)"], "mission": ["・部門業績最大化", "・店舗オペレーション統一化", "・幹部人材輩出", "・店舗運営力・人材力の強化による競争力維持"], "kpi": ["・部門売上", "・部門営業利益", "・原価率", "・人件費率", "・店舗KPI達成率"], "quant": ["・部門売上達成率", "・部門利益率", "・KPI達成店舗割合", "・FLコスト達成率", "・QSCスコア平均点", "・SV・店長の育成達成率"], "qual": ["・リーダーシップ", "・問題解決力", "・部門内の人材育成度", "・数字と現場のバランス感覚", "・現場実行力", "・他部門との連携力"]}, {"role": "SV\\n（店舗統括責任者）", "dept": "本部", "manager": "部長", "responsible": "SV", "scope": "3〜6店舗", "duties": ["・店舗巡回・指導-", "・店長OJT", "・数値改善施策", "・トラブル対応"], "mission": ["・担当店舗の売上・利益達成", "・店長層の定着・成長", "・店舗品質向上"], "kpi": ["・担当店舗売上", "・担当店舗営業利益", "・担当店舗FLコスト率", "・QSCスコア"], "quant": ["・担当店舗売上成長率", "・原価", "・人件費改善率", "・QSC改善率"], "qual": ["・現場指導力", "・課題発見・改善スピード", "・店長との信頼関係構築度"]}, {"role": "店長", "dept": "店舗", "manager": "SV", "responsible": "店長", "scope": "1店舗", "duties": ["・日次営業管理-", "・売上・利益管理", "・スタッフ教育", "・接客", "・衛生管理"], "mission": ["・店舗利益最大化", "・顧客満足度向上", "・スタッフ定着・育成", "・お客様に心地よい時間を提供", "・ブランド価値向上"], "kpi": ["・店舗売上", "・店舗営業利益", "・原価率", "・人件費率", "・顧客満足度"], "quant": ["・売上予算達成率", "・原価・人件費達成率", "・口コミ平均点", "・口コミ件数", "・リピート客比率"], "qual": ["・接客姿勢", "・チームワーク醸成", "・衛生意識/管理精度"]}, {"role": "店長代理", "dept": "店舗", "manager": "SV", "responsible": "店長代理", "scope": "1店舗", "duties": ["・日次営業管理", "・売上・利益管理", "・スタッフ教育", "・接客", "・衛生管理"], "mission": ["・顧客満足度向上", "・スタッフ定着・育成", "・お客様に心地よい時間を提供", "・ブランド価値向上"], "kpi": ["・原価率", "・人件費率", "・顧客満足度"], "quant": ["・原価・人件費達成率", "・口コミ平均点", "・口コミ件数"], "qual": ["・接客姿勢", "・チームワーク醸成", "・衛生意識/管理精度"]}, {"role": "副店長", "dept": "店舗", "manager": "店長", "responsible": "副店長", "scope": "1店舗", "duties": ["・日次営業管理", "・スタッフ教育", "・接客", "・衛生管理"], "mission": ["・顧客満足度向上", "・スタッフ定着,育成,スキル管理", "・お客様に心地よい時間を提供", "・ブランド価値向上"], "kpi": ["・店舗売上", "・顧客満足度"], "quant": ["・売上予算達成率", "・アルバイト定着率"], "qual": ["・コミュニケーション", "・教育力", "・接客品質"]}, {"role": "当日営業責任者", "dept": "店舗", "manager": "店長", "responsible": "社員", "scope": "1店舗", "duties": ["・日次営業管理", "・スタッフ教育", "・接客", "・衛生管理"], "mission": ["・顧客満足度向上", "・スタッフ定着・育成", "・お客様に心地よい時間を提供", "・ブランド価値向上"], "kpi": ["・店舗売上", "・顧客満足度", "・接客評価スコア", "・提供時間", "・調理時間", "・品質チェック合格率"], "quant": ["・売上予算達成率", "・口コミ平均点", "・口コミ件数", "・リピート客比率"], "qual": ["・接客姿勢", "・チームワーク", "・衛生意識/管理精度"]}, {"role": "現場従業員/アルバイト", "dept": "店舗", "manager": "店長", "responsible": "社員/スタッフ", "scope": "ー", "duties": ["（接客・サービス提供）", "・お客様対応、配膳、会計", "（調理・仕込み）", "・仕込み、調理、盛り付け"], "mission": ["・お客様に心地よい時間を提供", "・ブランド価値向上"], "kpi": ["・接客評価スコア", "・提供時間", "・調理時間", "・品質チェック合格率"], "quant": ["・接客満足度", "・提供スピード", "・仕込み精度"], "qual": ["・笑顔", "・態度", "・チームワーク", "・衛生意識", "・丁寧さ"]}, {"role": "セントラル", "dept": "店舗", "manager": "部長", "responsible": "社員", "scope": "全店舗", "duties": ["・食材・商品の製造・仕込み", "・品質管理", "・在庫管理と発注管理", "・店舗への供給・物流", "・衛生管理・設備管理", "・作業効率 / 製造効率の改善"], "mission": ["・全店舗の品質を均一化すること", "・店舗の負担を軽減し、生産性を最大化すること", "・原価・ロスを最小化して利益に貢献すること"], "kpi": ["・原価率（F率）", "・食材ロス率", "・納品精度（ミス率）", "・人件費率 / 作業生産性", "・衛生スコア", "・店舗からの評価"], "quant": ["・仕込み誤差率（計量誤差 %）", "・食材ロス率（前年比 / 目標比）", "・廃棄コスト削減額", "・納品ミス件数", "・人時生産性", "・HACCP遵守チェック項目達成率"], "qual": ["・課題を自ら抽出し改善案を提案できる", "・工程改善やロス削減への積極性", "・計量・配合の精度", "・基準以上の衛生を常に保つ姿勢", "・店舗との連携力", "・作業分担・協力体制"]}, {"role": "トレーナーG", "dept": "店舗", "manager": "副部長", "responsible": "社員", "scope": "全店舗", "duties": ["・新人教育・研修", "・店舗指導・巡回", "・OJT", "・教育進捗管理", "・スタッフ採用、管理"], "mission": ["・戦力化スピード向上", "・サービス平準化"], "kpi": ["・口コミ平均点", "・口コミ件数", "・研修完了率", "・教育満足度", "・店舗達成率/改善率"], "quant": ["・教育実施回数/合格率", "・巡回回数", "・改善実行率"], "qual": ["・教えるスキル", "・改善力", "・コミュニケーション力", "・現場適応力"]}, {"role": "業務企画", "dept": "本部", "manager": "部長\\n副部長", "responsible": "社員", "scope": "全店舗", "duties": [], "mission": [], "kpi": [], "quant": [], "qual": []}], "rules": [{"num": "1", "item": "賄い", "content": "【賄いルール】\\n＜提供商品＞\\n①平日\\n・フード⇒メニュー(もんじゃ、お好み焼き、焼きそばなど)より1品相当\\n※ポルチーニ、雲丹、こぼれや極、すき焼きは禁止\\n※トッピングはチーズ、海苔、マヨネーズのみ可\\n※大盛NG\\n・ドリンク⇒瓶や果実ジュースを除くソフトドリンク、ハイボールや酎ハイ系のお酒(未成年不可)より3杯まで\\n②土日祝\\n・通し出勤者は賄い回数は1回のみ(昼or夜に1回のみ賄いOK)\\n・ランチ出勤のみは賄いなし\\n③営業中\\n・水、炭酸水、お茶　のみ\\n＜その他＞\\n・食べた鉄板や食器類の洗浄を行い綺麗に片付けこと\\n※ルールを守れない場合賄いを停止する(期間は度合いにより店長検討)", "store": "全店舗", "dept": "店舗営業部", "resp": "店長,社員"}, {"num": "2", "item": "高校生勤務について", "content": "18歳未満のスタッフは、22時45分までに帰宅すること\\n※ルールを守れない場合賄いを停止する(期間は度合いにより店長検討)", "store": "全店舗", "dept": "店舗営業部", "resp": "店長,社員"}, {"num": "3", "item": "服装規定", "content": "https://delta2015-my.sharepoint.com/:p:/r/personal/nakamura_delta-tokyo_co_jp/_layouts/15/Doc.aspx?sourcedoc=%7B974074D9-4781-40D1-93BF-B7FF6468D694%7D&file=%E3%81%93%E3%81%BC%E3%82%8C%E3%82%84%E6%9C%8D%E8%A3%85%E8%A6%8F%E5%AE%9A.pptx&action=edit&mobileredirect=true", "store": "全店舗", "dept": "営業企画部", "resp": "店長,社員"}, {"num": "4", "item": "喫煙規定", "content": "https://delta2015.sharepoint.com/:x:/r/sites/msteams_fc0232/_layouts/15/Doc2.aspx?action=edit&sourcedoc=%7B70d38205-804e-4861-a316-fdfff5cc858c%7D&wdOrigin=TEAMS-MAGLEV.undefined_ns.rwc&wdExp=TEAMS-TREATMENT&wdhostclicktime=1762254634870&web=1", "store": "全店舗", "dept": "店舗営業部", "resp": "店長,社員"}, {"num": "5", "item": "清掃方法", "content": "https://delta2015-my.sharepoint.com/:x:/g/personal/saiki_delta-tokyo_co_jp/EWDYIFwJ3s9MtILulNbn-FIBTF9pHvW6RslKgaE94b9-PQ?e=X7GfhB", "store": "本店", "dept": "トレーナーG", "resp": "店長,社員"}, {"num": "6", "item": "店舗内ルール", "content": "・お客様として来店時や休憩時間などに働いているスタッフとお客様から近い位置で談笑はしないこと\\n・月島エリアは土日は基本的に別邸地下を休憩スペースとして利用すること", "store": "全店舗", "dept": "店舗営業部", "resp": "店長,社員"}, {"num": "7", "item": "勤務中の怪我について", "content": "", "store": "全店舗", "dept": "人事部", "resp": "店長,社員"}, {"num": "9", "item": "残業時間ルール", "content": "社員時間数が±5時間を超える場合は店舗マネジメントスレッドにて上長承認が必須", "store": "全店舗", "dept": "店舗営業部", "resp": "店長"}, {"num": "10", "item": "店舗最終退店時間", "content": "賄いとかののあと何時までには退店してねのルール", "store": "", "dept": "", "resp": ""}, {"num": "11", "item": "団体客受付ルール(各店舗)", "content": "", "store": "", "dept": "", "resp": ""}, {"num": "12", "item": "紙エプロン運用", "content": "本店：席セット時人数分の紙エプロンを設置\\n結店：席セット時人数分の紙エプロンを設置\\n囲店：席セット時人数分の紙エプロンを設置\\n別邸：ファーストドリンク提供時お客様に【紙エプロンの用意がありますが、ご利用なさいますか？？】と伺い、必要数提供をお願いします。\\n二番街：ファーストドリンク提供時お客様に【紙エプロンの用意がありますが、ご利用なさいますか？？】と伺い、必要数提供をお願いします。\\n浅草：ファーストドリンク提供時お客様に【紙エプロンの用意がありますが、ご利用なさいますか？？】と伺い、必要数提供をお願いします。\\n縁店：ファーストドリンク提供時お客様に【紙エプロンの用意がありますが、ご利用なさいますか？？】と伺い、必要数提供をお願いします。", "store": "各店舗", "dept": "店舗営業部", "resp": "店長,社員"}, {"num": "13", "item": "おしぼり運用", "content": "", "store": "", "dept": "", "resp": ""}, {"num": "14", "item": "オープン、中締め可否について", "content": "", "store": "全店舗", "dept": "店舗営業部", "resp": "部長\\n副部長"}, {"num": "15", "item": "オープン、中締め可否について", "content": "", "store": "全店舗", "dept": "店舗営業部", "resp": "部長\\n副部長"}, {"num": "16", "item": "売上報告ルール", "content": "売上報告は翌日営業前までに報告をあげる\\n・通常時　【店名】yyyymmdd売上報告　※【本店】【結】【囲】【別邸】【二番街】【浅草】【縁】\\n・修正再送時　【店名】yyyymmdd売上報告(件名修正)←()内はその都度修正再送理由により変更\\n・売上報告送付者は、該当店舗の当日責任者に限る。", "store": "全店舗", "dept": "店舗営業部", "resp": "部長\\n副部長"}, {"num": "17", "item": "セントラル納品回収配送ルール\\n(浅草以外)", "content": "平日は店舗側が14時から15時の間にセントラルへ回収に来る\\n土日祝は16時から17時の間にセントラル側から店舗へ配送する", "store": "全店舗", "dept": "店舗営業部", "resp": "部長\\n副部長"}, {"num": "18", "item": "食材棚卸ルール", "content": "・毎月月末に実施\\n・月末の営業後に実施\\n・月末が土曜日だった場合のみ翌日曜に実施\\n・全店舗同日に行わないと意味がないため必ず全店舗ルール通り同日に実施", "store": "全店舗", "dept": "店舗営業部", "resp": "部長\\n副部長"}], "contacts": [{"name": "各業者", "contact": "社内担当者", "phone": "電話番号", "person": "担当者", "note": "備考"}, {"name": "ソフトバンク", "contact": "富田", "phone": "0800-111-2009", "person": "", "note": "未納窓口"}, {"name": "まつの", "contact": "", "phone": "", "person": "", "note": ""}, {"name": "キタニ", "contact": "", "phone": "", "person": "", "note": ""}, {"name": "プレコ", "contact": "", "phone": "", "person": "", "note": ""}, {"name": "石川酒販", "contact": "", "phone": "", "person": "", "note": ""}, {"name": "いまでや", "contact": "", "phone": "", "person": "", "note": ""}, {"name": "かわしまや", "contact": "", "phone": "", "person": "", "note": ""}, {"name": "アルソック", "contact": "", "phone": "", "person": "", "note": ""}, {"name": "水道", "contact": "富田", "phone": "03-5298-5353", "person": "", "note": ""}, {"name": "レジル電気", "contact": "富田", "phone": "0120-33-0057", "person": "", "note": ""}, {"name": "レジル電気(緊急連絡)24時間対応", "contact": "富田", "phone": "0120-05-4920", "person": "", "note": ""}, {"name": "東京エナジーパートナー", "contact": "富田", "phone": "0120-995-113", "person": "", "note": ""}, {"name": "東京ガス", "contact": "富田", "phone": "0570-002-211", "person": "", "note": ""}, {"name": "ミートランド", "contact": "", "phone": "0237-83-0329", "person": "", "note": ""}, {"name": "福島鰹株式会社", "contact": "", "phone": "075-211-2940", "person": "", "note": ""}, {"name": "蛇の目ソース", "contact": "", "phone": "0771-24-3911", "person": "", "note": ""}, {"name": "こぼれや　本店", "contact": "", "phone": "03-3520-9976", "person": "", "note": ""}, {"name": "こぼれや　結", "contact": "", "phone": "03-3520-8779", "person": "", "note": ""}, {"name": "こぼれや　囲", "contact": "", "phone": "03-5547-4092", "person": "", "note": ""}, {"name": "こぼれや　別邸", "contact": "", "phone": "03-5534-8719", "person": "", "note": ""}, {"name": "こぼれや　二番街", "contact": "", "phone": "03-5534-9729", "person": "", "note": ""}, {"name": "こぼれや　浅草", "contact": "", "phone": "03-5830-7227", "person": "", "note": ""}, {"name": "こぼれや　縁", "contact": "", "phone": "03-6673-5654", "person": "", "note": ""}, {"name": "プレコ清掃担当", "contact": "富田", "phone": "080-3516-7646", "person": "池戸様", "note": ""}], "meetings": [{"name": "マネジメント定例", "host": "部長", "members": "佐藤\\n久野", "w1": "【水曜】\\n①前々月FL報告\\n　→人件費実績【分析・課題・対策(期限付)】\\n　→原価実績　【分析・課題・対策(期限付)】\\n②人員枠予算報告\\n③人事関連相談/報告\\n④案件進捗\\n⑤その他トピックス相談/報告", "w2": "　", "w3": "【水曜】\\n①前月売上報告\\n　→店舗別分析、商品、営推\\n　【分析・課題・対策(期限付)】\\n②翌月売上対策報告\\n③人員関連相談/報告\\n④案件進捗\\n⑤その他トピックス相談/報告", "w4": "　"}, {"name": "店長会", "host": "副部長\\nSV", "members": "佐藤\\n久野\\n小澤", "w1": "【金曜】\\n⓪アイスブレイク\\n①前会議までの振り返り\\n②業績報告\\n③前々月FL報告\\n→人件費実績【分析・課題・対策(期限付)】\\n　→原価実績　【分析・課題・対策(期限付)】\\n④採用進捗\\n⑤案件進捗(各店舗・各部)\\n　→前月振り返り、今月実施施策\\n⑥その他トピックス相談/報告", "w2": "【金曜】\\n⓪アイスブレイク\\n①業績報告\\n②採用進捗\\n③その他トピックス相談/報告\\n④1on1面談", "w3": "【金曜】\\n⓪アイスブレイク\\n①前会議までの振り返り\\n②業績報告\\n③前月売上報告・翌月売上対策報告\\n　→店舗別分析、商品、営推\\n　【分析・課題・対策(期限付)】\\n④採用進捗\\n⑤社員時間数確認\\n⑥案件進捗(各店舗・各部)\\n　→前月振り返り、来月実施施策、前月臨店報告\\n⑦その他トピックス相談/報告", "w4": "　"}, {"name": "副店長会", "host": "SV", "members": "久野\\n平川\\n副店長", "w1": "　", "w2": "　", "w3": "　", "w4": "【金曜】\\n⓪アイスブレイク\\n①アルバイトスキル管理進捗\\n②研修\\n③その他トッピング相談/報告"}, {"name": "セントラル・業務企画定例", "host": "セントラルL\\n業務企画L", "members": "佐藤\\n久野\\n中島\\n富田", "w1": "【土曜】\\n①案件進捗\\n②その他トピックス相談/報告", "w2": "　", "w3": "【土曜】\\n①案件進捗\\n②その他トピックス相談/報告", "w4": "　"}, {"name": "トレーナーG定例", "host": "トレーナーGL", "members": "久野\\n平川\\n齋木", "w1": "【金曜】\\n①採用進捗\\n②グーグル進捗\\n③案件進捗\\n④その他トピックス相談/報告", "w2": "　", "w3": "【金曜】\\n①採用進捗\\n②グーグル進捗\\n③案件進捗\\n④その他トピックス相談/報告", "w4": "　"}, {"name": "シフト会議", "host": "業務企画L", "members": "中島\\n富田", "w1": "【5日】\\n①シフト相違確認\\n②シフト未提出者確認", "w2": "　", "w3": "【20日】\\n①シフト相違確認\\n②シフト未提出者確認", "w4": "　"}], "trainings": [{"genre": "ジャンル", "title": "研修名", "duration": "分数", "content": "内容"}, {"genre": "エピソード", "title": "凡人が磨くべきビジネススキル【小澤隆生×田中溪】", "duration": "49分", "content": "「天才にはなれない」\\nそう感じたことのあるビジネスパーソンは多いだろう。\\nだが、凡人にも勝ち筋はある。\\nPayPayや楽天イーグルスの立ち上げ、ZOZOのM&Aまで——\\n孫正義氏・三木谷浩史氏の右腕として数々のビジネスを成功に導いてきた仕掛け人・小澤隆生氏。\\nそして、ゴールドマン・サックスに17年在籍し、星野リゾートとのジョイントベンチャーによる温泉旅館の再生や、企業価値5000億円超のM&Aなど、数多くの大型プロジェクトを率いてきた田中渓氏。\\n異なるキャリアを歩んだ2人が、「凡人がビジネスで勝つ方法」を徹底的に語り尽くす。\\n市場選びで成果の7割が決まる。\\n成功者に共通するのは、「やめる力＝逃げ足の速さ」。\\nリーダーの意図に憑依し、組織で信頼を勝ち取る「チューニング力」も、出世の鍵となる。\\n凡人が身につけられる、再現性あるスキルと思考法の数々。\\n才能に頼らず、戦略と努力で結果を出したいすべてのビジネスパーソンに向け、実践知に満ちた徹底議論を繰り広げていく。"}, {"genre": "教育", "title": "【マネジメント術】常に最適解を出せる「理想の上司」になる方法", "duration": "33分", "content": "200社以上の人事改革を手がけ、年間2000人以上の管理職育成をサポートしてきた南和気氏による「管理職のための実践的リーダーシップ論」の2回目。\\n今回のテーマは、「1on1」です。\\n多くの企業で導入されている1on1ですが、部下のモチベーションを高める効果がある一方、フィードバックの仕方を間違えると一気に「信頼」を失う、ハイリスクハイリターンなコミュニケーションでもあります。\\n南氏の豊富な経験から導き出された対話での「バイアス」を克服する方法や、信頼を勝ち取るフィードバック術など、実践的かつインパクトのある手法を学ぶことで、多くの管理職が陥ってしまう課題が明確になるだけでなく、次世代リーダーとなるための知見を得ることができます。"}, {"genre": "教育", "title": "「脱・マネジメントの無免許運転」リードマネジメントのすべて", "duration": "42分", "content": "悩める管理職を中心に支持され、昨年秋の発売以降瞬く間に10万部を突破したベストセラー『部下をもったらいちばん最初に読む本』。その著者・橋本拓也氏から、これからの時代に必須のマネジメント手法を学びます。\\n多くの管理職が陥りがちな、指示や管理で人を動かそうとする旧来のスタイル（＝ボスマネジメント）の限界を明らかにします。その上で、信頼をベースに部下一人ひとりの意欲と主体性を引き出し、チームを成功に導く新しいスタイル（＝リードマネジメント）への変革を促します。\\nこれからマネージャーになる方にはもちろん、むしろ現時点でマネジメントに悩みや課題を抱えている方にこそ、より共感ができ、明日からすぐに現場で使うこともできる、即効性の高い講座となっています。"}, {"genre": "エピソード", "title": "個人経営カフェを統計・マーケ分析【サトマイ×MEGUMI】", "duration": "52分", "content": "初回はMEGUMIが石川県で経営するカフェを、サトマイがデータを元にコンサルティング。リブランディング戦略から、商圏分析や顧客のリピート率向上、さらにスタッフのモチベーションの高め方まで… 統計学やマーケティングを用いて解決の糸口を探ります。\\n販売力に課題がある飲食店の経営者や、組織編制に悩む経営者まで、必見の内容です。"}, {"genre": "エピソード", "title": "飲食店消滅の危機【森朝奈×永田ラッパ】", "duration": "48分", "content": "“あなたのお気に入りの飲食店”が無くなる？\\n最新のデータでは、2023年、飲食店の倒産件数は930件。これは過去最悪の状況。\\nしかも一時、1ドル＝160円の急激な円安が進み「円の弱体化」。我々の生活水準にも影響を及ぼしかねない不安も。\\nコロナ５類移行後も、従来より抱える“人手不足問題・コロナ融資の返済・原材料高騰”問題。\\nこれまで店舗の努力で経費を削減してきたが、やはり経営は成り立たず、商品の価格を上げざるを得ない。\\nしかし、安易に価格を上げると客離れに繋がり、かえって利益が出せなくなる...という悪循環。\\nハッキリ言おう、今回は「飲食業界の全ての人の為に」番組を制作している。\\n現在、12店舗の飲食店を経営している、元「楽天」の森朝奈氏と、国内外で「11000件以上の外食コンサルタント」を行なってきた、永田ラッパ氏が、飲食店の大問題について、徹底議論。\\nお客が離れない値上げの方法は？人手不足を解消する術は？儲かる店と儲からない店、二極化の要因は何？これからも大好きな飲食店が続くように、考えていきます。"}, {"genre": "教育", "title": "【坂井風太】たった一人の熱量から始める「組織改革実践」", "duration": "35分", "content": "「どうせ何を言っても、うちの会社は変わらないよ」\\n現場の社員が会社を諦め組織が機能不全に陥る、こんな「組織の硬直化」が起きる背景には、経営層の無関心や人事のリーダーシップ不足など、合理的な理由がいくつかあります。\\nしかし、今回の講師を務めるMomentor代表の坂井風太氏は、『「うちの会社は変わらない」と言っている人の存在そのものが、硬直化の1番の原因』と語ります。\\n大小180を超える日本企業の人材育成・人事施策をサポートしてきた坂井氏によると、現状を打破して問題解決を果たして企業には、必ず周りを巻き込んで停滞を打破する「圧倒的なリーダー」の存在があるといいます。\\nもしあなたが、会社を変えたいと強く願うなら、たった1人の一歩からでも、組織は変わる。\\n本講座では、不安を抱えながらも会社の課題と向き合い、硬直化に風穴を開けるための「３つの基本的な作戦」、そして、人事施策の現実解としての「マネジメント民主化モデル」など、最新のデータと研究に基づく「人材育成/組織マネジメント改革」を学びます。"}, {"genre": "教育", "title": "【坂井風太】組織変革が可能なリーダーに共通する「５つの特徴」", "duration": "32分", "content": "大小180を超える日本企業の人材育成・人事施策をサポートしてきた\\nMomentor代表の坂井風太氏が送る講義「たった一人の熱量から始める組織改革実践」の第２弾。\\n今回のテーマは、「\"決断\"ができるリーダーシップとは何か？」です。\\n「決断」というのは、上手くいくかわからないプロジェクトに対して、自分の責任で、結果を出すまで突き進む覚悟を持つこと。\\n安心できる確かなデータに基づいていたり、他の人が責任を負ってくれる中での選択は、単なる「合理的判断」にすぎません。\\nこれからのビジネスでは、合理的判断しかできないリーダーでは勝ち抜くことはできません。\\n坂井氏がこれまで育成してきた、企業内で組織変革を担う「決断ができるリーダーたち」が実践している具体的な施策を紐解き、\\n「うまくいかせます」と自ら宣言し、執念を持ってやり切れるリーダーになるために必要な術を学びます。"}], "reviews": [{"date": "2025-01-01 00:00:00", "store": "囲", "media": "食べログ", "rating": "2.5", "content": "結、本店と比べて微妙でした。", "strategy": ""}, {"date": "2025-04-01 00:00:00", "store": "囲", "media": "食べログ", "rating": "2.5", "content": "全体的に味が濃く、最初の数口はとても美味しいのですが焼いてるうちにどんどん塩っぱくなるので2人で全て食べ切るにはつらかったです。", "strategy": ""}, {"date": "2025-08-06 00:00:00", "store": "囲", "media": "食べログ", "rating": "2", "content": "友人たちと訪問。焼いてもらえるもんじゃは蚊もなく不可もなくなお味。", "strategy": ""}, {"date": "2025-08-21 00:00:00", "store": "囲", "media": "食べログ", "rating": "2", "content": "個室と言うわりには…手狭に感じました。鉄板を使用するので暑いのは仕方ないんですが…風が全く来ず暑すぎてあまり美味しく食べれませんでした。", "strategy": ""}, {"date": "2025-09-17 00:00:00", "store": "結", "media": "食べログ", "rating": "2.4", "content": "家族で利用させてもらいました。入れ替えシステムで入店しました。みんなが一斉に注文するためか飲み物がなかなか届かないや忘れてるがあり、また早く出てくるだろうと思い、きゅうりのおつまみを頼みましたがなかなか来なくて声を掛けさせてもらいましたが、そこからどうなってるのかの返事もなく、提供してもらえたのはもんじゃ焼きを二つ目焼いてもらってる時に、詫びることもなく今頼んだかのように出てきました。", "strategy": ""}, {"date": "2025-09-23 00:00:00", "store": "結", "media": "食べログ", "rating": "1.5", "content": "ファーストドリンクは乾杯をする可能性がたかいので忘れていたにせよ声をかけられたなら優先してだしてほしいです。もんじゃ焼きを作りながらお客さんと話していてこちらの食べ物の提供が遅れていた。", "strategy": ""}, {"date": "", "store": "本店", "media": "食べログ", "rating": "2.9", "content": "ドリンクが高い。それからQRで注文しているのに注文個数何回も間違えて口頭で説明するのでQRの意味がない。", "strategy": ""}, {"date": "", "store": "本店", "media": "食べログ", "rating": "2", "content": "90分制なのに提供が遅い。割高でいつも炙りとろ鯖より質がわるい", "strategy": ""}, {"date": "2025-01-15 00:00:00", "store": "二番街", "media": "食べログ", "rating": "2.3", "content": "店内は少し狭めで、店員さんが隣のテーブルの調理に来るたびにぶつかってしまい、何とも言えない感じ。しかも。謝ることもない‥。味も微妙。", "strategy": ""}, {"date": "", "store": "二番街", "media": "食べログ", "rating": "2.8", "content": "もんじゃの出汁は特に感じられなかった…\\n逆に薄くて最初は味がなかったけど、煮詰めてるうちにちょうどいい感じにいただけた！\\nチーズトッピングはした方がいいかも！\\nもんじゃも焼きそばも店員さんが作ってくれるけど、接客は塩対応で微妙", "strategy": ""}, {"date": "", "store": "二番街", "media": "食べログ", "rating": "2.9", "content": "もんじゃ自体は悪くなかったですが、カウンター席が故に少し残念なものが色々と目に入ってしまいました。", "strategy": ""}, {"date": "", "store": "二番街", "media": "食べログ", "rating": "1", "content": "美味しいですが、提供までの時間がかかりすぎています。また、かなり高いです。\\nそして、Googleの口コミを書いてくださいというお願いがありました。Googleの評価が極端に良かったのはそういう理由か、と思いました。\\nおすすめはしません。", "strategy": ""}, {"date": "", "store": "別邸", "media": "食べログ", "rating": "2", "content": "残念だったのは、従業員のムスッとした対応には閉口した。接客時に笑顔がなく、バーンと音を立ててお皿を置いたり、丁寧さのかけらもなかった。2度と行くことはないが、接客も含めた料理が、そのお店の価値に通じると改めて実感した。", "strategy": ""}, {"date": "", "store": "別邸", "media": "食べログ", "rating": "2", "content": "たくさんの海鮮も小さく刻んでもんじゃに入れるとあんまり味がわからない", "strategy": ""}, {"date": "", "store": "別邸", "media": "食べログ", "rating": "1", "content": "残念でした", "strategy": ""}, {"date": "", "store": "別邸", "media": "食べログ", "rating": "1.5", "content": "店員さんがイマイチでした", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "なぜこんなに口コミが良いのか全くわからないぐらい、ひどい店だった。\\n口コミに騙された。\\n\\n予約時はどこにも2時間制と記載がないにも関わらず、次の予約が入っているからと追い出された。\\nもんじゃを焼いてもらえず待たされた挙句、何度も時間だから退店しろと言われ、2人で、もんじゃ2つ、お好み焼き1つ食べるのがやっと。お好み焼きも生焼けのまま慌てて大急ぎで食べた。\\n個室料金を払ったが、個室とは名ばかりの独房のような空間、換気も悪く、煙でいぶされ、顔も髪もベタベタ。\\nスタッフは皆学生バイトのような雑な接客で、訪店前に入れたTELでもチンピラのような口調。\\nそして何より、料理が不味い！\\n何を食べても不味い。\\nもんじゃでここまで味がなくコクもなく、美味しくなく作れるものかと驚いた。\\nもう二度と行かない。\\nもんじゃ屋は他にもたくさんある。", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "おしぼりは出てこない、ラストオーダーの時間は間違えられる、食べ物出てくるのも遅い。\\n周りに数あるもんじゃ屋さんの中で、選ぶ必要はないと思います。", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "100幅の席に3人で座り、膝を打って終始痛く且つ身動き取れず\\n混んでるから90分制と言われオーダーも通ってなくて40分後に初食事、50分でコース料理食べて代金１万円", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "GWで混んでいたのは理解しているがそれでもひどかった。お好み焼きを焼いてもらったが、しばらく放置され裏面はかなり焦げていた。会計の際にも別の卓の支払いを請求され、こちらが気づかなければ2倍以上請求されていた。", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "コースで利用しましたが、\\n全然メニューが出てませんでした。毎回こちらから次の料理の催促をしました。提供スピードが遅すぎて、最後に書き込んで食べないといけないお店です。\\nもちろんドリンクの提供も遅い👎飲み放題のドリンクのラストオーダー後に、焼きそばとお好み焼きを持ってくる。\\nしかも鉄板には焼きたてのもんじゃがある状態。明らかに料理の提供が遅く、ドリンクが進まない。飲み放題の客だったからか知りませんが、客を舐めすぎでした。\\n\\n焼き挙げ句の果てには席の時間5分前に焼き物を持ってくる始末。\\nオープン仕立ての店かと思うくらいサービスが悪かったです。\\n\\nデザートも言わないと持ってこないし、最後まで気分が悪かったです。\\n", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "味はマジで普通\\n店員が全員若すぎて流れ作業で接客してるかんじ。\\nおつまみが本当に美味しくない時点で終わってました", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "食事の味自体に不満はありませんが特別美味しいわけではありません。しかしサービスが最悪でした。\\n食事を焼いてくださるときにマスクもなしに喋る、髪も纏めたり前髪をしまっていないので衛生が気になります。\\nさらに焼いている時の会話もこちら側のプライバシーに踏み込むようなかなり返答に困るような内容でした。\\nそして急にGoogle口コミを書くことを強要されかけたことにかなり違和感を感じます。\\nこぼれやが何店舗かあってそこで口コミ数を競っていて俺は一位を取りたいから書いてほしいと言われ思わず笑いそうになりましたよ笑笑\\nこちら側としては店員さんの一位になりたい願望を叶える義務は全くありません。\\n口コミを書くためのQRコード兼次回来店時ドリンクサービスのチケットをいただきましたがもう行くことはないので置いてきました。\\n他の良い口コミに騙されないことをお勧めします。\\n", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "味と雰囲気は良かったのですが、サービス部分で気になる点があったので⭐︎1です。店員さんがもんじゃを焼いてくださっている際に、いきなりヘラヘラした顔で「ケータイ出してください」と言われ、かなり戸惑いました。どうやらGoogleの口コミ数を系列店と競っているようで、口コミを書いてくれたら、ワンドリンクサービスするという内容でした。丁寧に説明してくだされば、快く対応するのですが、いきなり客に向かって何の理由も無しに「ケータイ出してください」は失礼ですし、戸惑います。続けて店員さんが「怪しいものではない」と仰っていましたが、人に何かを依頼するときは、依頼内容を最初に明確にするべきです。また、こちらの店員さんが私と連れと雑談した際に「もんじゃはどこでも食べられる」と仰っていて驚きました。私たちはわざわざ月島に足を運んで食べに来ているのにも関わらず、この発言はあまりにも配慮がなく軽率でした。\\n若い男性店員さんだったので、経験値が浅く配慮が足りなかったのかなと思いつつ、気になったので口コミしました。また、他の店員さんの接客対応はよかったです。", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "口コミに騙されました。はじめから低評価をみてから行くべきでした。席に着いて注文してからメインメニューが３０分経っても届かなかった為、催促しました（店内が混雑する前です）その後１０分程度で届きました。あきらかに店側の確認ミスのようでしたが、詫びの言葉もなくふつうに提供されました。提供される待ち時間と食べるまでに入店からすでに５０分経過していました。初めにテーブルは2時間制です。と言われていたために忙しなく急いで食べました。食べてみて第一声は『味薄っ』海鮮の風味も特別ある訳でもなく、生地はシャバシャバ、こぼれるほどの具や食べ応えもありません（個人の意見）写真に騙されます。期待しすぎたせいでただただ残念でした。", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "「個室もんじゃ」という名前に惹かれて訪れましたが、少しだけ期待を下回る部分がありました。\\n\\nまず、個室を予約したつもりだったのですが、案内されたのは一番端の席。壁が少しあるだけで、完全な個室ではありませんでした。他のお客様からも見える位置だったので、名前に「個室」とある分、少し残念に感じました。完全個室を期待する方は事前に確認したほうがいいかもしれません。\\n\\nもんじゃ焼きは自分たちで焼くスタイルで、これは楽しかったです。ただ、もんじゃ以外のメニューは自分たちで焼かなければならず、焼き方の説明がほとんどなかったので、少し戸惑いました。初めて訪れる方や慣れていない方にはもう少し丁寧な案内があるとありがたいと思います。\\n\\nスタッフの方は忙しそうで、こちらから声をかけるタイミングが少し難しい印象でした。忙しい時間帯に訪れたので仕方がない部分もあるかもしれませんが、もう少し接客にゆとりがあると良かったなと思います。\\n\\nとはいえ、もんじゃ焼きそのものは美味しかったですし、工夫次第では楽しく過ごせるお店だと思います。個室やサービス面での改善があるとさらに魅力的になると思うので、今後に期待したいです。", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "個室になっていて良かった。個性的なメニューで面白かった。店員さんの感じも良いのだが、靴にタレがいっぱいこぼされていて、帰る時にびっくり。最後に残念すぎる。良いお店だけに、是非とも改善していただきたい。お気に入りの靴が台無しになりました（泣）。汚れていい靴で行った方がいいかも…", "strategy": ""}, {"date": "", "store": "本店", "media": "", "rating": "1", "content": "・入店時に女性の店員さんに名前を告げて入ったのに、店内で男性の店員さんにまた名前を聞かれた。(しかもキレ気味)\\n・通路側の椅子に座っていたのですが、男性の店員さんが私の後ろを通るたび足が椅子に当たってた。(毎回だったのでたぶん故意的に)\\n・人手不足で終始バタバタした様子で、料理が来ても鉄板の火もつけてもらえなかった。\\n・料理の説明が不親切だった。卓上にある油や醤油の説明もなく、戸惑いながら使っていた。\\n・おしぼりも食事の中盤でやっと来た。\\n▶️雰囲気\\n・店内は狭く、ガヤガヤしている。\\n・私の席が厨房とトイレの近くだったのですが、見るからに衛生環境が悪そうな厨房で、かつ席の方にもトイレの臭いが漂って臭かった。\\n以上、美味しい料理もあったので、非常に残念なお店でした。", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "正直、最悪な接客でした。評価はゼロです！\\n二度と行きたくない。週末なので忙しいのは分かりますが本店に行くと店員さんに別邸を案内されて（案内が適当で迷いました）別邸に行ったのに食べたいメニューが本店にしかないので目的だったもんじゃが食べれなかった。本来であれば案内時にその説明もすべきかと思います。誤案内です。2時間も待ったのにありえない。\\n評価が低いコメントには接客態度に関する内容が書かれており、お店の方が返信されてますがその時から全く改善されてません。他の人に同じような経験はしてほしくないのでこのお店は選ばないほうがいいと思います。", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "味普通、接客最低。\\nほかの方のレビューを見ると、本当に同じ店なのかと疑ってしまいますが…。\\n味は美味い！とも思えず、「まあ、もんじゃはこんなもんだよな」くらいのレベル。\\n一方、接客が非常に不快でした。\\n●もんじゃを作ってもらうとき店員さんが料理の説明をしてくれるのですが、声が小さく何を説明しているのか分かりませんでした。作り始める際も「油引くんで、油取ってもらえますか？」と。取るのは良いのですが、もんじゃを店員が作る前提なら最初から持ってくれば良いor腕を伸ばせば届く距離だから自分で取れば良いのに…と思ってしまいました。\\n●予約なしのお客をお断りするとき、「ご予約でいっぱいなんで！」と強めの口調で追い返していました。\\n●コースの最後の料理がまだ鉄板に残っているのにデザートが運ばれてきました。一応事前に持ってきても良いか確認はされましたが、鉄板にまだ一人前以上の料理が残っている状態で聞くことではないよな、と思います。既にこの時点で接客については諦めていたので早く退店するために運んできてもらうことにしました。ちなみに長居していた訳ではなく、ドリンクのラストオーダーよりも前の出来事です。\\n●最後、領収書を書いてもらうために名刺を探している最中に「お客さん、宛名は？！」とこれまた強めに言われました。\\n●その領収書ですが、名刺まで出したのに間違った社名の領収書を切られていました。名刺まで渡したのに正しい社名を書いてもらえなかったので、このお店には何も期待してはいけないことを悟りました。\\n●最後、会計を済ませて退店する際も「ありがとうございました」の一言もありませんでした。\\n店員ガチャを外しただけかもしれませんが、最初から最後まで不快な接客でした。\\nもう二度と行きません。\\n月島には他にもたくさんもんじゃ屋さんがありますので、このレビューを読まれた方は他に行くことをおすすめします。", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "愛想の悪いバイト2人がきりもりしていて気分が悪くなるお店でした。行ったことを後悔するし、二度と行きたくないです。", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "店員さんの態度が、失礼に感じました。\\n一人客は複数より粗末に扱うのかもと思いました。\\n味については海鮮の出汁や風味は感じられず薄くてあまり美味しくなかったです。\\n別に場所がもんじゃ焼きが有名な月島じゃなくてもいいんじゃないかと思った。", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "今日、子供の誕生日で早速予約して行ったのですが、お店の中が外より暑くて、楽しみにして行ったのですが、暑すぎて、食欲がなくなりました😥他のもんじゃ焼き屋さんもあんなに暑いんでしょうか？鉄板で暑いのは知ってましたが、お店のドアが開いていたので、クーラーが壊れてたのかなぁ❓\\n夏はもうもんじゃは行かないようにしようと思います", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "店内ガラガラで名簿も2番目だったので11時頃に並びました。あっという間に満席になり1時間経過しても呼ばれないので店員さんに声をかけたら、さらに1時間以上待つ事になると言われました。その時には12:00頃となり他のお店も大混雑。お店を変えることもできず八方塞がり。並ぶタイミングで予約客優先で2時間以上待ちと教えてくれたら他に空いてるお店が沢山あったのに、、、低評価の書き込みをするのは少数のなか同種の書き込みがありましたので、多発していると思います。実際、私の後ろにも10人くらい待ち時間を知らずに並んでました。予約以外で入らない事をお勧めします。", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "40代くらいの男性の店員がラストオーダーまで50分前くらいに伺ったが、明らかに怪訝そうな態度を示してきていたため接客態度が最悪だった。", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "口コミで予約して行きました。\\nこぼれや？全く溢れてないし 味薄いし おこげも無いしダメダメ❗\\nお好み焼き これ一人前？小さすぎで割に全く合わない❗\\n海老蔵の言ってた通りだったわ〜\\n会計時にわかったが サービス料金取られた 何をサービスされたか意味不明\\nワンドリンク制で2時間まででした\\n次は絶対無い❗", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "味はまずくないけど店員のやる気がなさすぎる\\n全ての業務だるそうにやってた\\n閉店2時間前くらいに行ったから別にそこまで迷惑な時間でもないのに\\n嫌ならもっと早く閉めれば？\\nとなりのもへじに行った方がいい。\\nもしまたいくならここではなく別の店舗にいく。", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "写真を上手に撮りすぎですね…海鮮の具が写真よりもよっぽど少なかったです。しかも他店舗より割高なのでがっかりしました。\\nあと、750円のビールがジョッキじゃなくグラスで出てくるのはちょっと厳しいですね。", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "料理は美味しかったのに！\\n土曜日の夜、若い女性の店員さんの私語が激しく、お店の間取り的に丸聞こえで不快でした。\\nまた、テーブル番号がわからなかったようで、「ここ何番だっけ？」と、失礼しますの掛け声もなく無言で低い仕切りの壁の向こうから鉄板の上へ頭を突っ込んで番号を確認し、同僚との私語にもどられました。味がすごく美味しかったので残念です。お会計の声掛けをして、こちらを一度確認した後も私語。\\n気持ちの良い接客を求めている方は避ける方が無難かと思われます。\\nもんじゃは美味しかったのに。残念です。", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "もんじゃ、お好み焼き、テーブルに出てくるまでに時間がかかりすぎている。テーブルに来てから焼きになるので、お腹へらして店にはいると相当待つことになる。本店は時間入れ替え制で、料理の提供が遅いのに、早く食べてくださいと急かされる。予約制で席が満杯なのに、店前に満員札を出さないから、客が出入口から入ってこようとする。味は悪くないが、サービスが絶望的に低すぎる。", "strategy": ""}, {"date": "", "store": "結", "media": "Google", "rating": "1", "content": "味は美味しく、お店も小綺麗で雰囲気は良かったです。\\nしかし頼んだメニューに髪の毛が2本も入っていました。1本目を発見した時は、こういうこともあるか、と目を瞑りましたが、2本目を発見したので、さすがにちょっと…と思い、スタッフさんに言いました。\\nしかし、渡した髪を「あー、はい」と受け取り、中のスタッフさんで共有することもなく何事もなかったかのようにスルーされました。\\nこちらとしてはきちんとした謝罪の言葉が返ってくるものと思っていたので、あまりの他人事対応に唖然としました。ちょっと受け入れ難かったので、「それだけですか？」と言いました。\\nその後他の方に伝えられ、上の方が「お代は要らないんで」と言われましたが、最後まできちんとした謝罪の言葉は聞けませんでした。(軽く、すみません、とは言われました。)\\nお店はきれいでおしゃれで、味も美味しかっただけに残念な気持ちが大きいです。\\n腹立たしいというより、悲しい気持ちになりました。\\n二度と行きません。", "strategy": ""}, {"date": "", "store": "結", "media": "Google", "rating": "1", "content": "客よって対応が違う、焼き物もほったらかしでお好み焼きもソース、マヨネーズもやらない\\nもう2度と使わない\\n値段も高く、普通のお店と変わらないから割高すぎ", "strategy": ""}, {"date": "", "store": "結", "media": "Google", "rating": "1", "content": "口コミが高評価だったので、予約して平日の夜に来訪。店内はかなり騒がしく、思ったより狭くて驚きました。\\n料理の味については特筆した何かはないですが、たまたまなのか焼いてくれた店員さんの態度がとても気になり、嫌な思いをしました。\\n・もんじゃを焼くときにこちらの箸とグラスが邪魔だったのか、勝手に移動させられる(一言、失礼します、などがあってもいいのではないか。とても驚いたし、触られたくなかった)\\n・お好み焼きを焼いたあと？に使ってもいない爪楊枝とゴミのようなものがテーブルに置かれていて気持ち悪かった。もちろん店員は気づかない\\n・メニュー名をフルで言ってくれなかったので、こちらが頼んだものかどうかわからなかった。え？と聞き返しても何を持ってきたのかきちんと伝えてくれなかった\\n・作るとき、不機嫌そうで、他のテーブルでは話しかけたり説明したりしてるのにこちらには無言で適当にされていた\\n・とにかく乱暴でガサツな作り方で、何かが飛んできそうでヒヤヒヤした\\n高価格帯なので、インバウンド向けなのかもしれませんが、メニューも少ないし一個ずつしか焼かないのでテンポも悪く、再訪する気になりませんでした。", "strategy": ""}, {"date": "", "store": "結", "media": "Google", "rating": "1", "content": "接客の質が極めて悪い。もんじゃの焼き方も雑、服についても謝らないのには驚愕、大人の対応ですね。空調は寒すぎる、まるメガネの男性が雑だよ、変えた方がよい。ほか、味はメイン通りの店の方が美味しいのであえてこの店にくる必要はありません。がネット予約できる点は良、ほかの店は並びますからね。", "strategy": ""}, {"date": "", "store": "二番街", "media": "Google", "rating": "1", "content": "少し待って入りましたがQR読み込みタイプの注文で、席の時間制限があると言われたが電波が悪く（これは自分だけかもしれないが）全く進まず注文できず、スタッフに言ったが待ってくださいと言われ数分待つものの一向に対応なく、時間制限あるにも関わらず放置されたので飲食せず退店しました。\\n退店する際にスタッフに一声かけましが、あっ大丈夫ですか と一言。 は？？？？となりました。時間の無駄でした。", "strategy": ""}, {"date": "", "store": "二番街", "media": "Google", "rating": "1", "content": "こちらのレストランで明太もんじゃを頼みました\\nところが途中、中に異物を発見しました。最初はなにかと思い、よくみるとお皿の破片のようにとても固いものでした。\\n幸い怪我などはありませんでしたが、店員に知らせてこれが何か確認してもらい、ホタテの貝殻破片ということがわかりましたが、明太もんじゃにホタテ含まれていないので混入はおかしいことです。\\nお店の去り際に謝罪もなく不満でした。サービスに納得できません。衛生管理も疑わしいです。もう二度と行きません。", "strategy": ""}, {"date": "", "store": "二番街", "media": "Google", "rating": "1", "content": "【もんじゃストリートの中で最もクオリティが低いお店】月島在住である程度色々なお店に行ったことありますが、味も値段もサービスも店の雰囲気も最低レベルだと感じました。\\n店員の覇気がなく、虚な目でもごもご接客、焼いているときも、すごくもっさりとした動き、焼き方で心配になりました。トッピング忘れ、ドリンク忘れもあり、お店として大丈夫なのかと。にも関わらず、口コミの強要。小柄な男性の定員が、何度も配膳ミスをしていたり、焼いている途中に無言でどこかに行ってしまい、焼き終わったのか途中なのかも分からず…。\\n席も階段下で狭く、埃っぽく、衛生面に不安あり。味も薄めで美味しくなかったです。\\n別邸の方は静かでオシャレなもんじゃ屋さん、本店は王道という印象ですが、ここは選ばない方が良いかと。良い口コミは、ドリンクサービスや強要によるものなので、信憑性は低いかな。月島もんじゃなら、迷わずもへじをお勧めします。", "strategy": ""}, {"date": "", "store": "二番街", "media": "Google", "rating": "1", "content": "寒空の下で2番目に名前を書いて待っていたら、10分ほどで前の客が店員に呼ばれ中へ。\\n合計で20分以上待ったところで\\n店員に声をやっとかけられ\\n｢今からだと最短で1時間待ちになりますがよろしいでしょうか？｣と\\n20分既に待っているのですが？\\nもっと早く教えて貰えていたらさっさと他のお店に行きました。\\n人の時間をなんだと思っているんですか？\\n二度と行きません。", "strategy": ""}, {"date": "", "store": "二番街", "media": "Google", "rating": "1", "content": "家族と行きました。月島駅の広告を見て興味を持ちました。まず入店後、男性店員の「少々お待ちください」の後、しばらく放置されるところから始まり、女性店員は私達に背を向けて耳の穴ホジホジしててそれに気づかず。こちらからその女性店員に声をかけてようやく目の前の空いている席に誘導されるが、スマホＱＲコードからの注文システムを使う際に「まだ配席されておりません」とスマホに表示され何も注文できず（店員側で承認しないと使えないシステムっぽいが、それを配席した女性店員がし忘れてる）。料理を注文後、しばらく何も届かない。その間スタッフ総出で皿洗いばかり。基本的にダラダラというか覇気が無いという風に見える。ジョッキは用意されているので、せめてビールくらいは出せるのでは？と感じた。鉄板はもんじゃを私たちに届けてから点火。なので鉄板が熱されるまでの間、ひたすら待たされる。とにかくこの店は待たされる。その後ようやく料理にありつけたが、飲み物ともんじゃの追加注文をすれば、再びひたすら来ない時間。本当にとにかく待たされる。結論、退散して他の店に行きました。料理は野菜が大盛りでそれなりだった気がしますが、とにかく他店より価格も高い。感情次第で味覚は心理的に鈍るのでもう記憶にありません。直後に行った他店では、店員さんの活気が良くて、迅速に対応していただいたのでとても良い思い出になりました。こういう出来事って、この店は－１、他店には＋１の評価が残るので、この店にとっては結果的に－２の負の効果になると思いますね。本当は☆１も付けたくないですが、かろうじて料理が１品出てきたので☆１を付けておきます。", "strategy": ""}, {"date": "", "store": "二番街", "media": "Google", "rating": "1", "content": "もんじゃ焼き屋さんで籠に荷物を入れるのは初めてでした。冬場はアウターや荷物も多いので厳しいと思いますけど。。何より店員さんが困っている姿を見て見ぬ振りされたのが悲しかったです。味の評価は基本したくないのですが穴子のもんじゃは、、評価が分かれると思います。", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "1", "content": "店員の愛想無し。店内は綺麗。もんじゃは火力強過ぎてゆっくり食べていた訳では無いが最終的に野菜炒めのような感じになっていた。", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "1", "content": "長身長のバイトの方に作ってもらったが、態度が悪い上に作り方が雑で不愉快だった。全然キャベツを刻んでくれなかった。好みの問題だが、味が少し薄かった。\\n", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "", "content": "本日地下の方で食べさて頂きました。\\nメニュー（おつまみ系）はあまり多くはなく、アスパラを注文しましたが、はっきり言って茹でであってそのあと軽く焼いたら水分がとばないので全く美味しくなかったです。\\n長芋のわさびは美味しかったです。もんじゃ焼きは、ごめんなさい普通です。それと換気が良くないですね。\\nもう行かないです。", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "", "content": "怒ってますか？と聞きたくなるくらい酷い接客でした。\\n焼いていただいているときはもんじゃの具材がこちらまで飛び散ってましたし、声も小さく表情も暗く、何より刻み方？が怖すぎてもんじゃになにか恨みでもあるのかと思いました。^^\\n\\nここにしたことを後悔するくらい、全てが大変不愉快でした。飲食店でこんな気持ちになったのははじめてです、二度と行きません。", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "", "content": "味は美味しかったですが、担当した女性従業員の対応が飲食店として人として最悪。\\nドリンクの提供が遅い！\\n客層が煩すぎて声が聞こえない！\\n\\n口コミ見て低レベルな店と思って行ったつもりはないけど、担当した女性がかなりのあり得ない事を次々としていた。\\nきちんと接客、飲食店としての衛生的な事を教えるべき。\\nいくら若くても、いくら忙しくても常識的に飲食店としてやってはいけない事位分かる様な事をやるような従業員は表に出すべきではないです。\\nこの高評価口コミは身内？さくら？", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "", "content": "期待して入ったのに残念\\n味もおいくしないし、店員の接客もいまいち、\\nおまけに高い、三拍子揃ってます。\\nもう行くとはないでしょう", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "", "content": "もんじゃへのこだわりをスタッフが説明してくれたが、味は普通のもんじゃでした。「普通」は当然悪いという意味合いではなく、スタンダードという意味合いで言っています。\\n\\nまた、スタッフからこの評価を名前入りで良く書いてくれないと時給に影響する旨話され、投稿をお願いされたので、なるほど、このお店の凄く多い高評価はあてにならないということが理解できました。\\n\\n時給アップには１日でスタッフの名前が入った５スターコメントが５件必要との説明でした。\\n確かに新しいコメントは、やたらスタッフ名が入った褒めコメばかりで、ゲンナリします。\\n\\nこの様な高評価誘導指示で、それをスタッフの時給に反映させるという経営者（もしくは店舗責任者）の行為は、このご時世、許されるものではないと思います。\\nこれは、Googleのコメント（評価システム）を愚弄する行為であり、消費者をも欺こうとしています。\\n反省すべきはそれを指示した責任者なので、弱者であるスタッフを責めたり、時給がカットされたりしないことを祈るばかりです…\\n\\nもんじゃにこだわりがあるのなら、その味とサービスで真の評価を得て、またそれを受け入れて、より良いお店にしていくのが本当の姿ではと思います。", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "", "content": "口コミが良かったので初めて行きましたが若い男性店員さんもマニュアル通りな感じでやらされてる感半端なく、特に笑顔もなく口コミお願いしまーすって名刺渡されて愛想もない感じで適当にもんじゃ作ってそそくさといなくなりました。気分悪かったです\\n味も凄い美味しいって訳でもなく、別のお店に入れば良かったです\\nもう行かないです", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "", "content": "味云々の前に、まず前の客のゴミがイスに散乱、鉄板も汚い。\\nそして店員が焼いてくれるのはいいが、客が頼んだものをテーブルに平気で落とし謝りもないそのまま。\\n接客中ポケットに手をいれながら話す、ドリンクを手渡ししてくる、どうやったらこんなレビュー点数になるのか疑問。\\nさらに地下のフロアは煙モクモクで服が臭くなりました。\\n味は普通。コスパゼロ論外。", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "", "content": "換気扇、壁、ホコリが溜まっててきれいではなかった。明太もちチーズもんじゃはなんと2200円で高額なのに美味しくない。高額な金額設定ならアルバイトや掃除をしっかりしないと割に合わない。ただ高いだけでアスパラも極太と書いてあるのに、普通の太さ。コストコのほうが太い。メニューも少なくて、ワンドリンク制でもう行かないと思います。", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "", "content": "店員の教育ができていない‼️\\nグラスをテーブルに置くにしても「ドン」中身が溢れるのではないか？と思わせる。\\nオーダーして、もんじゃの具材が出るまでビールが一杯あく程の\\nスロー❗それで二時間縛り。\\n店員の連絡、連携がで来ていない。こちら(お客)に言う内容が違いすぎる。何が本当なのか？\\n\\n高い！二度と行かないでしょう‼️", "strategy": ""}], "common_complaints": [{"cat": "入店時編", "desc": ""}, {"cat": "着席時スタッフさんから説明がない", "desc": "\\n①荷物の入れ場所を伝える\\n②注文方法を伝える\\n③メニューブックを伝える\\n④定番メニューを伝える\\n⑤火を点ける"}, {"cat": "1ドリンク1フードオーダー言われていないのに強制された", "desc": "入店時下記は必ず伝える\\n①時間制を伝える\\n②1ドリンク制、１フード制を伝える\\n\\n言われていないとなった場合\\n・「申し訳ございません、伝え漏れていたので、このままで大丈夫です」\\nと伝えて、責任者に伝える"}, {"cat": "入店、退店の挨拶がない", "desc": "\\n①「お客様ご来店です」と他スタッフに伝える\\n②「いらっしゃいませ」と他スタッフは言う\\n③席まで案内する"}, {"cat": "入店時、ドアを開けて入ったところ、長時間気づかない", "desc": "・入口に背を向けて私語をしない\\n・レセプション以外で気付いたスタッフは「いらっしゃいませ、少々お待ち下さい」と伝える"}, {"cat": "スタッフに元気がない", "desc": "声を出して活気を出す。下記は必ず言う\\n・お客様ご来店です。\\n・いらっしゃいませ。\\n・お客様お帰りです。\\n・ありがとうございました。\\n"}, {"cat": "ホール立ち回り編", "desc": ""}, {"cat": "スタッフ同士が会話をしていて呼んでも気づかない", "desc": "お客様がいる席に背中を向け私語をしない。"}, {"cat": "取り皿の交換が1回もない", "desc": "①料理提供時お皿交換をするか確認\\n②汚れていたら交換\\n③人数分のお皿を持って行く\\n④新しいお皿に交換\\n⑤使っているお皿を下げる"}, {"cat": "味付け何したら良いか分からなかった", "desc": "おつまみ、鉄板焼き提供時説明文言を必ず言う。\\n分からなかった場合はそのまま持って行かないで、社員に聞いてから持って行く"}, {"cat": "商品の提供が遅い", "desc": "①もんじゃ半分、お好み焼き、鉄板焼きのみ\\nの卓をキッチンに共有\\n②お客様に今作っている事を伝える\\n③〈鉄板にない場合〉\\n鉄板掃除、火の調整"}, {"cat": "席の時間を言われなかったのにラストオーダーを聞きに来た", "desc": "入店時下記は必ず伝える\\n①時間制を伝える\\n②1ドリンク制、１フード制を伝える\\n③スタッフが焼く料理を伝える\\n\\n言われた場合\\nそのまま、ラストオーダーを取らないで、「少々お待ちください、確認致します」と伝えて社員に回す"}, {"cat": "ドリンク、料理が全然来ない", "desc": "・「少々お待ちください」と伝えキッチン、ドリ場に確認する\\n・「今お作りしていますので少々お待ち下さい」と伝える\\n・「大変お待たせ致しました。」と伝えて提供する"}, {"cat": "無言で皿、グラスを下げられた。", "desc": "お客様に必ず確認してから下げる\\n「お下げしても宜しいでしょうか」"}, {"cat": "1時間15分でラストオーダーと言われた。席は2時間制だったので、ラストオーダーの時間も事前に知りたかった。", "desc": "・30分前にラストオーダーを聞く\\n・料理提供が遅くなってしまった場合責任者に聞く\\n・ラストオーダーを聞くのを忘れた場合、責任者に確認を取り伸ばす"}, {"cat": "質問をしたら、「分からない」と言われてそのままにされた", "desc": "イレギュラーな質問があった場合の対応方法（お客様には確認致します。と伝え社員に回す"}, {"cat": "トイレの場所に聞いたら素っ気なくされた", "desc": "ジェスチャーも合わせて、詳細に伝える"}, {"cat": "焼き時編", "desc": ""}, {"cat": "焼き方の説明がほとんどなかった。", "desc": "鉄板焼き提供時焼き方、味付け方法を伝える"}, {"cat": "もんじゃは焼いてくれたが、焼き終わった際に、テーブルに垂れた汁を拭いてもらえなかった。", "desc": "・焼き終わりポケットのダスターで拭き上げる\\n・お客様にかかった場合は自分で判断しないですぐ社員に報告する"}, {"cat": "焼いている時洋服にかかった", "desc": "申し訳ございませんと謝罪して、すぐに責任者に伝える"}, {"cat": "焼いている時に具材が落ちてそのままにされた", "desc": "そのままにしない\\n「申し訳ございません、新しいのお持ち致します」と伝えて、キッチンから貰う"}, {"cat": "何も言わずにテーブルに来てもんじゃ、お好み焼きを焼いてそのまま立ち去って放置された", "desc": "・焼いている間にテーブルを離れる時は「少々お待ちください」と伝えて離れる\\n・お好み焼きの場合は「こちらでひっくり返すのでこのままお待ちください」と伝えて離れる"}, {"cat": "退店時編", "desc": ""}, {"cat": "お会計後誰からも挨拶が無かった", "desc": "①「お客様お帰りです」と他スタッフに伝える\\n②「ありがとうございました」と他スタッフは言う\\n③出口（囲はエレベーター前）まで行く\\n④止まってお見送りをする"}, {"cat": "ドリ場編", "desc": ""}, {"cat": "ビールの泡が少なかった", "desc": "〈ドリンク作成者〉\\n泡をスプーンで捨てて新しい泡を足すか、泡を入れ替える\\n〈ホールスタッフ〉\\n泡が少ない（汚い）状態で提供をしない。戻して作り直させる。"}, {"cat": "グラスが汚かった", "desc": "〈ドリンク作成者〉\\nグラスが汚くないか確認して、作成\\n〈ホールスタッフ〉\\n汚い状態で提供をしない。戻して作り直させる。"}], "store_mgr_schedule": [{"date": "2026-03-06 00:00:00", "week": "1W", "training": "飲食店消滅の危機【森朝奈×永田ラッパ】"}, {"date": "2026-03-13 00:00:00", "week": "非開催", "training": "非開催"}, {"date": "2026-03-20 00:00:00", "week": "3W", "training": "凡人が磨くべきビジネススキル【小澤隆生×田中溪】"}, {"date": "2026-03-27 00:00:00", "week": "4W", "training": "【坂井風太】たった一人の熱量から始める「組織改革実践」"}, {"date": "2026-04-03 00:00:00", "week": "1W", "training": "【坂井風太】組織変革が可能なリーダーに共通する「５つの特徴」"}, {"date": "2026-04-10 00:00:00", "week": "2W", "training": "個人経営カフェを統計・マーケ分析【サトマイ×MEGUMI】"}, {"date": "2026-04-17 00:00:00", "week": "3W", "training": "【マネジメント術】常に最適解を出せる「理想の上司」になる方法"}, {"date": "2026-04-24 00:00:00", "week": "4W", "training": "「脱・マネジメントの無免許運転」リードマネジメントのすべて"}, {"date": "2026-05-01 00:00:00", "week": "非開催", "training": "非開催"}, {"date": "2026-05-08 00:00:00", "week": "1W", "training": "飲食店消滅の危機【森朝奈×永田ラッパ】"}, {"date": "2026-05-15 00:00:00", "week": "2W", "training": "未定"}, {"date": "2026-05-22 00:00:00", "week": "3W", "training": "未定"}, {"date": "2026-05-29 00:00:00", "week": "4W", "training": "未定"}]};
+// ── DATA ──
+const BASE_DATA = {"tasks": [{"cat1": "全体戦略", "cat2": "営業戦略策定", "task": "営業戦略策定", "freq": "年次", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "全体戦略", "cat2": "店舗人事戦略策定", "task": "店舗人事戦略策定", "freq": "年次", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "チーム管理", "cat2": "業務企画チーム管理", "task": "業務企画チーム戦略策定", "freq": "-", "mgmt": "部長", "dept": "業務企画", "person": "中島"}, {"cat1": "チーム管理", "cat2": "", "task": "業務管理", "freq": "-", "mgmt": "部長", "dept": "部長", "person": "佐藤"}, {"cat1": "チーム管理", "cat2": "", "task": "定例会議運営主管", "freq": "週2回", "mgmt": "部長", "dept": "業務企画", "person": "中島"}, {"cat1": "チーム管理", "cat2": "トレーナーチーム管理", "task": "トレーナーチーム戦略策定", "freq": "-", "mgmt": "副部長", "dept": "トレーナー", "person": "久野"}, {"cat1": "チーム管理", "cat2": "", "task": "業務管理", "freq": "-", "mgmt": "副部長", "dept": "副部長", "person": "久野"}, {"cat1": "チーム管理", "cat2": "", "task": "定例会議運営主管", "freq": "週次", "mgmt": "副部長", "dept": "トレーナー", "person": "平川"}, {"cat1": "チーム管理", "cat2": "設備・修繕・害虫チーム管理", "task": "設備・修繕・害虫チーム戦略策定", "freq": "-", "mgmt": "SV", "dept": "設備・修繕・害虫", "person": "小澤"}, {"cat1": "チーム管理", "cat2": "", "task": "業務管理", "freq": "-", "mgmt": "部長", "dept": "部長", "person": "佐藤"}, {"cat1": "チーム管理", "cat2": "", "task": "定例会議運営主管", "freq": "月2回", "mgmt": "SV", "dept": "設備・修繕・害虫", "person": "小澤"}, {"cat1": "チーム管理", "cat2": "セントラルキッチン管理", "task": "セントラルキッチン戦略", "freq": "-", "mgmt": "部長", "dept": "セントラル", "person": "中島"}, {"cat1": "チーム管理", "cat2": "", "task": "業務管理", "freq": "", "mgmt": "部長", "dept": "部長", "person": "佐藤"}, {"cat1": "チーム管理", "cat2": "", "task": "定例会議運営主管", "freq": "週次", "mgmt": "部長", "dept": "セントラル", "person": "中島"}, {"cat1": "会議体", "cat2": "店舗マネジメント定例会議", "task": "運営主管", "freq": "-", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "会議体", "cat2": "店長会", "task": "運営主管", "freq": "-", "mgmt": "副部長", "dept": "SV", "person": "小澤"}, {"cat1": "会議体", "cat2": "店舗全体会議", "task": "運営主管", "freq": "-", "mgmt": "副部長", "dept": "SV", "person": "小澤"}, {"cat1": "会議体", "cat2": "トレーナーチーム会議", "task": "運営主管", "freq": "-", "mgmt": "副部長", "dept": "トレーナー", "person": "平川"}, {"cat1": "会議体", "cat2": "設備・修繕・害虫チーム会議", "task": "運営主管", "freq": "-", "mgmt": "部長", "dept": "設備・修繕・害虫", "person": "小澤"}, {"cat1": "会議体", "cat2": "業務企画会議", "task": "運営主管", "freq": "-", "mgmt": "部長", "dept": "業務企画", "person": "富田"}, {"cat1": "会議体", "cat2": "セントラルキッチン会議", "task": "運営主管", "freq": "-", "mgmt": "部長", "dept": "セントラル", "person": "中島"}, {"cat1": "会議体", "cat2": "会議体管理", "task": "会議体適正化", "freq": "-", "mgmt": "部長", "dept": "副部長", "person": "久野"}, {"cat1": "売上管理", "cat2": "売上予算策定", "task": "期初予算策定", "freq": "年次", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "売上管理", "cat2": "", "task": "下期修正予算策定", "freq": "半期毎", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "売上管理", "cat2": "", "task": "月次修正予算策定", "freq": "月次", "mgmt": "部長", "dept": "業務企画", "person": "富田"}, {"cat1": "売上管理", "cat2": "売上進捗表更新", "task": "月次更新", "freq": "月次", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "売上管理", "cat2": "", "task": "日次更新", "freq": "日次", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "売上管理", "cat2": "売上施策立案", "task": "営業時間決定", "freq": "月次", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "売上管理", "cat2": "", "task": "客数増加施策立案", "freq": "-", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "売上管理", "cat2": "", "task": "客単価上昇施策立案", "freq": "-", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "予約管理", "cat2": "予約設計変更", "task": "予約戦略策定", "freq": "-", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "予約管理", "cat2": "", "task": "予約設計作成", "freq": "-", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "予約管理", "cat2": "", "task": "「予約設計表」更新", "freq": "-", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "", "task": "「グルメサイト設定シート」更新", "freq": "-", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "", "task": "グルメサイト更新", "freq": "-", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "", "task": "ebica更新", "freq": "-", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "", "task": "全社案内", "freq": "-", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "予約管理", "cat2": "営業時間変更", "task": "Google更新", "freq": "-", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "", "task": "グルメサイト更新", "freq": "-", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "", "task": "ebica更新", "freq": "-", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "", "task": "全社案内", "freq": "-", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "予約管理", "cat2": "団タメ！", "task": "契約対応", "freq": "-", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "", "task": "コース設定", "freq": "-", "mgmt": "SV", "dept": "SV", "person": "久野"}, {"cat1": "予約管理", "cat2": "", "task": "予約受付対応", "freq": "-", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "", "task": "支払い対応", "freq": "-", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "その他予約対応", "task": "リクエスト予約対応", "freq": "日次", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "予約管理", "cat2": "", "task": "予約エラー対応", "freq": "日次", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "コスト管理", "cat2": "コスト予算策定", "task": "期初予算策定", "freq": "年次", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "コスト管理", "cat2": "", "task": "予算外の起案", "freq": "-", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "コスト管理", "cat2": "", "task": "下期修正予算策定", "freq": "半期毎", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "コスト管理", "cat2": "コスト進捗確認", "task": "予算進捗確認", "freq": "-", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "コスト管理", "cat2": "コスト対策", "task": "食材費管理", "freq": "-", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "コスト管理", "cat2": "", "task": "人件費管理", "freq": "-", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "コスト管理", "cat2": "", "task": "備品管理", "freq": "-", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "コスト管理", "cat2": "", "task": "その他コスト管理", "freq": "-", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "食材費管理", "cat2": "食材費管理", "task": "「食材棚卸し」更新", "freq": "月次", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "食材費管理", "cat2": "", "task": "「理論-実績原価差異」更新", "freq": "月次", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "食材費管理", "cat2": "", "task": "商品情報(POS)更新", "freq": "-", "mgmt": "部長", "dept": "業務企画", "person": "富田"}, {"cat1": "人件費管理", "cat2": "人件費管理", "task": "「店舗営業部共通」予算決定", "freq": "月次", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "人件費管理", "cat2": "", "task": "シフト管理", "freq": "-", "mgmt": "SV", "dept": "店長", "person": "店長"}, {"cat1": "人件費管理", "cat2": "シフト管理", "task": "シフト枠(予算)作成", "freq": "月次", "mgmt": "SV", "dept": "業務企画", "person": "中島"}, {"cat1": "人件費管理", "cat2": "", "task": "シフト枠(予算)承認", "freq": "月次", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "人件費管理", "cat2": "", "task": "社員基本シフト作成", "freq": "", "mgmt": "SV", "dept": "店長", "person": "店長"}, {"cat1": "人件費管理", "cat2": "", "task": "シフト作成", "freq": "", "mgmt": "SV", "dept": "店長", "person": "店長"}, {"cat1": "人件費管理", "cat2": "", "task": "シフト承認会議", "freq": "", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "人件費管理", "cat2": "", "task": "シフト公開", "freq": "", "mgmt": "SV", "dept": "SV", "person": "久野"}, {"cat1": "人件費管理", "cat2": "", "task": "欠員等対応", "freq": "", "mgmt": "SV", "dept": "店長", "person": "店長"}, {"cat1": "人件費管理", "cat2": "勤怠管理", "task": "日次勤怠承認", "freq": "", "mgmt": "SV", "dept": "店長", "person": "店長"}, {"cat1": "人件費管理", "cat2": "", "task": "「勤怠管理」更新", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "人件費管理", "cat2": "", "task": "「残業管理」更新", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "人件費管理", "cat2": "", "task": "「退職者一覧」更新", "freq": "", "mgmt": "SV", "dept": "SV", "person": "久野"}, {"cat1": "人件費管理", "cat2": "", "task": "休暇管理", "freq": "", "mgmt": "SV", "dept": "SV", "person": "久野"}, {"cat1": "稟議対応", "cat2": "稟議承認", "task": "各種申請承認", "freq": "", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "稟議対応", "cat2": "", "task": "支払依頼承認", "freq": "", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "稟議対応", "cat2": "", "task": "経費精算承認", "freq": "", "mgmt": "事業部長", "dept": "部長", "person": "佐藤"}, {"cat1": "小口現金管理", "cat2": "小口現金管理", "task": "小口受取", "freq": "", "mgmt": "SV", "dept": "店長", "person": "店長"}, {"cat1": "小口現金管理", "cat2": "", "task": "小口精算", "freq": "", "mgmt": "SV", "dept": "店長", "person": "店長"}, {"cat1": "小口現金管理", "cat2": "", "task": "小口申請", "freq": "", "mgmt": "SV", "dept": "店長", "person": "店長"}, {"cat1": "小口現金管理", "cat2": "", "task": "小口承認", "freq": "", "mgmt": "事業部長", "dept": "SV", "person": "久野"}, {"cat1": "小口現金管理", "cat2": "", "task": "小口返金", "freq": "", "mgmt": "SV", "dept": "店長", "person": "店長"}, {"cat1": "人材管理", "cat2": "社員採用", "task": "採用計画立案", "freq": "", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "人材管理", "cat2": "", "task": "面接対応", "freq": "", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "人材管理", "cat2": "", "task": "採用判断", "freq": "", "mgmt": "事業部長", "dept": "SV", "person": "久野"}, {"cat1": "人材管理", "cat2": "", "task": "社員受入対応", "freq": "", "mgmt": "SV", "dept": "SV", "person": "久野"}, {"cat1": "人材管理", "cat2": "社員採用", "task": "採用計画立案", "freq": "", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "人材管理", "cat2": "", "task": "面接対応", "freq": "", "mgmt": "部長", "dept": "SV", "person": "久野"}, {"cat1": "人材管理", "cat2": "", "task": "採用判断", "freq": "", "mgmt": "事業部長", "dept": "SV", "person": "久野"}, {"cat1": "人材管理", "cat2": "アルバイト採用", "task": "採用計画立案", "freq": "", "mgmt": "SV", "dept": "SV", "person": "久野"}, {"cat1": "人材管理", "cat2": "", "task": "求人サイト掲載", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "人材管理", "cat2": "", "task": "書類選考", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "人材管理", "cat2": "", "task": "面接日程調整", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "人材管理", "cat2": "", "task": "面接対応", "freq": "", "mgmt": "SV", "dept": "トレーナー", "person": "平川"}, {"cat1": "人材管理", "cat2": "", "task": "採用判断", "freq": "", "mgmt": "SV", "dept": "トレーナー", "person": "平川"}, {"cat1": "人材管理", "cat2": "", "task": "入社手続き", "freq": "", "mgmt": "SV", "dept": "トレーナー", "person": "平川"}, {"cat1": "人材管理", "cat2": "", "task": "社員受入対応", "freq": "", "mgmt": "SV", "dept": "店長", "person": "店長"}, {"cat1": "人材管理", "cat2": "体制決定", "task": "SV配置決定", "freq": "", "mgmt": "", "dept": "", "person": ""}, {"cat1": "人材管理", "cat2": "", "task": "店長配置決定", "freq": "", "mgmt": "", "dept": "", "person": ""}, {"cat1": "人材管理", "cat2": "", "task": "社員配置決定", "freq": "", "mgmt": "", "dept": "", "person": ""}, {"cat1": "人材管理", "cat2": "", "task": "スタッフ配置決定", "freq": "", "mgmt": "", "dept": "", "person": ""}, {"cat1": "トレーナーG", "cat2": "", "task": "Google進捗管理", "freq": "", "mgmt": "トレーナー", "dept": "業務企画", "person": "富田"}, {"cat1": "備品発注", "cat2": "", "task": "藤本商会、アスクル発注", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "", "cat2": "", "task": "シフト会議", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "", "cat2": "", "task": "ポイント集計", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "", "cat2": "", "task": "おしぼり集計", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "セントラル業務改善", "task": "セントラル清掃スケジュール組", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "セントラルカーテン設置", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "ネズミ取り設置", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "セントラル清掃道具選定", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "セントラル清掃人件費", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "仕込み時間が正しくない→精査し直しが必要", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "ゴム手袋使い捨てロングに", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "エアコンの結露が垂れてて食品にかかっている", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "前のお店の備品がある清掃が必要", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "店舗備品とセントラル備品を仕分けをしたい", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "椅子が欲しい", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "セントラル専用ユニフォーム", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "新しく入る子に衛生講習をした方がいい", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "セントラル水道", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "セントラルライト", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "仕込みマニュアルの貼り出し", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "機材消毒方法検討、落とし込み", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "床用の洗剤", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "セントラル", "cat2": "", "task": "必要備品検討", "freq": "", "mgmt": "SV", "dept": "業務企画", "person": "富田"}, {"cat1": "スポット依頼業務", "cat2": "", "task": "別邸地下ガラスシート", "freq": "", "mgmt": "", "dept": "業務企画", "person": "富田"}, {"cat1": "", "cat2": "", "task": "大学求人掲示板問い合わせ", "freq": "", "mgmt": "", "dept": "業務企画", "person": "富田"}, {"cat1": "", "cat2": "", "task": "103万円の壁問い合わせ", "freq": "", "mgmt": "", "dept": "業務企画", "person": "富田"}, {"cat1": "", "cat2": "", "task": "別邸地下事務所整理", "freq": "", "mgmt": "", "dept": "業務企画", "person": "富田"}, {"cat1": "", "cat2": "", "task": "浅草ホテル・観光スポットリスト化", "freq": "", "mgmt": "", "dept": "業務企画", "person": "富田"}, {"cat1": "", "cat2": "", "task": "浅草特化インフルエンサーリスト化", "freq": "", "mgmt": "", "dept": "業務企画", "person": "富田"}, {"cat1": "", "cat2": "", "task": "修繕表更新", "freq": "", "mgmt": "", "dept": "", "person": ""}, {"cat1": "", "cat2": "", "task": "時給のリスト", "freq": "", "mgmt": "", "dept": "", "person": ""}, {"cat1": "", "cat2": "", "task": "売上表数字打ち込み", "freq": "", "mgmt": "", "dept": "", "person": ""}, {"cat1": "", "cat2": "", "task": "人事評価数字集計", "freq": "", "mgmt": "", "dept": "", "person": ""}, {"cat1": "e", "cat2": "e", "task": "e", "freq": "e", "mgmt": "e", "dept": "e", "person": "e"}], "schedule": [{"period": "上期", "q": "1Q", "month": "10月", "event": "店舗会", "training": "火災・衛生研修", "hr": "自己評価面談・評価資料提出期間", "ab_eval": "評価期間", "clean": "鉄板裏清掃", "misc": ""}, {"period": "", "q": "", "month": "11月", "event": "", "training": "", "hr": "", "ab_eval": "グレード改定", "clean": "業者清掃", "misc": ""}, {"period": "", "q": "", "month": "12月", "event": "店長会", "training": "", "hr": "評価確定", "ab_eval": "", "clean": "エアコン・換気扇清掃", "misc": "年末年始ゴミ回収申請"}, {"period": "", "q": "2Q", "month": "1月", "event": "", "training": "", "hr": "", "ab_eval": "", "clean": "", "misc": ""}, {"period": "", "q": "", "month": "2月", "event": "", "training": "", "hr": "", "ab_eval": "", "clean": "", "misc": ""}, {"period": "", "q": "", "month": "3月", "event": "店長会", "training": "", "hr": "", "ab_eval": "", "clean": "", "misc": ""}, {"period": "下期", "q": "3Q", "month": "4月", "event": "", "training": "火災・衛生研修", "hr": "自己評価面談・評価資料提出期間", "ab_eval": "評価期間", "clean": "鉄板裏清掃", "misc": ""}, {"period": "", "q": "", "month": "5月", "event": "", "training": "", "hr": "", "ab_eval": "グレード改定", "clean": "業者清掃", "misc": ""}, {"period": "", "q": "", "month": "6月", "event": "店長会", "training": "", "hr": "評価確定", "ab_eval": "", "clean": "エアコン・換気扇清掃", "misc": ""}, {"period": "", "q": "4Q", "month": "7月", "event": "", "training": "", "hr": "", "ab_eval": "", "clean": "", "misc": ""}, {"period": "", "q": "", "month": "8月", "event": "", "training": "", "hr": "", "ab_eval": "", "clean": "", "misc": ""}, {"period": "", "q": "", "month": "9 月", "event": "店長会", "training": "", "hr": "", "ab_eval": "", "clean": "", "misc": ""}], "roles": [{"role": "階層", "dept": "職種", "manager": "管理者", "responsible": "実務責任者", "scope": "管轄範囲", "duties": ["主な責務"], "mission": ["ミッション"], "kpi": ["数値責任（KPI例）"], "quant": ["定量評価項目（例）"], "qual": ["定性評価項目（例）"]}, {"role": "店舗営業部長/副部長\\n（最高店舗統括）", "dept": "本部", "manager": "部長", "responsible": "部長\\n副部長", "scope": "全店舗", "duties": ["・年間営業計画", "・店舗標準化", "・幹部育成", "・本部・現場連携", "・ステークホルダー対応(主要取引先)"], "mission": ["・部門業績最大化", "・店舗オペレーション統一化", "・幹部人材輩出", "・店舗運営力・人材力の強化による競争力維持"], "kpi": ["・部門売上", "・部門営業利益", "・原価率", "・人件費率", "・店舗KPI達成率"], "quant": ["・部門売上達成率", "・部門利益率", "・KPI達成店舗割合", "・FLコスト達成率", "・QSCスコア平均点", "・SV・店長の育成達成率"], "qual": ["・リーダーシップ", "・問題解決力", "・部門内の人材育成度", "・数字と現場のバランス感覚", "・現場実行力", "・他部門との連携力"]}, {"role": "SV\\n（店舗統括責任者）", "dept": "本部", "manager": "部長", "responsible": "SV", "scope": "3〜6店舗", "duties": ["・店舗巡回・指導-", "・店長OJT", "・数値改善施策", "・トラブル対応"], "mission": ["・担当店舗の売上・利益達成", "・店長層の定着・成長", "・店舗品質向上"], "kpi": ["・担当店舗売上", "・担当店舗営業利益", "・担当店舗FLコスト率", "・QSCスコア"], "quant": ["・担当店舗売上成長率", "・原価", "・人件費改善率", "・QSC改善率"], "qual": ["・現場指導力", "・課題発見・改善スピード", "・店長との信頼関係構築度"]}, {"role": "店長", "dept": "店舗", "manager": "SV", "responsible": "店長", "scope": "1店舗", "duties": ["・日次営業管理-", "・売上・利益管理", "・スタッフ教育", "・接客", "・衛生管理"], "mission": ["・店舗利益最大化", "・顧客満足度向上", "・スタッフ定着・育成", "・お客様に心地よい時間を提供", "・ブランド価値向上"], "kpi": ["・店舗売上", "・店舗営業利益", "・原価率", "・人件費率", "・顧客満足度"], "quant": ["・売上予算達成率", "・原価・人件費達成率", "・口コミ平均点", "・口コミ件数", "・リピート客比率"], "qual": ["・接客姿勢", "・チームワーク醸成", "・衛生意識/管理精度"]}, {"role": "店長代理", "dept": "店舗", "manager": "SV", "responsible": "店長代理", "scope": "1店舗", "duties": ["・日次営業管理", "・売上・利益管理", "・スタッフ教育", "・接客", "・衛生管理"], "mission": ["・顧客満足度向上", "・スタッフ定着・育成", "・お客様に心地よい時間を提供", "・ブランド価値向上"], "kpi": ["・原価率", "・人件費率", "・顧客満足度"], "quant": ["・原価・人件費達成率", "・口コミ平均点", "・口コミ件数"], "qual": ["・接客姿勢", "・チームワーク醸成", "・衛生意識/管理精度"]}, {"role": "副店長", "dept": "店舗", "manager": "店長", "responsible": "副店長", "scope": "1店舗", "duties": ["・日次営業管理", "・スタッフ教育", "・接客", "・衛生管理"], "mission": ["・顧客満足度向上", "・スタッフ定着,育成,スキル管理", "・お客様に心地よい時間を提供", "・ブランド価値向上"], "kpi": ["・店舗売上", "・顧客満足度"], "quant": ["・売上予算達成率", "・アルバイト定着率"], "qual": ["・コミュニケーション", "・教育力", "・接客品質"]}, {"role": "当日営業責任者", "dept": "店舗", "manager": "店長", "responsible": "社員", "scope": "1店舗", "duties": ["・日次営業管理", "・スタッフ教育", "・接客", "・衛生管理"], "mission": ["・顧客満足度向上", "・スタッフ定着・育成", "・お客様に心地よい時間を提供", "・ブランド価値向上"], "kpi": ["・店舗売上", "・顧客満足度", "・接客評価スコア", "・提供時間", "・調理時間", "・品質チェック合格率"], "quant": ["・売上予算達成率", "・口コミ平均点", "・口コミ件数", "・リピート客比率"], "qual": ["・接客姿勢", "・チームワーク", "・衛生意識/管理精度"]}, {"role": "現場従業員/アルバイト", "dept": "店舗", "manager": "店長", "responsible": "社員/スタッフ", "scope": "ー", "duties": ["（接客・サービス提供）", "・お客様対応、配膳、会計", "（調理・仕込み）", "・仕込み、調理、盛り付け"], "mission": ["・お客様に心地よい時間を提供", "・ブランド価値向上"], "kpi": ["・接客評価スコア", "・提供時間", "・調理時間", "・品質チェック合格率"], "quant": ["・接客満足度", "・提供スピード", "・仕込み精度"], "qual": ["・笑顔", "・態度", "・チームワーク", "・衛生意識", "・丁寧さ"]}, {"role": "セントラル", "dept": "店舗", "manager": "部長", "responsible": "社員", "scope": "全店舗", "duties": ["・食材・商品の製造・仕込み", "・品質管理", "・在庫管理と発注管理", "・店舗への供給・物流", "・衛生管理・設備管理", "・作業効率 / 製造効率の改善"], "mission": ["・全店舗の品質を均一化すること", "・店舗の負担を軽減し、生産性を最大化すること", "・原価・ロスを最小化して利益に貢献すること"], "kpi": ["・原価率（F率）", "・食材ロス率", "・納品精度（ミス率）", "・人件費率 / 作業生産性", "・衛生スコア", "・店舗からの評価"], "quant": ["・仕込み誤差率（計量誤差 %）", "・食材ロス率（前年比 / 目標比）", "・廃棄コスト削減額", "・納品ミス件数", "・人時生産性", "・HACCP遵守チェック項目達成率"], "qual": ["・課題を自ら抽出し改善案を提案できる", "・工程改善やロス削減への積極性", "・計量・配合の精度", "・基準以上の衛生を常に保つ姿勢", "・店舗との連携力", "・作業分担・協力体制"]}, {"role": "トレーナーG", "dept": "店舗", "manager": "副部長", "responsible": "社員", "scope": "全店舗", "duties": ["・新人教育・研修", "・店舗指導・巡回", "・OJT", "・教育進捗管理", "・スタッフ採用、管理"], "mission": ["・戦力化スピード向上", "・サービス平準化"], "kpi": ["・口コミ平均点", "・口コミ件数", "・研修完了率", "・教育満足度", "・店舗達成率/改善率"], "quant": ["・教育実施回数/合格率", "・巡回回数", "・改善実行率"], "qual": ["・教えるスキル", "・改善力", "・コミュニケーション力", "・現場適応力"]}, {"role": "業務企画", "dept": "本部", "manager": "部長\\n副部長", "responsible": "社員", "scope": "全店舗", "duties": [], "mission": [], "kpi": [], "quant": [], "qual": []}], "rules": [{"num": "1", "item": "賄い", "content": "【賄いルール】\\n＜提供商品＞\\n①平日\\n・フード⇒メニュー(もんじゃ、お好み焼き、焼きそばなど)より1品相当\\n※ポルチーニ、雲丹、こぼれや極、すき焼きは禁止\\n※トッピングはチーズ、海苔、マヨネーズのみ可\\n※大盛NG\\n・ドリンク⇒瓶や果実ジュースを除くソフトドリンク、ハイボールや酎ハイ系のお酒(未成年不可)より3杯まで\\n②土日祝\\n・通し出勤者は賄い回数は1回のみ(昼or夜に1回のみ賄いOK)\\n・ランチ出勤のみは賄いなし\\n③営業中\\n・水、炭酸水、お茶　のみ\\n＜その他＞\\n・食べた鉄板や食器類の洗浄を行い綺麗に片付けこと\\n※ルールを守れない場合賄いを停止する(期間は度合いにより店長検討)", "store": "全店舗", "dept": "店舗営業部", "resp": "店長,社員"}, {"num": "2", "item": "高校生勤務について", "content": "18歳未満のスタッフは、22時45分までに帰宅すること\\n※ルールを守れない場合賄いを停止する(期間は度合いにより店長検討)", "store": "全店舗", "dept": "店舗営業部", "resp": "店長,社員"}, {"num": "3", "item": "服装規定", "content": "https://delta2015-my.sharepoint.com/:p:/r/personal/nakamura_delta-tokyo_co_jp/_layouts/15/Doc.aspx?sourcedoc=%7B974074D9-4781-40D1-93BF-B7FF6468D694%7D&file=%E3%81%93%E3%81%BC%E3%82%8C%E3%82%84%E6%9C%8D%E8%A3%85%E8%A6%8F%E5%AE%9A.pptx&action=edit&mobileredirect=true", "store": "全店舗", "dept": "営業企画部", "resp": "店長,社員"}, {"num": "4", "item": "喫煙規定", "content": "https://delta2015.sharepoint.com/:x:/r/sites/msteams_fc0232/_layouts/15/Doc2.aspx?action=edit&sourcedoc=%7B70d38205-804e-4861-a316-fdfff5cc858c%7D&wdOrigin=TEAMS-MAGLEV.undefined_ns.rwc&wdExp=TEAMS-TREATMENT&wdhostclicktime=1762254634870&web=1", "store": "全店舗", "dept": "店舗営業部", "resp": "店長,社員"}, {"num": "5", "item": "清掃方法", "content": "https://delta2015-my.sharepoint.com/:x:/g/personal/saiki_delta-tokyo_co_jp/EWDYIFwJ3s9MtILulNbn-FIBTF9pHvW6RslKgaE94b9-PQ?e=X7GfhB", "store": "本店", "dept": "トレーナーG", "resp": "店長,社員"}, {"num": "6", "item": "店舗内ルール", "content": "・お客様として来店時や休憩時間などに働いているスタッフとお客様から近い位置で談笑はしないこと\\n・月島エリアは土日は基本的に別邸地下を休憩スペースとして利用すること", "store": "全店舗", "dept": "店舗営業部", "resp": "店長,社員"}, {"num": "7", "item": "勤務中の怪我について", "content": "", "store": "全店舗", "dept": "人事部", "resp": "店長,社員"}, {"num": "9", "item": "残業時間ルール", "content": "社員時間数が±5時間を超える場合は店舗マネジメントスレッドにて上長承認が必須", "store": "全店舗", "dept": "店舗営業部", "resp": "店長"}, {"num": "10", "item": "店舗最終退店時間", "content": "賄いとかののあと何時までには退店してねのルール", "store": "", "dept": "", "resp": ""}, {"num": "11", "item": "団体客受付ルール(各店舗)", "content": "", "store": "", "dept": "", "resp": ""}, {"num": "12", "item": "紙エプロン運用", "content": "本店：席セット時人数分の紙エプロンを設置\\n結店：席セット時人数分の紙エプロンを設置\\n囲店：席セット時人数分の紙エプロンを設置\\n別邸：ファーストドリンク提供時お客様に【紙エプロンの用意がありますが、ご利用なさいますか？？】と伺い、必要数提供をお願いします。\\n二番街：ファーストドリンク提供時お客様に【紙エプロンの用意がありますが、ご利用なさいますか？？】と伺い、必要数提供をお願いします。\\n浅草：ファーストドリンク提供時お客様に【紙エプロンの用意がありますが、ご利用なさいますか？？】と伺い、必要数提供をお願いします。\\n縁店：ファーストドリンク提供時お客様に【紙エプロンの用意がありますが、ご利用なさいますか？？】と伺い、必要数提供をお願いします。", "store": "各店舗", "dept": "店舗営業部", "resp": "店長,社員"}, {"num": "13", "item": "おしぼり運用", "content": "", "store": "", "dept": "", "resp": ""}, {"num": "14", "item": "オープン、中締め可否について", "content": "", "store": "全店舗", "dept": "店舗営業部", "resp": "部長\\n副部長"}, {"num": "15", "item": "オープン、中締め可否について", "content": "", "store": "全店舗", "dept": "店舗営業部", "resp": "部長\\n副部長"}, {"num": "16", "item": "売上報告ルール", "content": "売上報告は翌日営業前までに報告をあげる\\n・通常時　【店名】yyyymmdd売上報告　※【本店】【結】【囲】【別邸】【二番街】【浅草】【縁】\\n・修正再送時　【店名】yyyymmdd売上報告(件名修正)←()内はその都度修正再送理由により変更\\n・売上報告送付者は、該当店舗の当日責任者に限る。", "store": "全店舗", "dept": "店舗営業部", "resp": "部長\\n副部長"}, {"num": "17", "item": "セントラル納品回収配送ルール\\n(浅草以外)", "content": "平日は店舗側が14時から15時の間にセントラルへ回収に来る\\n土日祝は16時から17時の間にセントラル側から店舗へ配送する", "store": "全店舗", "dept": "店舗営業部", "resp": "部長\\n副部長"}, {"num": "18", "item": "食材棚卸ルール", "content": "・毎月月末に実施\\n・月末の営業後に実施\\n・月末が土曜日だった場合のみ翌日曜に実施\\n・全店舗同日に行わないと意味がないため必ず全店舗ルール通り同日に実施", "store": "全店舗", "dept": "店舗営業部", "resp": "部長\\n副部長"}], "contacts": [{"name": "各業者", "contact": "社内担当者", "phone": "電話番号", "person": "担当者", "note": "備考"}, {"name": "ソフトバンク", "contact": "富田", "phone": "0800-111-2009", "person": "", "note": "未納窓口"}, {"name": "まつの", "contact": "", "phone": "", "person": "", "note": ""}, {"name": "キタニ", "contact": "", "phone": "", "person": "", "note": ""}, {"name": "プレコ", "contact": "", "phone": "", "person": "", "note": ""}, {"name": "石川酒販", "contact": "", "phone": "", "person": "", "note": ""}, {"name": "いまでや", "contact": "", "phone": "", "person": "", "note": ""}, {"name": "かわしまや", "contact": "", "phone": "", "person": "", "note": ""}, {"name": "アルソック", "contact": "", "phone": "", "person": "", "note": ""}, {"name": "水道", "contact": "富田", "phone": "03-5298-5353", "person": "", "note": ""}, {"name": "レジル電気", "contact": "富田", "phone": "0120-33-0057", "person": "", "note": ""}, {"name": "レジル電気(緊急連絡)24時間対応", "contact": "富田", "phone": "0120-05-4920", "person": "", "note": ""}, {"name": "東京エナジーパートナー", "contact": "富田", "phone": "0120-995-113", "person": "", "note": ""}, {"name": "東京ガス", "contact": "富田", "phone": "0570-002-211", "person": "", "note": ""}, {"name": "ミートランド", "contact": "", "phone": "0237-83-0329", "person": "", "note": ""}, {"name": "福島鰹株式会社", "contact": "", "phone": "075-211-2940", "person": "", "note": ""}, {"name": "蛇の目ソース", "contact": "", "phone": "0771-24-3911", "person": "", "note": ""}, {"name": "こぼれや　本店", "contact": "", "phone": "03-3520-9976", "person": "", "note": ""}, {"name": "こぼれや　結", "contact": "", "phone": "03-3520-8779", "person": "", "note": ""}, {"name": "こぼれや　囲", "contact": "", "phone": "03-5547-4092", "person": "", "note": ""}, {"name": "こぼれや　別邸", "contact": "", "phone": "03-5534-8719", "person": "", "note": ""}, {"name": "こぼれや　二番街", "contact": "", "phone": "03-5534-9729", "person": "", "note": ""}, {"name": "こぼれや　浅草", "contact": "", "phone": "03-5830-7227", "person": "", "note": ""}, {"name": "こぼれや　縁", "contact": "", "phone": "03-6673-5654", "person": "", "note": ""}, {"name": "プレコ清掃担当", "contact": "富田", "phone": "080-3516-7646", "person": "池戸様", "note": ""}], "meetings": [{"name": "マネジメント定例", "host": "部長", "members": "佐藤\\n久野", "w1": "【水曜】\\n①前々月FL報告\\n　→人件費実績【分析・課題・対策(期限付)】\\n　→原価実績　【分析・課題・対策(期限付)】\\n②人員枠予算報告\\n③人事関連相談/報告\\n④案件進捗\\n⑤その他トピックス相談/報告", "w2": "　", "w3": "【水曜】\\n①前月売上報告\\n　→店舗別分析、商品、営推\\n　【分析・課題・対策(期限付)】\\n②翌月売上対策報告\\n③人員関連相談/報告\\n④案件進捗\\n⑤その他トピックス相談/報告", "w4": "　"}, {"name": "店長会", "host": "副部長\\nSV", "members": "佐藤\\n久野\\n小澤", "w1": "【金曜】\\n⓪アイスブレイク\\n①前会議までの振り返り\\n②業績報告\\n③前々月FL報告\\n→人件費実績【分析・課題・対策(期限付)】\\n　→原価実績　【分析・課題・対策(期限付)】\\n④採用進捗\\n⑤案件進捗(各店舗・各部)\\n　→前月振り返り、今月実施施策\\n⑥その他トピックス相談/報告", "w2": "【金曜】\\n⓪アイスブレイク\\n①業績報告\\n②採用進捗\\n③その他トピックス相談/報告\\n④1on1面談", "w3": "【金曜】\\n⓪アイスブレイク\\n①前会議までの振り返り\\n②業績報告\\n③前月売上報告・翌月売上対策報告\\n　→店舗別分析、商品、営推\\n　【分析・課題・対策(期限付)】\\n④採用進捗\\n⑤社員時間数確認\\n⑥案件進捗(各店舗・各部)\\n　→前月振り返り、来月実施施策、前月臨店報告\\n⑦その他トピックス相談/報告", "w4": "　"}, {"name": "副店長会", "host": "SV", "members": "久野\\n平川\\n副店長", "w1": "　", "w2": "　", "w3": "　", "w4": "【金曜】\\n⓪アイスブレイク\\n①アルバイトスキル管理進捗\\n②研修\\n③その他トッピング相談/報告"}, {"name": "セントラル・業務企画定例", "host": "セントラルL\\n業務企画L", "members": "佐藤\\n久野\\n中島\\n富田", "w1": "【土曜】\\n①案件進捗\\n②その他トピックス相談/報告", "w2": "　", "w3": "【土曜】\\n①案件進捗\\n②その他トピックス相談/報告", "w4": "　"}, {"name": "トレーナーG定例", "host": "トレーナーGL", "members": "久野\\n平川\\n齋木", "w1": "【金曜】\\n①採用進捗\\n②グーグル進捗\\n③案件進捗\\n④その他トピックス相談/報告", "w2": "　", "w3": "【金曜】\\n①採用進捗\\n②グーグル進捗\\n③案件進捗\\n④その他トピックス相談/報告", "w4": "　"}, {"name": "シフト会議", "host": "業務企画L", "members": "中島\\n富田", "w1": "【5日】\\n①シフト相違確認\\n②シフト未提出者確認", "w2": "　", "w3": "【20日】\\n①シフト相違確認\\n②シフト未提出者確認", "w4": "　"}], "trainings": [{"genre": "ジャンル", "title": "研修名", "duration": "分数", "content": "内容"}, {"genre": "エピソード", "title": "凡人が磨くべきビジネススキル【小澤隆生×田中溪】", "duration": "49分", "content": "「天才にはなれない」\\nそう感じたことのあるビジネスパーソンは多いだろう。\\nだが、凡人にも勝ち筋はある。\\nPayPayや楽天イーグルスの立ち上げ、ZOZOのM&Aまで——\\n孫正義氏・三木谷浩史氏の右腕として数々のビジネスを成功に導いてきた仕掛け人・小澤隆生氏。\\nそして、ゴールドマン・サックスに17年在籍し、星野リゾートとのジョイントベンチャーによる温泉旅館の再生や、企業価値5000億円超のM&Aなど、数多くの大型プロジェクトを率いてきた田中渓氏。\\n異なるキャリアを歩んだ2人が、「凡人がビジネスで勝つ方法」を徹底的に語り尽くす。\\n市場選びで成果の7割が決まる。\\n成功者に共通するのは、「やめる力＝逃げ足の速さ」。\\nリーダーの意図に憑依し、組織で信頼を勝ち取る「チューニング力」も、出世の鍵となる。\\n凡人が身につけられる、再現性あるスキルと思考法の数々。\\n才能に頼らず、戦略と努力で結果を出したいすべてのビジネスパーソンに向け、実践知に満ちた徹底議論を繰り広げていく。"}, {"genre": "教育", "title": "【マネジメント術】常に最適解を出せる「理想の上司」になる方法", "duration": "33分", "content": "200社以上の人事改革を手がけ、年間2000人以上の管理職育成をサポートしてきた南和気氏による「管理職のための実践的リーダーシップ論」の2回目。\\n今回のテーマは、「1on1」です。\\n多くの企業で導入されている1on1ですが、部下のモチベーションを高める効果がある一方、フィードバックの仕方を間違えると一気に「信頼」を失う、ハイリスクハイリターンなコミュニケーションでもあります。\\n南氏の豊富な経験から導き出された対話での「バイアス」を克服する方法や、信頼を勝ち取るフィードバック術など、実践的かつインパクトのある手法を学ぶことで、多くの管理職が陥ってしまう課題が明確になるだけでなく、次世代リーダーとなるための知見を得ることができます。"}, {"genre": "教育", "title": "「脱・マネジメントの無免許運転」リードマネジメントのすべて", "duration": "42分", "content": "悩める管理職を中心に支持され、昨年秋の発売以降瞬く間に10万部を突破したベストセラー『部下をもったらいちばん最初に読む本』。その著者・橋本拓也氏から、これからの時代に必須のマネジメント手法を学びます。\\n多くの管理職が陥りがちな、指示や管理で人を動かそうとする旧来のスタイル（＝ボスマネジメント）の限界を明らかにします。その上で、信頼をベースに部下一人ひとりの意欲と主体性を引き出し、チームを成功に導く新しいスタイル（＝リードマネジメント）への変革を促します。\\nこれからマネージャーになる方にはもちろん、むしろ現時点でマネジメントに悩みや課題を抱えている方にこそ、より共感ができ、明日からすぐに現場で使うこともできる、即効性の高い講座となっています。"}, {"genre": "エピソード", "title": "個人経営カフェを統計・マーケ分析【サトマイ×MEGUMI】", "duration": "52分", "content": "初回はMEGUMIが石川県で経営するカフェを、サトマイがデータを元にコンサルティング。リブランディング戦略から、商圏分析や顧客のリピート率向上、さらにスタッフのモチベーションの高め方まで… 統計学やマーケティングを用いて解決の糸口を探ります。\\n販売力に課題がある飲食店の経営者や、組織編制に悩む経営者まで、必見の内容です。"}, {"genre": "エピソード", "title": "飲食店消滅の危機【森朝奈×永田ラッパ】", "duration": "48分", "content": "“あなたのお気に入りの飲食店”が無くなる？\\n最新のデータでは、2023年、飲食店の倒産件数は930件。これは過去最悪の状況。\\nしかも一時、1ドル＝160円の急激な円安が進み「円の弱体化」。我々の生活水準にも影響を及ぼしかねない不安も。\\nコロナ５類移行後も、従来より抱える“人手不足問題・コロナ融資の返済・原材料高騰”問題。\\nこれまで店舗の努力で経費を削減してきたが、やはり経営は成り立たず、商品の価格を上げざるを得ない。\\nしかし、安易に価格を上げると客離れに繋がり、かえって利益が出せなくなる...という悪循環。\\nハッキリ言おう、今回は「飲食業界の全ての人の為に」番組を制作している。\\n現在、12店舗の飲食店を経営している、元「楽天」の森朝奈氏と、国内外で「11000件以上の外食コンサルタント」を行なってきた、永田ラッパ氏が、飲食店の大問題について、徹底議論。\\nお客が離れない値上げの方法は？人手不足を解消する術は？儲かる店と儲からない店、二極化の要因は何？これからも大好きな飲食店が続くように、考えていきます。"}, {"genre": "教育", "title": "【坂井風太】たった一人の熱量から始める「組織改革実践」", "duration": "35分", "content": "「どうせ何を言っても、うちの会社は変わらないよ」\\n現場の社員が会社を諦め組織が機能不全に陥る、こんな「組織の硬直化」が起きる背景には、経営層の無関心や人事のリーダーシップ不足など、合理的な理由がいくつかあります。\\nしかし、今回の講師を務めるMomentor代表の坂井風太氏は、『「うちの会社は変わらない」と言っている人の存在そのものが、硬直化の1番の原因』と語ります。\\n大小180を超える日本企業の人材育成・人事施策をサポートしてきた坂井氏によると、現状を打破して問題解決を果たして企業には、必ず周りを巻き込んで停滞を打破する「圧倒的なリーダー」の存在があるといいます。\\nもしあなたが、会社を変えたいと強く願うなら、たった1人の一歩からでも、組織は変わる。\\n本講座では、不安を抱えながらも会社の課題と向き合い、硬直化に風穴を開けるための「３つの基本的な作戦」、そして、人事施策の現実解としての「マネジメント民主化モデル」など、最新のデータと研究に基づく「人材育成/組織マネジメント改革」を学びます。"}, {"genre": "教育", "title": "【坂井風太】組織変革が可能なリーダーに共通する「５つの特徴」", "duration": "32分", "content": "大小180を超える日本企業の人材育成・人事施策をサポートしてきた\\nMomentor代表の坂井風太氏が送る講義「たった一人の熱量から始める組織改革実践」の第２弾。\\n今回のテーマは、「\"決断\"ができるリーダーシップとは何か？」です。\\n「決断」というのは、上手くいくかわからないプロジェクトに対して、自分の責任で、結果を出すまで突き進む覚悟を持つこと。\\n安心できる確かなデータに基づいていたり、他の人が責任を負ってくれる中での選択は、単なる「合理的判断」にすぎません。\\nこれからのビジネスでは、合理的判断しかできないリーダーでは勝ち抜くことはできません。\\n坂井氏がこれまで育成してきた、企業内で組織変革を担う「決断ができるリーダーたち」が実践している具体的な施策を紐解き、\\n「うまくいかせます」と自ら宣言し、執念を持ってやり切れるリーダーになるために必要な術を学びます。"}], "reviews": [{"date": "2025-01-01 00:00:00", "store": "囲", "media": "食べログ", "rating": "2.5", "content": "結、本店と比べて微妙でした。", "strategy": ""}, {"date": "2025-04-01 00:00:00", "store": "囲", "media": "食べログ", "rating": "2.5", "content": "全体的に味が濃く、最初の数口はとても美味しいのですが焼いてるうちにどんどん塩っぱくなるので2人で全て食べ切るにはつらかったです。", "strategy": ""}, {"date": "2025-08-06 00:00:00", "store": "囲", "media": "食べログ", "rating": "2", "content": "友人たちと訪問。焼いてもらえるもんじゃは蚊もなく不可もなくなお味。", "strategy": ""}, {"date": "2025-08-21 00:00:00", "store": "囲", "media": "食べログ", "rating": "2", "content": "個室と言うわりには…手狭に感じました。鉄板を使用するので暑いのは仕方ないんですが…風が全く来ず暑すぎてあまり美味しく食べれませんでした。", "strategy": ""}, {"date": "2025-09-17 00:00:00", "store": "結", "media": "食べログ", "rating": "2.4", "content": "家族で利用させてもらいました。入れ替えシステムで入店しました。みんなが一斉に注文するためか飲み物がなかなか届かないや忘れてるがあり、また早く出てくるだろうと思い、きゅうりのおつまみを頼みましたがなかなか来なくて声を掛けさせてもらいましたが、そこからどうなってるのかの返事もなく、提供してもらえたのはもんじゃ焼きを二つ目焼いてもらってる時に、詫びることもなく今頼んだかのように出てきました。", "strategy": ""}, {"date": "2025-09-23 00:00:00", "store": "結", "media": "食べログ", "rating": "1.5", "content": "ファーストドリンクは乾杯をする可能性がたかいので忘れていたにせよ声をかけられたなら優先してだしてほしいです。もんじゃ焼きを作りながらお客さんと話していてこちらの食べ物の提供が遅れていた。", "strategy": ""}, {"date": "", "store": "本店", "media": "食べログ", "rating": "2.9", "content": "ドリンクが高い。それからQRで注文しているのに注文個数何回も間違えて口頭で説明するのでQRの意味がない。", "strategy": ""}, {"date": "", "store": "本店", "media": "食べログ", "rating": "2", "content": "90分制なのに提供が遅い。割高でいつも炙りとろ鯖より質がわるい", "strategy": ""}, {"date": "2025-01-15 00:00:00", "store": "二番街", "media": "食べログ", "rating": "2.3", "content": "店内は少し狭めで、店員さんが隣のテーブルの調理に来るたびにぶつかってしまい、何とも言えない感じ。しかも。謝ることもない‥。味も微妙。", "strategy": ""}, {"date": "", "store": "二番街", "media": "食べログ", "rating": "2.8", "content": "もんじゃの出汁は特に感じられなかった…\\n逆に薄くて最初は味がなかったけど、煮詰めてるうちにちょうどいい感じにいただけた！\\nチーズトッピングはした方がいいかも！\\nもんじゃも焼きそばも店員さんが作ってくれるけど、接客は塩対応で微妙", "strategy": ""}, {"date": "", "store": "二番街", "media": "食べログ", "rating": "2.9", "content": "もんじゃ自体は悪くなかったですが、カウンター席が故に少し残念なものが色々と目に入ってしまいました。", "strategy": ""}, {"date": "", "store": "二番街", "media": "食べログ", "rating": "1", "content": "美味しいですが、提供までの時間がかかりすぎています。また、かなり高いです。\\nそして、Googleの口コミを書いてくださいというお願いがありました。Googleの評価が極端に良かったのはそういう理由か、と思いました。\\nおすすめはしません。", "strategy": ""}, {"date": "", "store": "別邸", "media": "食べログ", "rating": "2", "content": "残念だったのは、従業員のムスッとした対応には閉口した。接客時に笑顔がなく、バーンと音を立ててお皿を置いたり、丁寧さのかけらもなかった。2度と行くことはないが、接客も含めた料理が、そのお店の価値に通じると改めて実感した。", "strategy": ""}, {"date": "", "store": "別邸", "media": "食べログ", "rating": "2", "content": "たくさんの海鮮も小さく刻んでもんじゃに入れるとあんまり味がわからない", "strategy": ""}, {"date": "", "store": "別邸", "media": "食べログ", "rating": "1", "content": "残念でした", "strategy": ""}, {"date": "", "store": "別邸", "media": "食べログ", "rating": "1.5", "content": "店員さんがイマイチでした", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "なぜこんなに口コミが良いのか全くわからないぐらい、ひどい店だった。\\n口コミに騙された。\\n\\n予約時はどこにも2時間制と記載がないにも関わらず、次の予約が入っているからと追い出された。\\nもんじゃを焼いてもらえず待たされた挙句、何度も時間だから退店しろと言われ、2人で、もんじゃ2つ、お好み焼き1つ食べるのがやっと。お好み焼きも生焼けのまま慌てて大急ぎで食べた。\\n個室料金を払ったが、個室とは名ばかりの独房のような空間、換気も悪く、煙でいぶされ、顔も髪もベタベタ。\\nスタッフは皆学生バイトのような雑な接客で、訪店前に入れたTELでもチンピラのような口調。\\nそして何より、料理が不味い！\\n何を食べても不味い。\\nもんじゃでここまで味がなくコクもなく、美味しくなく作れるものかと驚いた。\\nもう二度と行かない。\\nもんじゃ屋は他にもたくさんある。", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "おしぼりは出てこない、ラストオーダーの時間は間違えられる、食べ物出てくるのも遅い。\\n周りに数あるもんじゃ屋さんの中で、選ぶ必要はないと思います。", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "100幅の席に3人で座り、膝を打って終始痛く且つ身動き取れず\\n混んでるから90分制と言われオーダーも通ってなくて40分後に初食事、50分でコース料理食べて代金１万円", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "GWで混んでいたのは理解しているがそれでもひどかった。お好み焼きを焼いてもらったが、しばらく放置され裏面はかなり焦げていた。会計の際にも別の卓の支払いを請求され、こちらが気づかなければ2倍以上請求されていた。", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "コースで利用しましたが、\\n全然メニューが出てませんでした。毎回こちらから次の料理の催促をしました。提供スピードが遅すぎて、最後に書き込んで食べないといけないお店です。\\nもちろんドリンクの提供も遅い👎飲み放題のドリンクのラストオーダー後に、焼きそばとお好み焼きを持ってくる。\\nしかも鉄板には焼きたてのもんじゃがある状態。明らかに料理の提供が遅く、ドリンクが進まない。飲み放題の客だったからか知りませんが、客を舐めすぎでした。\\n\\n焼き挙げ句の果てには席の時間5分前に焼き物を持ってくる始末。\\nオープン仕立ての店かと思うくらいサービスが悪かったです。\\n\\nデザートも言わないと持ってこないし、最後まで気分が悪かったです。\\n", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "味はマジで普通\\n店員が全員若すぎて流れ作業で接客してるかんじ。\\nおつまみが本当に美味しくない時点で終わってました", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "食事の味自体に不満はありませんが特別美味しいわけではありません。しかしサービスが最悪でした。\\n食事を焼いてくださるときにマスクもなしに喋る、髪も纏めたり前髪をしまっていないので衛生が気になります。\\nさらに焼いている時の会話もこちら側のプライバシーに踏み込むようなかなり返答に困るような内容でした。\\nそして急にGoogle口コミを書くことを強要されかけたことにかなり違和感を感じます。\\nこぼれやが何店舗かあってそこで口コミ数を競っていて俺は一位を取りたいから書いてほしいと言われ思わず笑いそうになりましたよ笑笑\\nこちら側としては店員さんの一位になりたい願望を叶える義務は全くありません。\\n口コミを書くためのQRコード兼次回来店時ドリンクサービスのチケットをいただきましたがもう行くことはないので置いてきました。\\n他の良い口コミに騙されないことをお勧めします。\\n", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "味と雰囲気は良かったのですが、サービス部分で気になる点があったので⭐︎1です。店員さんがもんじゃを焼いてくださっている際に、いきなりヘラヘラした顔で「ケータイ出してください」と言われ、かなり戸惑いました。どうやらGoogleの口コミ数を系列店と競っているようで、口コミを書いてくれたら、ワンドリンクサービスするという内容でした。丁寧に説明してくだされば、快く対応するのですが、いきなり客に向かって何の理由も無しに「ケータイ出してください」は失礼ですし、戸惑います。続けて店員さんが「怪しいものではない」と仰っていましたが、人に何かを依頼するときは、依頼内容を最初に明確にするべきです。また、こちらの店員さんが私と連れと雑談した際に「もんじゃはどこでも食べられる」と仰っていて驚きました。私たちはわざわざ月島に足を運んで食べに来ているのにも関わらず、この発言はあまりにも配慮がなく軽率でした。\\n若い男性店員さんだったので、経験値が浅く配慮が足りなかったのかなと思いつつ、気になったので口コミしました。また、他の店員さんの接客対応はよかったです。", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "口コミに騙されました。はじめから低評価をみてから行くべきでした。席に着いて注文してからメインメニューが３０分経っても届かなかった為、催促しました（店内が混雑する前です）その後１０分程度で届きました。あきらかに店側の確認ミスのようでしたが、詫びの言葉もなくふつうに提供されました。提供される待ち時間と食べるまでに入店からすでに５０分経過していました。初めにテーブルは2時間制です。と言われていたために忙しなく急いで食べました。食べてみて第一声は『味薄っ』海鮮の風味も特別ある訳でもなく、生地はシャバシャバ、こぼれるほどの具や食べ応えもありません（個人の意見）写真に騙されます。期待しすぎたせいでただただ残念でした。", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "「個室もんじゃ」という名前に惹かれて訪れましたが、少しだけ期待を下回る部分がありました。\\n\\nまず、個室を予約したつもりだったのですが、案内されたのは一番端の席。壁が少しあるだけで、完全な個室ではありませんでした。他のお客様からも見える位置だったので、名前に「個室」とある分、少し残念に感じました。完全個室を期待する方は事前に確認したほうがいいかもしれません。\\n\\nもんじゃ焼きは自分たちで焼くスタイルで、これは楽しかったです。ただ、もんじゃ以外のメニューは自分たちで焼かなければならず、焼き方の説明がほとんどなかったので、少し戸惑いました。初めて訪れる方や慣れていない方にはもう少し丁寧な案内があるとありがたいと思います。\\n\\nスタッフの方は忙しそうで、こちらから声をかけるタイミングが少し難しい印象でした。忙しい時間帯に訪れたので仕方がない部分もあるかもしれませんが、もう少し接客にゆとりがあると良かったなと思います。\\n\\nとはいえ、もんじゃ焼きそのものは美味しかったですし、工夫次第では楽しく過ごせるお店だと思います。個室やサービス面での改善があるとさらに魅力的になると思うので、今後に期待したいです。", "strategy": ""}, {"date": "", "store": "囲", "media": "Google", "rating": "1", "content": "個室になっていて良かった。個性的なメニューで面白かった。店員さんの感じも良いのだが、靴にタレがいっぱいこぼされていて、帰る時にびっくり。最後に残念すぎる。良いお店だけに、是非とも改善していただきたい。お気に入りの靴が台無しになりました（泣）。汚れていい靴で行った方がいいかも…", "strategy": ""}, {"date": "", "store": "本店", "media": "", "rating": "1", "content": "・入店時に女性の店員さんに名前を告げて入ったのに、店内で男性の店員さんにまた名前を聞かれた。(しかもキレ気味)\\n・通路側の椅子に座っていたのですが、男性の店員さんが私の後ろを通るたび足が椅子に当たってた。(毎回だったのでたぶん故意的に)\\n・人手不足で終始バタバタした様子で、料理が来ても鉄板の火もつけてもらえなかった。\\n・料理の説明が不親切だった。卓上にある油や醤油の説明もなく、戸惑いながら使っていた。\\n・おしぼりも食事の中盤でやっと来た。\\n▶️雰囲気\\n・店内は狭く、ガヤガヤしている。\\n・私の席が厨房とトイレの近くだったのですが、見るからに衛生環境が悪そうな厨房で、かつ席の方にもトイレの臭いが漂って臭かった。\\n以上、美味しい料理もあったので、非常に残念なお店でした。", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "正直、最悪な接客でした。評価はゼロです！\\n二度と行きたくない。週末なので忙しいのは分かりますが本店に行くと店員さんに別邸を案内されて（案内が適当で迷いました）別邸に行ったのに食べたいメニューが本店にしかないので目的だったもんじゃが食べれなかった。本来であれば案内時にその説明もすべきかと思います。誤案内です。2時間も待ったのにありえない。\\n評価が低いコメントには接客態度に関する内容が書かれており、お店の方が返信されてますがその時から全く改善されてません。他の人に同じような経験はしてほしくないのでこのお店は選ばないほうがいいと思います。", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "味普通、接客最低。\\nほかの方のレビューを見ると、本当に同じ店なのかと疑ってしまいますが…。\\n味は美味い！とも思えず、「まあ、もんじゃはこんなもんだよな」くらいのレベル。\\n一方、接客が非常に不快でした。\\n●もんじゃを作ってもらうとき店員さんが料理の説明をしてくれるのですが、声が小さく何を説明しているのか分かりませんでした。作り始める際も「油引くんで、油取ってもらえますか？」と。取るのは良いのですが、もんじゃを店員が作る前提なら最初から持ってくれば良いor腕を伸ばせば届く距離だから自分で取れば良いのに…と思ってしまいました。\\n●予約なしのお客をお断りするとき、「ご予約でいっぱいなんで！」と強めの口調で追い返していました。\\n●コースの最後の料理がまだ鉄板に残っているのにデザートが運ばれてきました。一応事前に持ってきても良いか確認はされましたが、鉄板にまだ一人前以上の料理が残っている状態で聞くことではないよな、と思います。既にこの時点で接客については諦めていたので早く退店するために運んできてもらうことにしました。ちなみに長居していた訳ではなく、ドリンクのラストオーダーよりも前の出来事です。\\n●最後、領収書を書いてもらうために名刺を探している最中に「お客さん、宛名は？！」とこれまた強めに言われました。\\n●その領収書ですが、名刺まで出したのに間違った社名の領収書を切られていました。名刺まで渡したのに正しい社名を書いてもらえなかったので、このお店には何も期待してはいけないことを悟りました。\\n●最後、会計を済ませて退店する際も「ありがとうございました」の一言もありませんでした。\\n店員ガチャを外しただけかもしれませんが、最初から最後まで不快な接客でした。\\nもう二度と行きません。\\n月島には他にもたくさんもんじゃ屋さんがありますので、このレビューを読まれた方は他に行くことをおすすめします。", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "愛想の悪いバイト2人がきりもりしていて気分が悪くなるお店でした。行ったことを後悔するし、二度と行きたくないです。", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "店員さんの態度が、失礼に感じました。\\n一人客は複数より粗末に扱うのかもと思いました。\\n味については海鮮の出汁や風味は感じられず薄くてあまり美味しくなかったです。\\n別に場所がもんじゃ焼きが有名な月島じゃなくてもいいんじゃないかと思った。", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "今日、子供の誕生日で早速予約して行ったのですが、お店の中が外より暑くて、楽しみにして行ったのですが、暑すぎて、食欲がなくなりました😥他のもんじゃ焼き屋さんもあんなに暑いんでしょうか？鉄板で暑いのは知ってましたが、お店のドアが開いていたので、クーラーが壊れてたのかなぁ❓\\n夏はもうもんじゃは行かないようにしようと思います", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "店内ガラガラで名簿も2番目だったので11時頃に並びました。あっという間に満席になり1時間経過しても呼ばれないので店員さんに声をかけたら、さらに1時間以上待つ事になると言われました。その時には12:00頃となり他のお店も大混雑。お店を変えることもできず八方塞がり。並ぶタイミングで予約客優先で2時間以上待ちと教えてくれたら他に空いてるお店が沢山あったのに、、、低評価の書き込みをするのは少数のなか同種の書き込みがありましたので、多発していると思います。実際、私の後ろにも10人くらい待ち時間を知らずに並んでました。予約以外で入らない事をお勧めします。", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "40代くらいの男性の店員がラストオーダーまで50分前くらいに伺ったが、明らかに怪訝そうな態度を示してきていたため接客態度が最悪だった。", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "口コミで予約して行きました。\\nこぼれや？全く溢れてないし 味薄いし おこげも無いしダメダメ❗\\nお好み焼き これ一人前？小さすぎで割に全く合わない❗\\n海老蔵の言ってた通りだったわ〜\\n会計時にわかったが サービス料金取られた 何をサービスされたか意味不明\\nワンドリンク制で2時間まででした\\n次は絶対無い❗", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "味はまずくないけど店員のやる気がなさすぎる\\n全ての業務だるそうにやってた\\n閉店2時間前くらいに行ったから別にそこまで迷惑な時間でもないのに\\n嫌ならもっと早く閉めれば？\\nとなりのもへじに行った方がいい。\\nもしまたいくならここではなく別の店舗にいく。", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "写真を上手に撮りすぎですね…海鮮の具が写真よりもよっぽど少なかったです。しかも他店舗より割高なのでがっかりしました。\\nあと、750円のビールがジョッキじゃなくグラスで出てくるのはちょっと厳しいですね。", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "料理は美味しかったのに！\\n土曜日の夜、若い女性の店員さんの私語が激しく、お店の間取り的に丸聞こえで不快でした。\\nまた、テーブル番号がわからなかったようで、「ここ何番だっけ？」と、失礼しますの掛け声もなく無言で低い仕切りの壁の向こうから鉄板の上へ頭を突っ込んで番号を確認し、同僚との私語にもどられました。味がすごく美味しかったので残念です。お会計の声掛けをして、こちらを一度確認した後も私語。\\n気持ちの良い接客を求めている方は避ける方が無難かと思われます。\\nもんじゃは美味しかったのに。残念です。", "strategy": ""}, {"date": "", "store": "本店", "media": "Google", "rating": "1", "content": "もんじゃ、お好み焼き、テーブルに出てくるまでに時間がかかりすぎている。テーブルに来てから焼きになるので、お腹へらして店にはいると相当待つことになる。本店は時間入れ替え制で、料理の提供が遅いのに、早く食べてくださいと急かされる。予約制で席が満杯なのに、店前に満員札を出さないから、客が出入口から入ってこようとする。味は悪くないが、サービスが絶望的に低すぎる。", "strategy": ""}, {"date": "", "store": "結", "media": "Google", "rating": "1", "content": "味は美味しく、お店も小綺麗で雰囲気は良かったです。\\nしかし頼んだメニューに髪の毛が2本も入っていました。1本目を発見した時は、こういうこともあるか、と目を瞑りましたが、2本目を発見したので、さすがにちょっと…と思い、スタッフさんに言いました。\\nしかし、渡した髪を「あー、はい」と受け取り、中のスタッフさんで共有することもなく何事もなかったかのようにスルーされました。\\nこちらとしてはきちんとした謝罪の言葉が返ってくるものと思っていたので、あまりの他人事対応に唖然としました。ちょっと受け入れ難かったので、「それだけですか？」と言いました。\\nその後他の方に伝えられ、上の方が「お代は要らないんで」と言われましたが、最後まできちんとした謝罪の言葉は聞けませんでした。(軽く、すみません、とは言われました。)\\nお店はきれいでおしゃれで、味も美味しかっただけに残念な気持ちが大きいです。\\n腹立たしいというより、悲しい気持ちになりました。\\n二度と行きません。", "strategy": ""}, {"date": "", "store": "結", "media": "Google", "rating": "1", "content": "客よって対応が違う、焼き物もほったらかしでお好み焼きもソース、マヨネーズもやらない\\nもう2度と使わない\\n値段も高く、普通のお店と変わらないから割高すぎ", "strategy": ""}, {"date": "", "store": "結", "media": "Google", "rating": "1", "content": "口コミが高評価だったので、予約して平日の夜に来訪。店内はかなり騒がしく、思ったより狭くて驚きました。\\n料理の味については特筆した何かはないですが、たまたまなのか焼いてくれた店員さんの態度がとても気になり、嫌な思いをしました。\\n・もんじゃを焼くときにこちらの箸とグラスが邪魔だったのか、勝手に移動させられる(一言、失礼します、などがあってもいいのではないか。とても驚いたし、触られたくなかった)\\n・お好み焼きを焼いたあと？に使ってもいない爪楊枝とゴミのようなものがテーブルに置かれていて気持ち悪かった。もちろん店員は気づかない\\n・メニュー名をフルで言ってくれなかったので、こちらが頼んだものかどうかわからなかった。え？と聞き返しても何を持ってきたのかきちんと伝えてくれなかった\\n・作るとき、不機嫌そうで、他のテーブルでは話しかけたり説明したりしてるのにこちらには無言で適当にされていた\\n・とにかく乱暴でガサツな作り方で、何かが飛んできそうでヒヤヒヤした\\n高価格帯なので、インバウンド向けなのかもしれませんが、メニューも少ないし一個ずつしか焼かないのでテンポも悪く、再訪する気になりませんでした。", "strategy": ""}, {"date": "", "store": "結", "media": "Google", "rating": "1", "content": "接客の質が極めて悪い。もんじゃの焼き方も雑、服についても謝らないのには驚愕、大人の対応ですね。空調は寒すぎる、まるメガネの男性が雑だよ、変えた方がよい。ほか、味はメイン通りの店の方が美味しいのであえてこの店にくる必要はありません。がネット予約できる点は良、ほかの店は並びますからね。", "strategy": ""}, {"date": "", "store": "二番街", "media": "Google", "rating": "1", "content": "少し待って入りましたがQR読み込みタイプの注文で、席の時間制限があると言われたが電波が悪く（これは自分だけかもしれないが）全く進まず注文できず、スタッフに言ったが待ってくださいと言われ数分待つものの一向に対応なく、時間制限あるにも関わらず放置されたので飲食せず退店しました。\\n退店する際にスタッフに一声かけましが、あっ大丈夫ですか と一言。 は？？？？となりました。時間の無駄でした。", "strategy": ""}, {"date": "", "store": "二番街", "media": "Google", "rating": "1", "content": "こちらのレストランで明太もんじゃを頼みました\\nところが途中、中に異物を発見しました。最初はなにかと思い、よくみるとお皿の破片のようにとても固いものでした。\\n幸い怪我などはありませんでしたが、店員に知らせてこれが何か確認してもらい、ホタテの貝殻破片ということがわかりましたが、明太もんじゃにホタテ含まれていないので混入はおかしいことです。\\nお店の去り際に謝罪もなく不満でした。サービスに納得できません。衛生管理も疑わしいです。もう二度と行きません。", "strategy": ""}, {"date": "", "store": "二番街", "media": "Google", "rating": "1", "content": "【もんじゃストリートの中で最もクオリティが低いお店】月島在住である程度色々なお店に行ったことありますが、味も値段もサービスも店の雰囲気も最低レベルだと感じました。\\n店員の覇気がなく、虚な目でもごもご接客、焼いているときも、すごくもっさりとした動き、焼き方で心配になりました。トッピング忘れ、ドリンク忘れもあり、お店として大丈夫なのかと。にも関わらず、口コミの強要。小柄な男性の定員が、何度も配膳ミスをしていたり、焼いている途中に無言でどこかに行ってしまい、焼き終わったのか途中なのかも分からず…。\\n席も階段下で狭く、埃っぽく、衛生面に不安あり。味も薄めで美味しくなかったです。\\n別邸の方は静かでオシャレなもんじゃ屋さん、本店は王道という印象ですが、ここは選ばない方が良いかと。良い口コミは、ドリンクサービスや強要によるものなので、信憑性は低いかな。月島もんじゃなら、迷わずもへじをお勧めします。", "strategy": ""}, {"date": "", "store": "二番街", "media": "Google", "rating": "1", "content": "寒空の下で2番目に名前を書いて待っていたら、10分ほどで前の客が店員に呼ばれ中へ。\\n合計で20分以上待ったところで\\n店員に声をやっとかけられ\\n｢今からだと最短で1時間待ちになりますがよろしいでしょうか？｣と\\n20分既に待っているのですが？\\nもっと早く教えて貰えていたらさっさと他のお店に行きました。\\n人の時間をなんだと思っているんですか？\\n二度と行きません。", "strategy": ""}, {"date": "", "store": "二番街", "media": "Google", "rating": "1", "content": "家族と行きました。月島駅の広告を見て興味を持ちました。まず入店後、男性店員の「少々お待ちください」の後、しばらく放置されるところから始まり、女性店員は私達に背を向けて耳の穴ホジホジしててそれに気づかず。こちらからその女性店員に声をかけてようやく目の前の空いている席に誘導されるが、スマホＱＲコードからの注文システムを使う際に「まだ配席されておりません」とスマホに表示され何も注文できず（店員側で承認しないと使えないシステムっぽいが、それを配席した女性店員がし忘れてる）。料理を注文後、しばらく何も届かない。その間スタッフ総出で皿洗いばかり。基本的にダラダラというか覇気が無いという風に見える。ジョッキは用意されているので、せめてビールくらいは出せるのでは？と感じた。鉄板はもんじゃを私たちに届けてから点火。なので鉄板が熱されるまでの間、ひたすら待たされる。とにかくこの店は待たされる。その後ようやく料理にありつけたが、飲み物ともんじゃの追加注文をすれば、再びひたすら来ない時間。本当にとにかく待たされる。結論、退散して他の店に行きました。料理は野菜が大盛りでそれなりだった気がしますが、とにかく他店より価格も高い。感情次第で味覚は心理的に鈍るのでもう記憶にありません。直後に行った他店では、店員さんの活気が良くて、迅速に対応していただいたのでとても良い思い出になりました。こういう出来事って、この店は－１、他店には＋１の評価が残るので、この店にとっては結果的に－２の負の効果になると思いますね。本当は☆１も付けたくないですが、かろうじて料理が１品出てきたので☆１を付けておきます。", "strategy": ""}, {"date": "", "store": "二番街", "media": "Google", "rating": "1", "content": "もんじゃ焼き屋さんで籠に荷物を入れるのは初めてでした。冬場はアウターや荷物も多いので厳しいと思いますけど。。何より店員さんが困っている姿を見て見ぬ振りされたのが悲しかったです。味の評価は基本したくないのですが穴子のもんじゃは、、評価が分かれると思います。", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "1", "content": "店員の愛想無し。店内は綺麗。もんじゃは火力強過ぎてゆっくり食べていた訳では無いが最終的に野菜炒めのような感じになっていた。", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "1", "content": "長身長のバイトの方に作ってもらったが、態度が悪い上に作り方が雑で不愉快だった。全然キャベツを刻んでくれなかった。好みの問題だが、味が少し薄かった。\\n", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "", "content": "本日地下の方で食べさて頂きました。\\nメニュー（おつまみ系）はあまり多くはなく、アスパラを注文しましたが、はっきり言って茹でであってそのあと軽く焼いたら水分がとばないので全く美味しくなかったです。\\n長芋のわさびは美味しかったです。もんじゃ焼きは、ごめんなさい普通です。それと換気が良くないですね。\\nもう行かないです。", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "", "content": "怒ってますか？と聞きたくなるくらい酷い接客でした。\\n焼いていただいているときはもんじゃの具材がこちらまで飛び散ってましたし、声も小さく表情も暗く、何より刻み方？が怖すぎてもんじゃになにか恨みでもあるのかと思いました。^^\\n\\nここにしたことを後悔するくらい、全てが大変不愉快でした。飲食店でこんな気持ちになったのははじめてです、二度と行きません。", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "", "content": "味は美味しかったですが、担当した女性従業員の対応が飲食店として人として最悪。\\nドリンクの提供が遅い！\\n客層が煩すぎて声が聞こえない！\\n\\n口コミ見て低レベルな店と思って行ったつもりはないけど、担当した女性がかなりのあり得ない事を次々としていた。\\nきちんと接客、飲食店としての衛生的な事を教えるべき。\\nいくら若くても、いくら忙しくても常識的に飲食店としてやってはいけない事位分かる様な事をやるような従業員は表に出すべきではないです。\\nこの高評価口コミは身内？さくら？", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "", "content": "期待して入ったのに残念\\n味もおいくしないし、店員の接客もいまいち、\\nおまけに高い、三拍子揃ってます。\\nもう行くとはないでしょう", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "", "content": "もんじゃへのこだわりをスタッフが説明してくれたが、味は普通のもんじゃでした。「普通」は当然悪いという意味合いではなく、スタンダードという意味合いで言っています。\\n\\nまた、スタッフからこの評価を名前入りで良く書いてくれないと時給に影響する旨話され、投稿をお願いされたので、なるほど、このお店の凄く多い高評価はあてにならないということが理解できました。\\n\\n時給アップには１日でスタッフの名前が入った５スターコメントが５件必要との説明でした。\\n確かに新しいコメントは、やたらスタッフ名が入った褒めコメばかりで、ゲンナリします。\\n\\nこの様な高評価誘導指示で、それをスタッフの時給に反映させるという経営者（もしくは店舗責任者）の行為は、このご時世、許されるものではないと思います。\\nこれは、Googleのコメント（評価システム）を愚弄する行為であり、消費者をも欺こうとしています。\\n反省すべきはそれを指示した責任者なので、弱者であるスタッフを責めたり、時給がカットされたりしないことを祈るばかりです…\\n\\nもんじゃにこだわりがあるのなら、その味とサービスで真の評価を得て、またそれを受け入れて、より良いお店にしていくのが本当の姿ではと思います。", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "", "content": "口コミが良かったので初めて行きましたが若い男性店員さんもマニュアル通りな感じでやらされてる感半端なく、特に笑顔もなく口コミお願いしまーすって名刺渡されて愛想もない感じで適当にもんじゃ作ってそそくさといなくなりました。気分悪かったです\\n味も凄い美味しいって訳でもなく、別のお店に入れば良かったです\\nもう行かないです", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "", "content": "味云々の前に、まず前の客のゴミがイスに散乱、鉄板も汚い。\\nそして店員が焼いてくれるのはいいが、客が頼んだものをテーブルに平気で落とし謝りもないそのまま。\\n接客中ポケットに手をいれながら話す、ドリンクを手渡ししてくる、どうやったらこんなレビュー点数になるのか疑問。\\nさらに地下のフロアは煙モクモクで服が臭くなりました。\\n味は普通。コスパゼロ論外。", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "", "content": "換気扇、壁、ホコリが溜まっててきれいではなかった。明太もちチーズもんじゃはなんと2200円で高額なのに美味しくない。高額な金額設定ならアルバイトや掃除をしっかりしないと割に合わない。ただ高いだけでアスパラも極太と書いてあるのに、普通の太さ。コストコのほうが太い。メニューも少なくて、ワンドリンク制でもう行かないと思います。", "strategy": ""}, {"date": "", "store": "別邸", "media": "Google", "rating": "", "content": "店員の教育ができていない‼️\\nグラスをテーブルに置くにしても「ドン」中身が溢れるのではないか？と思わせる。\\nオーダーして、もんじゃの具材が出るまでビールが一杯あく程の\\nスロー❗それで二時間縛り。\\n店員の連絡、連携がで来ていない。こちら(お客)に言う内容が違いすぎる。何が本当なのか？\\n\\n高い！二度と行かないでしょう‼️", "strategy": ""}], "common_complaints": [{"cat": "入店時編", "desc": ""}, {"cat": "着席時スタッフさんから説明がない", "desc": "\\n①荷物の入れ場所を伝える\\n②注文方法を伝える\\n③メニューブックを伝える\\n④定番メニューを伝える\\n⑤火を点ける"}, {"cat": "1ドリンク1フードオーダー言われていないのに強制された", "desc": "入店時下記は必ず伝える\\n①時間制を伝える\\n②1ドリンク制、１フード制を伝える\\n\\n言われていないとなった場合\\n・「申し訳ございません、伝え漏れていたので、このままで大丈夫です」\\nと伝えて、責任者に伝える"}, {"cat": "入店、退店の挨拶がない", "desc": "\\n①「お客様ご来店です」と他スタッフに伝える\\n②「いらっしゃいませ」と他スタッフは言う\\n③席まで案内する"}, {"cat": "入店時、ドアを開けて入ったところ、長時間気づかない", "desc": "・入口に背を向けて私語をしない\\n・レセプション以外で気付いたスタッフは「いらっしゃいませ、少々お待ち下さい」と伝える"}, {"cat": "スタッフに元気がない", "desc": "声を出して活気を出す。下記は必ず言う\\n・お客様ご来店です。\\n・いらっしゃいませ。\\n・お客様お帰りです。\\n・ありがとうございました。\\n"}, {"cat": "ホール立ち回り編", "desc": ""}, {"cat": "スタッフ同士が会話をしていて呼んでも気づかない", "desc": "お客様がいる席に背中を向け私語をしない。"}, {"cat": "取り皿の交換が1回もない", "desc": "①料理提供時お皿交換をするか確認\\n②汚れていたら交換\\n③人数分のお皿を持って行く\\n④新しいお皿に交換\\n⑤使っているお皿を下げる"}, {"cat": "味付け何したら良いか分からなかった", "desc": "おつまみ、鉄板焼き提供時説明文言を必ず言う。\\n分からなかった場合はそのまま持って行かないで、社員に聞いてから持って行く"}, {"cat": "商品の提供が遅い", "desc": "①もんじゃ半分、お好み焼き、鉄板焼きのみ\\nの卓をキッチンに共有\\n②お客様に今作っている事を伝える\\n③〈鉄板にない場合〉\\n鉄板掃除、火の調整"}, {"cat": "席の時間を言われなかったのにラストオーダーを聞きに来た", "desc": "入店時下記は必ず伝える\\n①時間制を伝える\\n②1ドリンク制、１フード制を伝える\\n③スタッフが焼く料理を伝える\\n\\n言われた場合\\nそのまま、ラストオーダーを取らないで、「少々お待ちください、確認致します」と伝えて社員に回す"}, {"cat": "ドリンク、料理が全然来ない", "desc": "・「少々お待ちください」と伝えキッチン、ドリ場に確認する\\n・「今お作りしていますので少々お待ち下さい」と伝える\\n・「大変お待たせ致しました。」と伝えて提供する"}, {"cat": "無言で皿、グラスを下げられた。", "desc": "お客様に必ず確認してから下げる\\n「お下げしても宜しいでしょうか」"}, {"cat": "1時間15分でラストオーダーと言われた。席は2時間制だったので、ラストオーダーの時間も事前に知りたかった。", "desc": "・30分前にラストオーダーを聞く\\n・料理提供が遅くなってしまった場合責任者に聞く\\n・ラストオーダーを聞くのを忘れた場合、責任者に確認を取り伸ばす"}, {"cat": "質問をしたら、「分からない」と言われてそのままにされた", "desc": "イレギュラーな質問があった場合の対応方法（お客様には確認致します。と伝え社員に回す"}, {"cat": "トイレの場所に聞いたら素っ気なくされた", "desc": "ジェスチャーも合わせて、詳細に伝える"}, {"cat": "焼き時編", "desc": ""}, {"cat": "焼き方の説明がほとんどなかった。", "desc": "鉄板焼き提供時焼き方、味付け方法を伝える"}, {"cat": "もんじゃは焼いてくれたが、焼き終わった際に、テーブルに垂れた汁を拭いてもらえなかった。", "desc": "・焼き終わりポケットのダスターで拭き上げる\\n・お客様にかかった場合は自分で判断しないですぐ社員に報告する"}, {"cat": "焼いている時洋服にかかった", "desc": "申し訳ございませんと謝罪して、すぐに責任者に伝える"}, {"cat": "焼いている時に具材が落ちてそのままにされた", "desc": "そのままにしない\\n「申し訳ございません、新しいのお持ち致します」と伝えて、キッチンから貰う"}, {"cat": "何も言わずにテーブルに来てもんじゃ、お好み焼きを焼いてそのまま立ち去って放置された", "desc": "・焼いている間にテーブルを離れる時は「少々お待ちください」と伝えて離れる\\n・お好み焼きの場合は「こちらでひっくり返すのでこのままお待ちください」と伝えて離れる"}, {"cat": "退店時編", "desc": ""}, {"cat": "お会計後誰からも挨拶が無かった", "desc": "①「お客様お帰りです」と他スタッフに伝える\\n②「ありがとうございました」と他スタッフは言う\\n③出口（囲はエレベーター前）まで行く\\n④止まってお見送りをする"}, {"cat": "ドリ場編", "desc": ""}, {"cat": "ビールの泡が少なかった", "desc": "〈ドリンク作成者〉\\n泡をスプーンで捨てて新しい泡を足すか、泡を入れ替える\\n〈ホールスタッフ〉\\n泡が少ない（汚い）状態で提供をしない。戻して作り直させる。"}, {"cat": "グラスが汚かった", "desc": "〈ドリンク作成者〉\\nグラスが汚くないか確認して、作成\\n〈ホールスタッフ〉\\n汚い状態で提供をしない。戻して作り直させる。"}], "store_mgr_schedule": [{"date": "2026-03-06 00:00:00", "week": "1W", "training": "飲食店消滅の危機【森朝奈×永田ラッパ】"}, {"date": "2026-03-13 00:00:00", "week": "非開催", "training": "非開催"}, {"date": "2026-03-20 00:00:00", "week": "3W", "training": "凡人が磨くべきビジネススキル【小澤隆生×田中溪】"}, {"date": "2026-03-27 00:00:00", "week": "4W", "training": "【坂井風太】たった一人の熱量から始める「組織改革実践」"}, {"date": "2026-04-03 00:00:00", "week": "1W", "training": "【坂井風太】組織変革が可能なリーダーに共通する「５つの特徴」"}, {"date": "2026-04-10 00:00:00", "week": "2W", "training": "個人経営カフェを統計・マーケ分析【サトマイ×MEGUMI】"}, {"date": "2026-04-17 00:00:00", "week": "3W", "training": "【マネジメント術】常に最適解を出せる「理想の上司」になる方法"}, {"date": "2026-04-24 00:00:00", "week": "4W", "training": "「脱・マネジメントの無免許運転」リードマネジメントのすべて"}, {"date": "2026-05-01 00:00:00", "week": "非開催", "training": "非開催"}, {"date": "2026-05-08 00:00:00", "week": "1W", "training": "飲食店消滅の危機【森朝奈×永田ラッパ】"}, {"date": "2026-05-15 00:00:00", "week": "2W", "training": "未定"}, {"date": "2026-05-22 00:00:00", "week": "3W", "training": "未定"}, {"date": "2026-05-29 00:00:00", "week": "4W", "training": "未定"}]};
 
+function loadData() {
+  try {
+    const saved = localStorage.getItem('koboreya_portal_v1');
+    if (saved) return JSON.parse(saved);
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(BASE_DATA));
+}
+function saveData() {
+  localStorage.setItem('koboreya_portal_v1', JSON.stringify(D));
+  const b = document.getElementById('save-banner');
+  b.textContent = '✅ 保存しました';
+  b.style.background = '#22c55e';
+  setTimeout(() => {
+    b.textContent = '💾 変更を保存';
+    b.style.background = '';
+  }, 1500);
+}
+
+let D = loadData();
+
+// ── EDIT MODE ──
+let editMode = false;
+document.getElementById('edit-toggle').addEventListener('click', function() {
+  editMode = !editMode;
+  this.classList.toggle('on', editMode);
+  this.textContent = editMode ? '✅ 編集中' : '✏️ 編集モード';
+  document.body.classList.toggle('edit-mode', editMode);
+  document.getElementById('save-banner').style.display = editMode ? 'flex' : 'none';
+  // refresh current page render
+  renderCurrentPage();
+});
+document.getElementById('save-banner').addEventListener('click', saveData);
+
+// ── NAVIGATION ──
 const PAGE_TITLES = {
-  dashboard:'ダッシュボード',
-  tasks:'業務一覧',
-  schedule:'年間スケジュール・店長会',
-  meetings:'会議体',
-  roles:'ロール定義',
-  rules:'店舗ルール',
-  contacts:'連絡先一覧',
-  training:'研修ライブラリ',
-  reviews:'口コミ管理',
-  complaints:'サービス改善集'
+  dashboard:'ダッシュボード', tasks:'業務一覧', schedule:'年間スケジュール・店長会',
+  meetings:'会議体', roles:'ロール定義', rules:'店舗ルール', contacts:'連絡先一覧',
+  training:'研修ライブラリ', reviews:'口コミ管理', complaints:'サービス改善集', report:'課題分析レポート'
 };
+let currentPage = 'dashboard';
 
-function showPage(id, el) {
+document.getElementById('sb-nav').addEventListener('click', function(e) {
+  const item = e.target.closest('.sb-item');
+  if (!item) return;
+  const page = item.getAttribute('data-page');
+  if (!page) return;
+  if (page === 'report') { window.open('koboreya_issues_report.html', '_blank'); return; }
+  showPage(page);
+});
+document.getElementById('btn-report').addEventListener('click', () => window.open('koboreya_issues_report.html','_blank'));
+document.getElementById('btn-reviews').addEventListener('click', () => showPage('reviews'));
+
+function showPage(id) {
+  currentPage = id;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
   const page = document.getElementById('page-' + id);
-  if(page) page.classList.add('active');
-  if(el) el.classList.add('active');
+  if (page) page.classList.add('active');
+  const sbItem = document.querySelector('.sb-item[data-page="' + id + '"]');
+  if (sbItem) sbItem.classList.add('active');
   document.getElementById('topbar-title').textContent = PAGE_TITLES[id] || id;
-  window.scrollTo(0,0);
+  renderPage(id);
+  window.scrollTo(0, 0);
 }
 
-function openReport() {
-  window.open('koboreya_issues_report.html', '_blank');
+function renderCurrentPage() { renderPage(currentPage); }
+
+function renderPage(id) {
+  if (id === 'dashboard') renderDashboard();
+  else if (id === 'tasks') renderTasks();
+  else if (id === 'schedule') renderSchedule();
+  else if (id === 'meetings') renderMeetings();
+  else if (id === 'roles') renderRoles();
+  else if (id === 'rules') renderRules();
+  else if (id === 'contacts') renderContacts();
+  else if (id === 'training') renderTraining();
+  else if (id === 'reviews') renderReviews();
+  else if (id === 'complaints') renderComplaints();
 }
 
-function switchTab(group, id, btn) {
-  document.querySelectorAll('[id^="' + group + '-"]').forEach(p => p.classList.remove('active'));
-  document.getElementById(group + '-' + id).classList.add('active');
-  btn.closest('.tab-bar').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-}
-
-// ── Date ──
-function formatDate(d) {
-  if(!d) return '';
-  const s = String(d);
-  const m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
-  if(m) return m[1] + '/' + m[2] + '/' + m[3];
-  return s.replace(' 00:00:00','');
-}
+// ── DATE ──
 const now = new Date();
 document.getElementById('topbar-date').textContent =
-  now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日（' + ['日','月','火','水','木','金','土'][now.getDay()] + '）';
+  now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日（' +
+  ['日','月','火','水','木','金','土'][now.getDay()] + '）';
+
+function fmtDate(d) {
+  if (!d) return '';
+  return String(d).replace(' 00:00:00','').replace(/^(\d{4})-(\d{2})-(\d{2}).*/, '$1/$2/$3');
+}
+
+// ── HELPERS ──
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function editable(val, dataPath, tag) {
+  tag = tag || 'span';
+  if (!editMode) return esc(val);
+  return '<' + tag + ' class="editable" contenteditable="true" data-path="' + esc(dataPath) + '" data-ph="入力…">' + esc(val) + '</' + tag + '>';
+}
+function freqBadge(f) {
+  if (!f) return '';
+  const cls = (f.includes('毎日')||f.includes('日次')) ? 'b-red' :
+              f.includes('週') ? 'b-orange' : f.includes('月') ? 'b-blue' :
+              f.includes('年') ? 'b-green' : 'b-gray';
+  return '<span class="badge ' + cls + '">' + esc(f) + '</span>';
+}
+
+// Listen for edits
+document.addEventListener('input', function(e) {
+  if (!e.target.classList.contains('editable')) return;
+  const path = e.target.getAttribute('data-path');
+  if (!path) return;
+  const val = e.target.textContent.trim();
+  setByPath(D, path, val);
+});
+
+function setByPath(obj, path, val) {
+  const parts = path.split('.');
+  let cur = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    const k = isNaN(parts[i]) ? parts[i] : parseInt(parts[i]);
+    cur = cur[k];
+    if (!cur) return;
+  }
+  const last = parts[parts.length - 1];
+  cur[isNaN(last) ? last : parseInt(last)] = val;
+}
 
 // ── DASHBOARD ──
-function initDashboard() {
-  // KPI
-  const kpiData = [
-    {label:'業務件数', value: DATA.tasks.length, sub:'登録済み業務', icon:'📋'},
-    {label:'店舗ルール', value: DATA.rules.length, sub:'ルール件数', icon:'📜'},
-    {label:'悪評件数', value: DATA.reviews.length, sub:'要対応レビュー', icon:'⭐'},
-    {label:'研修コンテンツ', value: DATA.trainings.length, sub:'登録コンテンツ', icon:'🎓'},
+function renderDashboard() {
+  const kpi = [
+    {icon:'📋', label:'業務件数', val: D.tasks.length, sub:'登録済み業務'},
+    {icon:'📜', label:'店舗ルール', val: D.rules.length, sub:'ルール件数'},
+    {icon:'⭐', label:'悪評件数', val: D.reviews.length, sub:'登録レビュー'},
+    {icon:'🎓', label:'研修コンテンツ', val: D.trainings.length, sub:'登録コンテンツ'},
   ];
-  document.getElementById('kpi-summary').innerHTML = kpiData.map(k =>
-    `<div class="card"><div class="card-title">${k.icon} ${k.label}</div><div class="card-value">${k.value}</div><div class="card-sub">${k.sub}</div></div>`
+  document.getElementById('kpi-cards').innerHTML = kpi.map(k =>
+    '<div class="card"><div style="font-size:12px;font-weight:700;color:var(--light);">' + k.icon + ' ' + k.label + '</div>' +
+    '<div style="font-size:28px;font-weight:800;color:var(--text);margin:4px 0;">' + k.val + '</div>' +
+    '<div style="font-size:11px;color:var(--light);">' + k.sub + '</div></div>'
   ).join('');
 
-  // Quick links
-  const links = [
-    {icon:'📋', label:'業務一覧', page:'tasks'},
-    {icon:'📅', label:'スケジュール', page:'schedule'},
-    {icon:'🤝', label:'会議体', page:'meetings'},
-    {icon:'👥', label:'ロール定義', page:'roles'},
-    {icon:'📜', label:'店舗ルール', page:'rules'},
-    {icon:'📞', label:'連絡先', page:'contacts'},
-    {icon:'🎓', label:'研修', page:'training'},
-    {icon:'⭐', label:'口コミ管理', page:'reviews'},
-    {icon:'⚠️', label:'改善集', page:'complaints'},
-    {icon:'📊', label:'課題分析レポート', page:'report'},
-    {icon:'📈', label:'KPI表（Excel）', page:''},
-    {icon:'🔧', label:'業務進捗', page:''},
+  const qlLinks = [
+    {icon:'📋',label:'業務一覧',page:'tasks'},{icon:'📅',label:'スケジュール',page:'schedule'},
+    {icon:'🤝',label:'会議体',page:'meetings'},{icon:'👥',label:'ロール定義',page:'roles'},
+    {icon:'📜',label:'店舗ルール',page:'rules'},{icon:'📞',label:'連絡先',page:'contacts'},
+    {icon:'🎓',label:'研修',page:'training'},{icon:'⭐',label:'口コミ管理',page:'reviews'},
+    {icon:'⚠️',label:'改善集',page:'complaints'},{icon:'📊',label:'課題分析レポート',page:'report'},
   ];
-  document.getElementById('quick-links').innerHTML = links.map(l =>
-    `<div class="ql" onclick="${l.page === 'report' ? 'openReport()' : l.page ? `showPage('${l.page}')` : `alert('Excelファイルをご確認ください')`}">
-      <div class="ql-icon">${l.icon}</div><div class="ql-label">${l.label}</div>
-    </div>`
+  document.getElementById('quick-links').innerHTML = qlLinks.map(l =>
+    '<div class="ql" data-ql="' + l.page + '"><div class="ql-icon">' + l.icon + '</div><div class="ql-label">' + l.label + '</div></div>'
   ).join('');
+  document.querySelectorAll('.ql[data-ql]').forEach(el => {
+    el.addEventListener('click', function() {
+      const p = this.getAttribute('data-ql');
+      if (p === 'report') window.open('koboreya_issues_report.html','_blank');
+      else showPage(p);
+    });
+  });
 
-  // Upcoming schedule (next 5 from store manager schedule)
   const today = new Date().toISOString().split('T')[0];
-  const upcoming = DATA.store_mgr_schedule
-    .filter(s => {
-      const d = String(s.date).replace(' 00:00:00','').trim();
-      return d >= today && s.week !== '非開催' && s.training;
-    })
-    .slice(0, 4);
-  document.getElementById('upcoming-schedule').innerHTML = upcoming.length
-    ? upcoming.map(s => `
-      <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;">
-        <span style="font-size:11px;background:var(--primary);color:#fff;padding:3px 8px;border-radius:6px;white-space:nowrap;margin-top:1px;">${formatDate(s.date)}</span>
-        <div>
-          <span class="badge badge-blue" style="margin-bottom:4px;">${s.week}</span>
-          <div style="font-size:13px;color:var(--text);line-height:1.4;">${s.training}</div>
-        </div>
-      </div>`).join('')
-    : '<div style="color:var(--text-light);font-size:13px;padding:10px;">直近の予定なし</div>';
+  const upcoming = D.store_mgr_schedule.filter(s => {
+    const d = String(s.date).replace(' 00:00:00','').trim();
+    return d >= today && s.week !== '非開催' && s.training;
+  }).slice(0, 4);
+  document.getElementById('upcoming-sched').innerHTML = upcoming.length ? upcoming.map(s =>
+    '<div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;">' +
+    '<span style="font-size:11px;background:var(--primary);color:#fff;padding:3px 8px;border-radius:6px;white-space:nowrap;">' + fmtDate(s.date) + '</span>' +
+    '<div><span class="badge b-blue" style="margin-bottom:4px;">' + esc(s.week) + '</span>' +
+    '<div style="font-size:13px;line-height:1.4;">' + esc(s.training) + '</div></div></div>'
+  ).join('') : '<div style="color:var(--light);font-size:13px;padding:10px;">直近の予定なし</div>';
 
-  // Recent reviews needing action
-  const noStrategy = DATA.reviews.filter(r => !r.strategy).slice(0, 4);
-  document.getElementById('recent-reviews').innerHTML = noStrategy.map(r => `
-    <div style="background:#fff;border:1px solid var(--border);border-left:3px solid var(--danger);border-radius:8px;padding:10px 14px;margin-bottom:8px;">
-      <div style="display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap;">
-        <span class="badge badge-red">${r.store}</span>
-        <span class="badge badge-gray">${r.media}</span>
-        <span class="star-bad">★${r.rating}</span>
-      </div>
-      <div style="font-size:12px;color:var(--text);line-height:1.4;">${r.content.slice(0,80)}…</div>
-    </div>`).join('');
+  const noStrategy = D.reviews.filter(r => !r.strategy).slice(0, 4);
+  document.getElementById('recent-reviews').innerHTML = noStrategy.map(r =>
+    '<div style="background:#fff;border:1px solid var(--border);border-left:3px solid var(--danger);border-radius:8px;padding:10px 14px;margin-bottom:8px;">' +
+    '<div style="display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap;">' +
+    '<span class="badge b-red">' + esc(r.store) + '</span>' +
+    '<span class="badge b-gray">' + esc(r.media) + '</span>' +
+    '<span style="color:var(--danger);font-weight:700;">★' + esc(r.rating) + '</span></div>' +
+    '<div style="font-size:12px;line-height:1.4;">' + esc((r.content||'').slice(0,80)) + '…</div></div>'
+  ).join('');
 }
 
 // ── TASKS ──
-function initTasks() {
-  const cats = [...new Set(DATA.tasks.map(t => t.cat1).filter(Boolean))];
-  const persons = [...new Set(DATA.tasks.map(t => t.person).filter(Boolean))];
+function renderTasks() {
+  const cats = [...new Set(D.tasks.map(t => t.cat1).filter(Boolean))];
+  const persons = [...new Set(D.tasks.map(t => t.person).filter(Boolean))];
   const catSel = document.getElementById('task-cat');
-  cats.forEach(c => catSel.insertAdjacentHTML('beforeend', `<option value="${c}">${c}</option>`));
-  const personSel = document.getElementById('task-person');
-  persons.forEach(p => personSel.insertAdjacentHTML('beforeend', `<option value="${p}">${p}</option>`));
-  renderTasks(DATA.tasks);
-}
+  const curCat = catSel.value;
+  catSel.innerHTML = '<option value="">全カテゴリ</option>' + cats.map(c => '<option' + (c===curCat?' selected':'') + '>' + esc(c) + '</option>').join('');
+  const pSel = document.getElementById('task-person');
+  const curP = pSel.value;
+  pSel.innerHTML = '<option value="">全担当者</option>' + persons.map(p => '<option' + (p===curP?' selected':'') + '>' + esc(p) + '</option>').join('');
+  filterTasks();
 
-function freqBadge(f) {
-  if(!f) return '';
-  const cls = f.includes('毎日')||f.includes('日次') ? 'badge-red' :
-              f.includes('週') ? 'badge-orange' :
-              f.includes('月') ? 'badge-blue' :
-              f.includes('年') ? 'badge-green' : 'badge-gray';
-  return `<span class="badge ${cls}">${f}</span>`;
-}
-
-function renderTasks(list) {
-  document.getElementById('tasks-body').innerHTML = list.map(t =>
-    `<tr>
-      <td>${t.cat1 ? `<span class="badge badge-blue">${t.cat1}</span>` : ''}</td>
-      <td><span style="font-size:12px;color:var(--text-light);">${t.cat2}</span></td>
-      <td style="font-weight:500;">${t.task}</td>
-      <td>${freqBadge(t.freq)}</td>
-      <td><span style="font-size:12px;">${t.mgmt}</span></td>
-      <td><span style="font-size:12px;font-weight:600;">${t.person}</span></td>
-    </tr>`
-  ).join('');
+  document.getElementById('tasks-add').onclick = function() {
+    D.tasks.push({cat1:'',cat2:'',task:'新規業務',freq:'',mgmt:'',dept:'',person:''});
+    renderTasks();
+  };
+  document.getElementById('task-q').oninput = filterTasks;
+  document.getElementById('task-cat').onchange = filterTasks;
+  document.getElementById('task-person').onchange = filterTasks;
 }
 
 function filterTasks() {
-  const q = document.getElementById('task-search').value.toLowerCase();
+  const q = (document.getElementById('task-q').value||'').toLowerCase();
   const cat = document.getElementById('task-cat').value;
   const person = document.getElementById('task-person').value;
-  renderTasks(DATA.tasks.filter(t =>
-    (!q || t.task.toLowerCase().includes(q) || t.person.toLowerCase().includes(q) || t.cat1.toLowerCase().includes(q)) &&
-    (!cat || t.cat1 === cat) &&
-    (!person || t.person === person)
-  ));
+  const list = D.tasks.map((t, i) => ({...t, _i: i})).filter(t =>
+    (!q || t.task.toLowerCase().includes(q) || (t.person||'').toLowerCase().includes(q) || (t.cat1||'').toLowerCase().includes(q)) &&
+    (!cat || t.cat1 === cat) && (!person || t.person === person)
+  );
+  document.getElementById('tasks-body').innerHTML = list.map(t =>
+    '<tr>' +
+    '<td>' + editable(t.cat1, 'tasks.' + t._i + '.cat1') + '</td>' +
+    '<td><span style="font-size:12px;color:var(--light);">' + editable(t.cat2, 'tasks.' + t._i + '.cat2') + '</span></td>' +
+    '<td style="font-weight:500;">' + editable(t.task, 'tasks.' + t._i + '.task') + '</td>' +
+    '<td>' + (editMode ? editable(t.freq, 'tasks.' + t._i + '.freq') : freqBadge(t.freq)) + '</td>' +
+    '<td>' + editable(t.mgmt, 'tasks.' + t._i + '.mgmt') + '</td>' +
+    '<td style="font-weight:600;">' + editable(t.person, 'tasks.' + t._i + '.person') + '</td>' +
+    '<td><div class="row-actions"><button class="del-btn" data-del="tasks.' + t._i + '">✕</button></div></td>' +
+    '</tr>'
+  ).join('');
+  setupDelButtons();
 }
 
 // ── SCHEDULE ──
-function initSchedule() {
-  const periodColors = {'上期':'badge-blue','下期':'badge-green'};
-  document.getElementById('annual-body').innerHTML = DATA.schedule.map(s => {
-    const pc = periodColors[s.period] || 'badge-gray';
-    return `<tr>
-      <td>${s.period ? `<span class="badge ${pc}">${s.period}</span>` : ''}</td>
-      <td>${s.q ? `<span class="badge badge-gray">${s.q}</span>` : ''}</td>
-      <td style="font-weight:700;white-space:nowrap;">${s.month}</td>
-      <td>${s.event ? `<span class="badge badge-purple">${s.event}</span>` : ''}</td>
-      <td>${s.training ? `<span style="font-size:12px;color:#c62828;">🔥 ${s.training}</span>` : ''}</td>
-      <td>${s.hr ? `<span style="font-size:12px;color:#1565c0;">👤 ${s.hr}</span>` : ''}</td>
-      <td>${s.ab_eval ? `<span style="font-size:12px;color:#2e7d32;">✅ ${s.ab_eval}</span>` : ''}</td>
-      <td>${s.clean ? `<span style="font-size:12px;">🧹 ${s.clean}</span>` : ''}</td>
-      <td>${s.misc ? `<span style="font-size:12px;color:var(--text-light);">${s.misc}</span>` : ''}</td>
-    </tr>`;
+function renderSchedule() {
+  document.getElementById('annual-body').innerHTML = D.schedule.map((s, i) =>
+    '<tr>' +
+    '<td>' + (s.period ? '<span class="badge b-blue">' + esc(s.period) + '</span>' : '') + '</td>' +
+    '<td>' + (s.q ? '<span class="badge b-gray">' + esc(s.q) + '</span>' : '') + '</td>' +
+    '<td style="font-weight:700;white-space:nowrap;">' + editable(s.month, 'schedule.'+i+'.month') + '</td>' +
+    '<td>' + editable(s.event, 'schedule.'+i+'.event') + '</td>' +
+    '<td>' + editable(s.training, 'schedule.'+i+'.training') + '</td>' +
+    '<td>' + editable(s.hr, 'schedule.'+i+'.hr') + '</td>' +
+    '<td>' + editable(s.ab_eval, 'schedule.'+i+'.ab_eval') + '</td>' +
+    '<td>' + editable(s.clean, 'schedule.'+i+'.clean') + '</td>' +
+    '<td>' + editable(s.misc, 'schedule.'+i+'.misc') + '</td>' +
+    '</tr>'
+  ).join('');
+
+  document.getElementById('storemgr-body').innerHTML = D.store_mgr_schedule.map((s, i) => {
+    const isCancel = s.week === '非開催';
+    return '<tr style="' + (isCancel ? 'opacity:.45;' : '') + '">' +
+      '<td style="font-weight:600;white-space:nowrap;">' + editable(fmtDate(s.date), 'store_mgr_schedule.'+i+'.date') + '</td>' +
+      '<td>' + editable(s.week, 'store_mgr_schedule.'+i+'.week') + '</td>' +
+      '<td>' + editable(s.training, 'store_mgr_schedule.'+i+'.training') + '</td>' +
+      '</tr>';
   }).join('');
 
-  document.getElementById('storemgr-body').innerHTML = DATA.store_mgr_schedule.map(s => {
-    const dateStr = formatDate(s.date);
-    const isCancel = s.week === '非開催';
-    return `<tr style="${isCancel ? 'opacity:0.45;' : ''}">
-      <td style="font-weight:600;white-space:nowrap;">${dateStr}</td>
-      <td>${s.week ? `<span class="badge ${isCancel ? 'badge-gray' : 'badge-blue'}">${s.week}</span>` : ''}</td>
-      <td style="font-size:13px;">${isCancel ? '<span style="color:var(--text-light);">非開催</span>' : s.training}</td>
-    </tr>`;
-  }).join('');
+  document.getElementById('storemgr-add').onclick = function() {
+    D.store_mgr_schedule.push({date:'',week:'',training:''});
+    renderSchedule();
+  };
+
+  // Tabs
+  document.querySelectorAll('#page-schedule .tab-btn').forEach(btn => {
+    btn.onclick = function() {
+      document.querySelectorAll('#page-schedule .tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#page-schedule .tab-pane').forEach(p => p.classList.remove('active'));
+      this.classList.add('active');
+      document.getElementById(this.getAttribute('data-tab')).classList.add('active');
+    };
+  });
 }
 
 // ── MEETINGS ──
-function initMeetings() {
-  document.getElementById('meetings-content').innerHTML = DATA.meetings.map(m => `
-    <div class="meeting-card">
-      <h3>🤝 ${m.name}</h3>
-      <div class="meeting-meta">
-        <span class="badge badge-blue">主催: ${m.host.replace(/\\n/g,'/')}</span>
-        <span class="badge badge-gray">出席: ${m.members.replace(/\\n/g,'・')}</span>
-      </div>
-      <div class="week-grid">
-        ${[['1W', m.w1], ['2W', m.w2], ['3W', m.w3], ['4W', m.w4]].map(([wk, ag]) => ag ? `
-          <div class="week-col">
-            <div class="week-col-title">${wk}</div>
-            <div style="white-space:pre-wrap;font-size:11px;line-height:1.6;color:var(--text);">${ag.replace(/\\n/g,'\n')}</div>
-          </div>` : `<div class="week-col" style="opacity:.3;"><div class="week-col-title">${wk}</div><div style="font-size:11px;color:var(--text-light);">－</div></div>`
-        ).join('')}
-      </div>
-    </div>
-  `).join('');
+function renderMeetings() {
+  document.getElementById('meetings-content').innerHTML = D.meetings.map((m, mi) =>
+    '<div class="meet-card">' +
+    '<h3>🤝 ' + editable(m.name, 'meetings.'+mi+'.name') + '</h3>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;">' +
+    '<span class="badge b-blue">主催: ' + esc((m.host||'').replace(/\\n/g,'/')) + '</span>' +
+    '<span class="badge b-gray">出席: ' + esc((m.members||'').replace(/\\n/g,'・')) + '</span>' +
+    '</div>' +
+    '<div class="wk-grid">' +
+    ['w1','w2','w3','w4'].map((wk, wi) => {
+      const label = ['1W','2W','3W','4W'][wi];
+      const val = m[wk] || '';
+      return '<div class="wk-col"><div class="wk-title">' + label + '</div>' +
+        (editMode
+          ? '<textarea class="editable" style="width:100%;min-height:80px;font-size:11px;font-family:inherit;padding:4px;border:1px solid var(--primary);border-radius:4px;resize:vertical;" data-path="meetings.' + mi + '.' + wk + '">' + esc(val.replace(/\\n/g,'\n')) + '</textarea>'
+          : '<div style="white-space:pre-wrap;font-size:11px;line-height:1.6;">' + esc(val.replace(/\\n/g,'\n')) + '</div>') +
+        '</div>';
+    }).join('') +
+    '</div></div>'
+  ).join('');
+
+  // Handle textarea input for meetings
+  document.querySelectorAll('#meetings-content textarea').forEach(ta => {
+    ta.addEventListener('input', function() {
+      setByPath(D, this.getAttribute('data-path'), this.value);
+    });
+  });
 }
 
 // ── ROLES ──
-function initRoles() {
-  const deptColors = {'本部':'badge-blue','店舗':'badge-green'};
-  document.getElementById('roles-content').innerHTML = DATA.roles.map(r => {
-    const dc = deptColors[r.dept] || 'badge-gray';
-    return `
-    <div class="role-card">
-      <div class="role-header">
-        <div>
-          <div class="role-title">👤 ${r.role.replace(/\\n/g,' / ')}</div>
-          <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
-            <span class="badge ${dc}">${r.dept}</span>
-            ${r.scope ? `<span class="badge badge-gray">管轄: ${r.scope}</span>` : ''}
-            ${r.manager ? `<span class="badge badge-gray">管理者: ${r.manager.replace(/\\n/g,'/')}</span>` : ''}
-          </div>
-        </div>
-      </div>
-      <div class="role-cols">
-        <div>
-          <div class="role-section-title">⚙️ 主な責務</div>
-          <ul class="role-list">${r.duties.map(d => `<li>${d}</li>`).join('')}</ul>
-          <div class="role-section-title" style="margin-top:10px;">🎯 ミッション</div>
-          <ul class="role-list">${r.mission.map(d => `<li>${d}</li>`).join('')}</ul>
-        </div>
-        <div>
-          <div class="role-section-title">📊 数値責任 (KPI)</div>
-          <ul class="role-list">${r.kpi.map(d => `<li>${d}</li>`).join('')}</ul>
-        </div>
-        <div>
-          <div class="role-section-title">📈 定量評価項目</div>
-          <ul class="role-list">${r.quant.map(d => `<li>${d}</li>`).join('')}</ul>
-          <div class="role-section-title" style="margin-top:10px;">🌟 定性評価項目</div>
-          <ul class="role-list">${r.qual.map(d => `<li>${d}</li>`).join('')}</ul>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+function renderRoles() {
+  document.getElementById('roles-content').innerHTML = D.roles.map((r, ri) =>
+    '<div class="role-card">' +
+    '<div style="margin-bottom:12px;">' +
+    '<div style="font-size:15px;font-weight:800;margin-bottom:6px;">👤 ' + esc((r.role||'').replace(/\\n/g,' / ')) + '</div>' +
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+    '<span class="badge ' + (r.dept==='本部'?'b-blue':'b-green') + '">' + esc(r.dept) + '</span>' +
+    (r.scope ? '<span class="badge b-gray">管轄: ' + esc(r.scope) + '</span>' : '') +
+    '</div></div>' +
+    '<div class="role-cols">' +
+    '<div><div class="role-sec">⚙️ 主な責務</div>' +
+    '<ul class="role-list">' + r.duties.map((d,di) => '<li>' + editable(d,'roles.'+ri+'.duties.'+di) + '</li>').join('') + '</ul>' +
+    (editMode ? '<button class="add-row-btn" style="margin-top:6px;" onclick="addToList('roles.'+ri+'.duties')">＋ 追加</button>' : '') +
+    '<div class="role-sec" style="margin-top:10px;">🎯 ミッション</div>' +
+    '<ul class="role-list">' + r.mission.map((d,di) => '<li>' + editable(d,'roles.'+ri+'.mission.'+di) + '</li>').join('') + '</ul>' +
+    (editMode ? '<button class="add-row-btn" style="margin-top:6px;" onclick="addToList('roles.'+ri+'.mission')">＋ 追加</button>' : '') +
+    '</div>' +
+    '<div><div class="role-sec">📊 KPI</div><ul class="role-list">' + r.kpi.map((d,di) => '<li>' + editable(d,'roles.'+ri+'.kpi.'+di) + '</li>').join('') + '</ul></div>' +
+    '<div><div class="role-sec">📈 定量評価</div><ul class="role-list">' + r.quant.map((d,di) => '<li>' + editable(d,'roles.'+ri+'.quant.'+di) + '</li>').join('') + '</ul>' +
+    '<div class="role-sec" style="margin-top:10px;">🌟 定性評価</div><ul class="role-list">' + r.qual.map((d,di) => '<li>' + editable(d,'roles.'+ri+'.qual.'+di) + '</li>').join('') + '</ul></div>' +
+    '</div></div>'
+  ).join('');
+}
+
+function addToList(path) {
+  const parts = path.split('.');
+  let cur = D;
+  parts.forEach(p => { cur = cur[isNaN(p)?p:parseInt(p)]; });
+  if (Array.isArray(cur)) { cur.push('新規項目'); renderCurrentPage(); }
 }
 
 // ── RULES ──
-function initRules() {
-  const stores = [...new Set(DATA.rules.map(r => r.store).filter(Boolean))];
+function renderRules() {
+  const stores = [...new Set(D.rules.map(r => r.store).filter(Boolean))];
   const sel = document.getElementById('rules-store');
-  stores.forEach(s => sel.insertAdjacentHTML('beforeend', `<option value="${s}">${s}</option>`));
-  renderRules(DATA.rules);
-}
-
-function renderRules(list) {
-  document.getElementById('rules-body').innerHTML = list.map((r, i) => `
-    <tr class="rule-row" onclick="toggleRule(${i})">
-      <td style="font-weight:700;color:var(--primary);">${r.num}</td>
-      <td style="font-weight:600;">${r.item}</td>
-      <td><span class="badge badge-${r.store === '全店舗' ? 'blue' : 'orange'}">${r.store}</span></td>
-      <td><span style="font-size:12px;">${r.dept}</span></td>
-      <td><span style="font-size:12px;">${r.resp}</span></td>
-    </tr>
-    <tr><td colspan="5" style="padding:0;"><div class="rule-content" id="rule-detail-${i}">${r.content.replace(/\\n/g,'\n')}</div></td></tr>
-  `).join('');
-}
-
-function toggleRule(i) {
-  const el = document.getElementById('rule-detail-' + i);
-  if(el) el.style.display = el.style.display === 'block' ? 'none' : 'block';
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">全店舗</option>' + stores.map(s => '<option' + (s===cur?' selected':'') + '>' + esc(s) + '</option>').join('');
+  filterRules();
+  document.getElementById('rules-q').oninput = filterRules;
+  document.getElementById('rules-store').onchange = filterRules;
+  document.getElementById('rules-add').onclick = function() {
+    D.rules.push({num: D.rules.length+1, item:'新規ルール', content:'', store:'全店舗', dept:'', resp:''});
+    renderRules();
+  };
 }
 
 function filterRules() {
-  const q = document.getElementById('rules-search').value.toLowerCase();
+  const q = (document.getElementById('rules-q').value||'').toLowerCase();
   const store = document.getElementById('rules-store').value;
-  const filtered = DATA.rules.filter((r, idx) => {
-    r._idx = idx;
-    return (!q || r.item.toLowerCase().includes(q) || r.content.toLowerCase().includes(q)) &&
-           (!store || r.store === store || r.store === '全店舗');
+  const list = D.rules.map((r,i) => ({...r,_i:i})).filter(r =>
+    (!q || (r.item||'').toLowerCase().includes(q) || (r.content||'').toLowerCase().includes(q)) &&
+    (!store || r.store === store || r.store === '全店舗')
+  );
+  document.getElementById('rules-list').innerHTML = list.map(r =>
+    '<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden;">' +
+    '<div style="padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="this.nextSibling.style.display=this.nextSibling.style.display==='block'?'none':'block'">' +
+    '<span style="font-weight:700;color:var(--primary);min-width:28px;">' + editable(r.num,'rules.'+r._i+'.num') + '</span>' +
+    '<span style="font-weight:600;flex:1;">' + editable(r.item,'rules.'+r._i+'.item') + '</span>' +
+    '<span class="badge ' + (r.store==='全店舗'?'b-blue':'b-orange') + '">' + editable(r.store,'rules.'+r._i+'.store') + '</span>' +
+    '<span style="font-size:12px;color:var(--light);margin-left:6px;">' + editable(r.dept,'rules.'+r._i+'.dept') + '</span>' +
+    '<div class="row-actions"><button class="del-btn" data-del="rules.' + r._i + '">✕</button></div>' +
+    '</div>' +
+    '<div style="display:none;background:#f8fafc;padding:12px 16px;border-top:1px solid var(--border);">' +
+    (editMode
+      ? '<textarea class="editable" style="width:100%;min-height:100px;font-size:13px;font-family:inherit;padding:8px;border:1px solid var(--primary);border-radius:6px;resize:vertical;" data-path="rules.' + r._i + '.content">' + esc((r.content||'').replace(/\\n/g,'\n')) + '</textarea>'
+      : '<div style="font-size:13px;line-height:1.7;white-space:pre-wrap;">' + esc((r.content||'').replace(/\\n/g,'\n')) + '</div>') +
+    '</div></div>'
+  ).join('');
+  setupDelButtons();
+  document.querySelectorAll('#rules-list textarea').forEach(ta => {
+    ta.addEventListener('input', function() { setByPath(D, this.getAttribute('data-path'), this.value); });
   });
-  renderRules(filtered);
 }
 
 // ── CONTACTS ──
-function initContacts() { renderContacts(DATA.contacts); }
+function renderContacts() {
+  const q = (document.getElementById('contact-q').value||'').toLowerCase();
+  const list = D.contacts.filter(c => !q || (c.name||'').toLowerCase().includes(q) || (c.phone||'').includes(q));
+  const stores = list.filter(c => (c.name||'').includes('こぼれや'));
+  const vendors = list.filter(c => !(c.name||'').includes('こぼれや'));
+  let html = '';
 
-function renderContacts(list) {
-  const storeContacts = list.filter(c => c.name.includes('こぼれや'));
-  const vendorContacts = list.filter(c => !c.name.includes('こぼれや'));
-  
-  let html = '<div class="contact-group"><div class="contact-group-title">🏪 店舗連絡先</div>';
-  html += '<div class="table-wrap"><table><thead><tr><th>店舗名</th><th>電話番号</th><th>担当者</th><th>備考</th></tr></thead><tbody>';
-  html += storeContacts.map(c => `<tr>
-    <td style="font-weight:600;">${c.name}</td>
-    <td><a href="tel:${c.phone}" style="color:var(--primary);text-decoration:none;font-weight:600;">${c.phone}</a></td>
-    <td>${c.contact || c.person || ''}</td>
-    <td style="font-size:12px;color:var(--text-light);">${c.note || ''}</td>
-  </tr>`).join('');
-  html += '</tbody></table></div></div>';
+  if (stores.length) {
+    html += '<div style="margin-bottom:20px;"><div class="cg-title">🏪 店舗連絡先</div>';
+    html += '<div class="tw"><table><thead><tr><th>店舗名</th><th>電話番号</th><th>担当者</th><th>備考</th><th class="edit-btn"></th></tr></thead><tbody>';
+    html += stores.map((c,_) => {
+      const i = D.contacts.indexOf(c);
+      return '<tr><td style="font-weight:600;">' + editable(c.name,'contacts.'+i+'.name') + '</td>' +
+        '<td><a href="tel:' + esc(c.phone) + '" style="color:var(--primary);text-decoration:none;font-weight:600;">' + editable(c.phone,'contacts.'+i+'.phone') + '</a></td>' +
+        '<td>' + editable(c.contact,'contacts.'+i+'.contact') + '</td>' +
+        '<td style="font-size:12px;color:var(--light);">' + editable(c.note,'contacts.'+i+'.note') + '</td>' +
+        '<td><div class="row-actions"><button class="del-btn" data-del="contacts.' + i + '">✕</button></div></td></tr>';
+    }).join('');
+    html += '</tbody></table></div></div>';
+  }
 
-  html += '<div class="contact-group"><div class="contact-group-title">🏢 取引先・業者</div>';
-  html += '<div class="table-wrap"><table><thead><tr><th>業者名</th><th>社内担当者</th><th>電話番号</th><th>備考</th></tr></thead><tbody>';
-  html += vendorContacts.map(c => `<tr>
-    <td style="font-weight:600;">${c.name}</td>
-    <td>${c.contact || ''}</td>
-    <td>${c.phone ? `<a href="tel:${c.phone}" style="color:var(--primary);text-decoration:none;">${c.phone}</a>` : '<span style="color:#aaa;">未登録</span>'}</td>
-    <td style="font-size:12px;color:var(--text-light);">${c.note || ''}</td>
-  </tr>`).join('');
-  html += '</tbody></table></div></div>';
+  if (vendors.length) {
+    html += '<div><div class="cg-title">🏢 取引先・業者</div>';
+    html += '<div class="tw"><table><thead><tr><th>業者名</th><th>社内担当</th><th>電話番号</th><th>備考</th><th class="edit-btn"></th></tr></thead><tbody>';
+    html += vendors.map((c,_) => {
+      const i = D.contacts.indexOf(c);
+      return '<tr><td style="font-weight:600;">' + editable(c.name,'contacts.'+i+'.name') + '</td>' +
+        '<td>' + editable(c.contact,'contacts.'+i+'.contact') + '</td>' +
+        '<td>' + (c.phone ? '<a href="tel:' + esc(c.phone) + '" style="color:var(--primary);text-decoration:none;">' + editable(c.phone,'contacts.'+i+'.phone') + '</a>' : editable('','contacts.'+i+'.phone')) + '</td>' +
+        '<td style="font-size:12px;color:var(--light);">' + editable(c.note,'contacts.'+i+'.note') + '</td>' +
+        '<td><div class="row-actions"><button class="del-btn" data-del="contacts.' + i + '">✕</button></div></td></tr>';
+    }).join('');
+    html += '</tbody></table></div></div>';
+  }
   document.getElementById('contacts-content').innerHTML = html;
-}
-
-function filterContacts() {
-  const q = document.getElementById('contact-search').value.toLowerCase();
-  renderContacts(DATA.contacts.filter(c =>
-    !q || c.name.toLowerCase().includes(q) || c.phone.includes(q) || (c.contact||'').toLowerCase().includes(q)
-  ));
+  setupDelButtons();
+  document.getElementById('contact-q').oninput = renderContacts;
+  document.getElementById('contacts-add').onclick = function() {
+    D.contacts.push({name:'新規連絡先',contact:'',phone:'',person:'',note:''});
+    renderContacts();
+  };
 }
 
 // ── TRAINING ──
-function initTraining() {
-  const genreBadge = g => g === 'エピソード' ? 'badge-orange' : g === '教育' ? 'badge-blue' : 'badge-gray';
-  document.getElementById('training-content').innerHTML = DATA.trainings.map((t, i) => `
-    <div class="training-card">
-      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
-        <span class="badge ${genreBadge(t.genre)}">${t.genre}</span>
-        <span class="badge badge-gray">${t.duration}</span>
-      </div>
-      <h3>${t.title}</h3>
-      <div class="training-content" id="tc-${i}">${t.content.replace(/\\n/g,'\n')}</div>
-      <button class="expand-btn" onclick="expandTraining(${i},this)">▼ 続きを読む</button>
-    </div>
-  `).join('');
-}
-
-function expandTraining(i, btn) {
-  const el = document.getElementById('tc-' + i);
-  const expanded = el.classList.toggle('expanded');
-  btn.textContent = expanded ? '▲ 閉じる' : '▼ 続きを読む';
+function renderTraining() {
+  const genreCls = g => g==='エピソード'?'b-orange':g==='教育'?'b-blue':'b-gray';
+  document.getElementById('training-content').innerHTML = D.trainings.map((t,i) =>
+    '<div class="tr-card">' +
+    '<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">' +
+    '<span class="badge ' + genreCls(t.genre) + '">' + editable(t.genre,'trainings.'+i+'.genre') + '</span>' +
+    '<span class="badge b-gray">' + editable(t.duration,'trainings.'+i+'.duration') + '</span>' +
+    '<div class="row-actions" style="margin-left:auto;"><button class="del-btn" data-del="trainings.'+i+'">✕</button></div>' +
+    '</div>' +
+    '<div style="font-size:14px;font-weight:700;margin-bottom:8px;">' + editable(t.title,'trainings.'+i+'.title') + '</div>' +
+    (editMode
+      ? '<textarea class="editable" style="width:100%;min-height:80px;font-size:12px;font-family:inherit;padding:8px;border:1px solid var(--primary);border-radius:6px;resize:vertical;" data-path="trainings.'+i+'.content">' + esc((t.content||'').replace(/\\n/g,'\n')) + '</textarea>'
+      : '<div class="tr-content" id="tc-'+i+'">' + esc((t.content||'').replace(/\\n/g,'\n')) + '</div>' +
+        '<button style="font-size:11px;color:var(--primary);cursor:pointer;margin-top:6px;background:none;border:none;font-family:inherit;padding:0;" onclick="var e=document.getElementById('tc-'+i+'');e.classList.toggle('open');this.textContent=e.classList.contains('open')?'▲ 閉じる':'▼ 続きを読む'">▼ 続きを読む</button>') +
+    '</div>'
+  ).join('');
+  setupDelButtons();
+  document.querySelectorAll('#training-content textarea').forEach(ta => {
+    ta.addEventListener('input', function() { setByPath(D, this.getAttribute('data-path'), this.value); });
+  });
+  document.getElementById('training-add').onclick = function() {
+    D.trainings.push({genre:'教育',title:'新規研修',duration:'',content:''});
+    renderTraining();
+  };
 }
 
 // ── REVIEWS ──
-function initReviews() { renderReviews(DATA.reviews); }
+function renderReviews() {
+  const q = (document.getElementById('rv-q').value||'').toLowerCase();
+  const store = document.getElementById('rv-store').value;
+  const media = document.getElementById('rv-media').value;
+  const list = D.reviews.map((r,i) => ({...r,_i:i})).filter(r =>
+    (!q || (r.content||'').toLowerCase().includes(q) || (r.store||'').includes(q)) &&
+    (!store || r.store === store) && (!media || r.media === media)
+  );
+  const ratingCls = r => parseFloat(r)<2?'b-red':parseFloat(r)<3?'b-orange':'b-yellow';
+  document.getElementById('reviews-content').innerHTML = list.length ? list.map(r =>
+    '<div class="rv-card" style="' + (r.strategy?'border-left-color:var(--success);':'') + '">' +
+    '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center;">' +
+    '<span class="badge b-red">' + editable(r.store,'reviews.'+r._i+'.store') + '</span>' +
+    '<span class="badge b-gray">' + editable(r.media,'reviews.'+r._i+'.media') + '</span>' +
+    '<span class="badge ' + ratingCls(r.rating) + '">★ ' + editable(r.rating,'reviews.'+r._i+'.rating') + '</span>' +
+    (r.date ? '<span style="font-size:11px;color:var(--light);">' + fmtDate(r.date) + '</span>' : '') +
+    (r.strategy ? '<span class="badge b-green">✅ 対策済</span>' : '<span class="badge b-red">⚠️ 未対策</span>') +
+    '<div class="row-actions" style="margin-left:auto;"><button class="del-btn" data-del="reviews.' + r._i + '">✕</button></div>' +
+    '</div>' +
+    '<div style="font-size:13px;line-height:1.6;margin-bottom:8px;">' + editable(r.content,'reviews.'+r._i+'.content','div') + '</div>' +
+    '<div>' +
+    '<div style="font-size:11px;font-weight:700;color:var(--light);margin-bottom:4px;">💡 対策・メモ</div>' +
+    '<textarea style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;resize:vertical;min-height:52px;" placeholder="対策・対応メモを入力…" data-rv="' + r._i + '">' + esc(r.strategy||'') + '</textarea>' +
+    '</div></div>'
+  ).join('') : '<div style="padding:20px;color:var(--light);text-align:center;">該当なし</div>';
 
-function renderReviews(list) {
-  const ratingColor = r => parseFloat(r) < 2 ? 'badge-red' : parseFloat(r) < 3 ? 'badge-orange' : 'badge-yellow';
-  document.getElementById('reviews-content').innerHTML = list.map(r => `
-    <div class="review-card ${r.strategy ? 'strategy-done' : ''}">
-      <div class="review-meta">
-        <span class="badge badge-red">${r.store}</span>
-        <span class="badge badge-gray">${r.media}</span>
-        <span class="badge ${ratingColor(r.rating)}">★ ${r.rating}</span>
-        ${r.date ? `<span style="font-size:11px;color:var(--text-light);">${formatDate(r.date)}</span>` : ''}
-        ${r.strategy ? '<span class="badge badge-green">✅ 対策済</span>' : '<span class="badge badge-red">⚠️ 未対策</span>'}
-      </div>
-      <div style="font-size:13px;color:var(--text);line-height:1.6;">${r.content}</div>
-      ${r.strategy ? `<div style="margin-top:8px;background:#f0fdf4;padding:8px 12px;border-radius:6px;font-size:12px;color:#166534;">💡 ${r.strategy}</div>` : ''}
-    </div>
-  `).join('') || '<div style="padding:20px;color:var(--text-light);text-align:center;">該当なし</div>';
-}
-
-function filterReviews() {
-  const q = document.getElementById('review-search').value.toLowerCase();
-  const store = document.getElementById('review-store').value;
-  const media = document.getElementById('review-media').value;
-  renderReviews(DATA.reviews.filter(r =>
-    (!q || r.content.toLowerCase().includes(q) || r.store.includes(q)) &&
-    (!store || r.store === store) &&
-    (!media || r.media === media)
-  ));
+  document.querySelectorAll('textarea[data-rv]').forEach(ta => {
+    ta.addEventListener('input', function() {
+      D.reviews[parseInt(this.getAttribute('data-rv'))].strategy = this.value;
+    });
+  });
+  setupDelButtons();
+  document.getElementById('rv-q').oninput = renderReviews;
+  document.getElementById('rv-store').onchange = renderReviews;
+  document.getElementById('rv-media').onchange = renderReviews;
+  document.getElementById('reviews-add').onclick = function() {
+    D.reviews.push({date:'',store:'',media:'食べログ',rating:'',content:'新規口コミ',strategy:''});
+    renderReviews();
+  };
 }
 
 // ── COMPLAINTS ──
-function initComplaints() {
+function renderComplaints() {
   let html = '';
-  let sectionOpen = false;
-  DATA.common_complaints.forEach((c, i) => {
-    if(!c.desc || c.desc.trim() === '') {
-      if(sectionOpen) html += '</div>';
-      html += `<div class="complaint-section">
-        <div class="complaint-header" onclick="toggleComplaint(${i})">
-          <span>📌 ${c.cat}</span>
-          <span id="comp-arrow-${i}">▼</span>
-        </div>
-        <div class="complaint-body" id="comp-body-${i}">`;
-      sectionOpen = true;
+  let secIdx = -1;
+  D.common_complaints.forEach((c, i) => {
+    if (!c.desc || c.desc.trim() === '') {
+      secIdx++;
+      html += '<div class="cp-sec">' +
+        '<div class="cp-hd" onclick="var b=this.nextSibling;b.style.display=b.style.display==='block'?'none':'block'">' +
+        '<span>📌 ' + editable(c.cat,'common_complaints.'+i+'.cat') + '</span><span>▼</span></div>' +
+        '<div class="cp-bd">';
     } else {
-      html += `<div style="background:#fff;border-radius:8px;padding:12px 14px;margin-bottom:10px;border:1px solid var(--border);">
-        <div style="font-weight:600;font-size:13px;color:var(--text);margin-bottom:6px;">🔴 ${c.cat}</div>
-        <div style="font-size:12px;color:var(--text-light);line-height:1.7;white-space:pre-wrap;">${c.desc.replace(/\\n/g,'\n')}</div>
-      </div>`;
+      html += '<div style="background:#fff;border-radius:8px;padding:12px 14px;margin-bottom:10px;border:1px solid var(--border);">' +
+        '<div style="font-weight:600;font-size:13px;margin-bottom:6px;">🔴 ' + editable(c.cat,'common_complaints.'+i+'.cat') + '</div>' +
+        (editMode
+          ? '<textarea class="editable" style="width:100%;min-height:80px;font-size:12px;font-family:inherit;padding:8px;border:1px solid var(--primary);border-radius:6px;resize:vertical;" data-path="common_complaints.'+i+'.desc">' + esc((c.desc||'').replace(/\\n/g,'\n')) + '</textarea>'
+          : '<div style="font-size:12px;color:var(--light);line-height:1.7;white-space:pre-wrap;">' + esc((c.desc||'').replace(/\\n/g,'\n')) + '</div>') +
+        '</div>';
+    }
+    // close section if next is a header or end
+    const next = D.common_complaints[i+1];
+    if (c.desc && c.desc.trim() !== '' && (!next || !next.desc || next.desc.trim() === '')) {
+      html += '</div></div>';
     }
   });
-  if(sectionOpen) html += '</div></div>';
   document.getElementById('complaints-content').innerHTML = html;
+  document.querySelectorAll('#complaints-content textarea').forEach(ta => {
+    ta.addEventListener('input', function() { setByPath(D, this.getAttribute('data-path'), this.value); });
+  });
 }
 
-function toggleComplaint(i) {
-  const body = document.getElementById('comp-body-' + i);
-  const arrow = document.getElementById('comp-arrow-' + i);
-  if(body) {
-    const open = body.style.display === 'block';
-    body.style.display = open ? 'none' : 'block';
-    if(arrow) arrow.textContent = open ? '▼' : '▲';
-  }
+// ── DELETE BUTTONS ──
+function setupDelButtons() {
+  document.querySelectorAll('.del-btn[data-del]').forEach(btn => {
+    btn.onclick = function(e) {
+      e.stopPropagation();
+      const path = this.getAttribute('data-del').split('.');
+      const arrKey = isNaN(path[0]) ? path[0] : parseInt(path[0]);
+      const idx = parseInt(path[1]);
+      if (Array.isArray(D[arrKey])) {
+        if (confirm('削除しますか？')) {
+          D[arrKey].splice(idx, 1);
+          renderCurrentPage();
+        }
+      }
+    };
+  });
 }
 
-// ── INIT ALL ──
-initDashboard();
-initTasks();
-initSchedule();
-initMeetings();
-initRoles();
-initRules();
-initContacts();
-initTraining();
-initReviews();
-initComplaints();
+// ── INIT ──
+renderDashboard();
 </script>
 </body>
 </html>
