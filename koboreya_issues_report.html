@@ -1608,17 +1608,20 @@ function submitAPModal() {
   renderActionPlan(_apModalStore);
 }
 
-// Close modal on backdrop click
-document.getElementById('apModal').addEventListener('click', function(e) {
-  if(e.target === this) closeAPModal();
+// ========== 初期化 ==========
+renderOverview();
+
+// Close modal on backdrop click (deferred until DOM ready)
+document.addEventListener('DOMContentLoaded', function() {
+  const _apModal = document.getElementById('apModal');
+  if(_apModal) _apModal.addEventListener('click', function(e) {
+    if(e.target === this) closeAPModal();
+  });
 });
 // Close on Escape key
 document.addEventListener('keydown', function(e) {
   if(e.key === 'Escape') closeAPModal();
 });
-
-// ========== 初期化 ==========
-renderOverview();
 </script>
 
 <!-- ===== Action Plan Modal ===== -->
