@@ -1335,7 +1335,7 @@ function renderAdvice() {
 
     // Month tabs for this store
     const monthTabs = monthList.map(m =>
-      '<button class="store-month-tab' + (m === selMonth ? ' active' : '') + '" onclick="switchStoreMonth('' + s + '','' + m + '')">' + m + '</button>'
+      '<button class="store-month-tab' + (m === selMonth ? ' active' : '') + '" onclick="switchStoreMonth(\'' + s + '\',\'' + m + '\')">' + m + '</button>'
     ).join('');
 
     const improvements = d.improvements.map((item, i) =>
@@ -1368,7 +1368,7 @@ function renderAdvice() {
       + '<div style="margin-bottom:16px;">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
       + '<div style="font-size:13px;font-weight:700;color:var(--primary);">📝 ' + selMonth + ' の月次総評</div>'
-      + '<button id="meval_btn_' + s + '" onclick="saveMonthlyEval('' + s + '','' + selMonth + '')" style="padding:5px 14px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">保存</button>'
+      + '<button id="meval_btn_' + s + '" onclick="saveMonthlyEval(\'' + s + '\',\'' + selMonth + '\')" style="padding:5px 14px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">保存</button>'
       + '</div>'
       + '<textarea id="meval_' + s + '" rows="4" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;line-height:1.6;box-sizing:border-box;resize:vertical;" placeholder="' + selMonth + 'の総評・コメントを入力してください…">' + savedEval + '</textarea>'
       + '</div>'
