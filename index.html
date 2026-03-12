@@ -160,6 +160,14 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
 .game-log p{color:var(--text);}
 .game-log p.event{color:var(--danger);}
 .game-log p.good{color:var(--success);}
+/* ── 業務進捗 ── */
+.progress-item{background:var(--surface);border-radius:10px;padding:14px 16px;margin-bottom:10px;border-left:4px solid var(--border);}
+.progress-item.todo{border-left-color:var(--warn);}
+.progress-item.doing{border-left-color:var(--primary);}
+.progress-item.done{border-left-color:var(--success);}
+.progress-item.blocked{border-left-color:var(--danger);}
+.progress-badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+
 /* ── 面談申し込み ── */
 .interview-card{background:#fff;border-radius:12px;padding:18px;box-shadow:var(--shadow);margin-bottom:12px;border-left:4px solid var(--primary);}
 .interview-card.pending{border-left-color:var(--warn);}
@@ -259,15 +267,7 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
             <option>本部</option>
           </select>
         </div>
-        <div class="inp-group">
-          <label class="inp-label">役職・ロール *</label>
-          <select class="inp" id="reg-role">
-            <option value="">選択...</option>
-            <option value="admin">管理者(Admin)</option>
-            <option value="manager">店長・SV</option>
-            <option value="staff">スタッフ</option>
-          </select>
-        </div>
+        <input type="hidden" id="reg-role" value="staff">
         <div class="inp-group">
           <label class="inp-label">誕生日</label>
           <input type="date" class="inp" id="reg-birthday">
@@ -330,6 +330,7 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
     <div class="sb-item" data-page="store-meetings"><span class="sb-icon">🤝</span>会議体・研修</div>
     <div class="sb-item" data-page="store-rules"><span class="sb-icon">📜</span>店舗ルール</div>
     <div class="sb-item" data-page="store-contacts"><span class="sb-icon">📞</span>連絡先一覧</div>
+    <div class="sb-item" data-page="store-progress"><span class="sb-icon">📊</span>業務進捗</div>
     <div class="sb-group">人材育成</div>
     <div class="sb-item" data-page="training-progress"><span class="sb-icon">📈</span>育成進捗管理</div>
     <div class="sb-item" data-page="manuals"><span class="sb-icon">📚</span>各種マニュアル</div>
@@ -357,6 +358,9 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
     <div class="topbar-right">
       <span id="topbar-user-badge" style="font-size:12px;color:var(--light);"></span>
       <button class="topbar-btn" id="edit-toggle-btn" onclick="toggleEditMode()" style="display:none;">✏️ 編集モード</button>
+      <button class="topbar-btn" id="notif-btn" onclick="showNotifications()" style="position:relative;display:none;">
+        🔔 <span id="notif-badge" style="position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;border-radius:50%;width:16px;height:16px;font-size:10px;display:none;align-items:center;justify-content:center;font-weight:700;"></span>
+      </button>
       <button class="topbar-btn" onclick="doLogout()">ログアウト</button>
     </div>
   </div>
@@ -426,6 +430,15 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
     <div id="page-store-contacts" class="page">
       <div class="page-header"><h2>📞 連絡先一覧</h2></div>
       <div id="contacts-content"></div>
+    </div>
+
+    <!-- ── 店舗管理: 業務進捗 ── -->
+    <div id="page-store-progress" class="page">
+      <div class="page-header">
+        <h2>📊 業務進捗</h2>
+        <p>業務の進捗状況を管理・記録できます</p>
+      </div>
+      <div id="progress-content"></div>
     </div>
 
     <!-- ── 育成進捗管理 ── -->
@@ -498,6 +511,45 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
       <div id="clubs-content"></div>
     </div>
 
+    <!-- ── 部活詳細パネル ── -->
+    <div id="club-detail-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;">
+      <div style="background:var(--bg);border-radius:16px;width:min(700px,95vw);max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+        <div id="club-detail-header" style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;">
+          <div id="club-detail-icon" style="font-size:32px;width:50px;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;"></div>
+          <div style="flex:1;">
+            <div id="club-detail-name" style="font-size:18px;font-weight:700;"></div>
+            <div id="club-detail-schedule" style="font-size:12px;color:var(--light);"></div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="closeClubDetail()">✕ 閉じる</button>
+        </div>
+        <!-- タブ -->
+        <div style="display:flex;border-bottom:1px solid var(--border);background:var(--surface);">
+          <button class="page-tab active" id="club-tab-board" onclick="switchClubTab('board',this)" style="flex:1;padding:10px;border:none;background:none;cursor:pointer;font-size:13px;">📋 活動報告</button>
+          <button class="page-tab" id="club-tab-chat" onclick="switchClubTab('chat',this)" style="flex:1;padding:10px;border:none;background:none;cursor:pointer;font-size:13px;">💬 内部チャット</button>
+        </div>
+        <!-- 掲示板 -->
+        <div id="club-detail-board" style="flex:1;overflow-y:auto;padding:16px;display:block;">
+          <div id="club-board-content"></div>
+          <div id="club-board-form" style="margin-top:12px;display:none;">
+            <textarea class="inp" id="club-board-text" rows="3" placeholder="活動報告を入力..."></textarea>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <input type="file" class="inp" id="club-board-img" accept="image/*" style="padding:4px;font-size:12px;flex:1;">
+              <button class="btn btn-primary btn-sm" onclick="submitClubPost()">📤 投稿</button>
+            </div>
+          </div>
+        </div>
+        <!-- チャット -->
+        <div id="club-detail-chat" style="flex:1;overflow-y:auto;padding:0;display:none;flex-direction:column;">
+          <div id="club-chat-messages" style="flex:1;overflow-y:auto;padding:12px;min-height:200px;max-height:55vh;"></div>
+          <div id="club-chat-locked" style="display:none;text-align:center;padding:32px;color:var(--light);">🔒 部活に参加するとチャットが閲覧できます</div>
+          <div id="club-chat-input" style="display:none;padding:12px;border-top:1px solid var(--border);display:none;gap:8px;align-items:center;">
+            <input class="inp" id="club-chat-text" placeholder="メッセージを入力..." style="flex:1;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){submitClubChat();event.preventDefault();}">
+            <button class="btn btn-primary btn-sm" onclick="submitClubChat()">送信</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ── シミュレーションゲーム ── -->
     <div id="page-game" class="page">
       <div class="page-header"><h2>🎮 こぼれや番</h2><p>月島もんじゃ経営シミュレーション</p></div>
@@ -516,7 +568,7 @@ var PAGE_TITLES = {
   'sales':'店舗売上','store-tasks':'業務一覧','store-schedule':'年間スケジュール',
   'store-meetings':'会議体・研修','store-rules':'店舗ルール','store-contacts':'連絡先一覧',
   'training-progress':'育成進捗管理','manuals':'各種マニュアル',
-  'meyasu':'目安箱','interview-req':'面談申し込み',
+  'meyasu':'目安箱','interview-req':'面談申し込み','store-progress':'業務進捗',
   'reviews-ops':'臨店・口コミ',
   'news-store':'店長会報告','news-hq':'本部報告',
   'accounts':'アカウント管理','clubs':'部活管理','game':'こぼれや番'
@@ -616,6 +668,25 @@ function getInterviews() {
   catch(e) { return []; }
 }
 function saveInterviews(arr) { localStorage.setItem('koboreya_interviews', JSON.stringify(arr)); }
+
+// 面談状況PW管理
+var IV_STATUS_PW_HASH = '226f76b55acb49701e06ded1d95165d179458f6fc37f5c6fc760ae30dec1c378'; // 310
+var ivStatusVerified = false;
+
+// 通知管理
+function getNotifications(userId) {
+  try { return JSON.parse(localStorage.getItem('koboreya_notif_' + userId) || '[]'); }
+  catch(e) { return []; }
+}
+function addNotification(userId, msg, type) {
+  var notifs = getNotifications(userId);
+  notifs.unshift({ id: 'n'+Date.now(), msg: msg, type: type||'info', ts: new Date().toISOString(), read: false });
+  if (notifs.length > 50) notifs = notifs.slice(0, 50);
+  localStorage.setItem('koboreya_notif_' + userId, JSON.stringify(notifs));
+}
+function getUnreadCount(userId) {
+  return getNotifications(userId).filter(function(n) { return !n.read; }).length;
+}
 function getMeyasuData() {
   try { return JSON.parse(localStorage.getItem('koboreya_meyasu') || '[]'); }
   catch(e) { return []; }
@@ -686,7 +757,7 @@ function goRegStep2() {
   var role = document.getElementById('reg-role').value;
   var pw = document.getElementById('reg-pw').value;
   var pw2 = document.getElementById('reg-pw2').value;
-  if (!name || !store || !role || !pw) {
+  if (!name || !store || !pw) {
     document.getElementById('reg-err').textContent = '必須項目を入力してください';
     return;
   }
@@ -849,9 +920,13 @@ function updateSidebarUser() {
   document.getElementById('sb-user-pts').textContent = pts.toFixed(1) + ' pts';
   // Show edit button for admin/manager
   var editBtn = document.getElementById('edit-toggle-btn');
-  if (currentUser.role === 'admin' || currentUser.role === 'manager') {
+  if (currentUser.role === 'admin' || currentUser.role === 'manager' || currentUser.role === 'editor') {
     editBtn.style.display = 'inline-block';
   }
+  // 通知ベル
+  var notifBtn = document.getElementById('notif-btn');
+  if (notifBtn) notifBtn.style.display = 'inline-block';
+  updateNotifBadge();
   // Show admin tab in accounts
   if (currentUser.role === 'admin') {
     document.getElementById('acct-admin-tab').style.display = 'inline-block';
@@ -918,6 +993,7 @@ function renderPage(id) {
   else if (id === 'manuals') renderManuals();
   else if (id === 'meyasu') renderMeyasu();
   else if (id === 'interview-req') renderInterviews();
+  else if (id === 'store-progress') renderProgress();
   else if (id === 'reviews-ops') renderReviewsOps();
   else if (id === 'news-store') renderNews('store');
   else if (id === 'news-hq') renderNews('hq');
@@ -975,7 +1051,7 @@ function esc(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function linkify(text) {
-  var escaped = esc(text);
+  var escaped = esc(text).replace(/\\n|\/n/g, '<br>').replace(/\n/g, '<br>');
   return escaped.replace(/(https?:\/\/[^\s<>"&]+)/g, function(url) {
     var label = url.length > 60 ? url.slice(0,57)+'...' : url;
     return '<a href="'+url+'" target="_blank" rel="noopener" style="color:var(--primary);font-size:12px;">'+label+' ↗</a>';
@@ -1216,7 +1292,7 @@ function renderManuals() {
 }
 
 // ── 目安箱 ──
-var MEYASU_PW_HASH = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918'; // admin123
+var MEYASU_PW_HASH = '226f76b55acb49701e06ded1d95165d179458f6fc37f5c6fc760ae30dec1c378'; // 310
 var MEYASU_CATEGORIES = {
   business:{label:'業務面',badge:'badge-blue',questions:[
     {q:'業務量は適切ですか？',name:'q_b1'},{q:'役割・責任は明確ですか？',name:'q_b2'},
@@ -1365,11 +1441,9 @@ function bindMeyasuEvents() {
 // ── RENDER INTERVIEWS ──
 function renderInterviews() {
   var el = document.getElementById('interview-content');
-  var interviews = getInterviews();
   var accounts = getAccounts();
-  var myInterviews = currentUser ? interviews.filter(function(i) { return i.fromId === currentUser.id || i.toId === currentUser.id; }) : [];
   var html = '<div class="grid-2"><div>';
-  // Request form
+  // 申し込みフォーム
   html += '<div class="card"><div class="card-title">📝 面談を申し込む</div>';
   var toOpts = accounts.filter(function(a) { return !currentUser || a.id !== currentUser.id; })
     .map(function(a) { return '<option value="'+a.id+'">'+esc(a.name)+' ('+esc(a.store)+')</option>'; }).join('');
@@ -1380,60 +1454,256 @@ function renderInterviews() {
     '<div class="inp-group"><label class="inp-label">メモ・伝えたいこと</label><textarea class="inp" id="iv-note" rows="3" placeholder="相談内容や準備してほしいことなど"></textarea></div>'+
     '<button class="btn btn-primary" onclick="submitInterview()">📤 申し込む</button></div>';
   html += '</div><div>';
-  // My interviews
+  // 申し込み状況（PW保護）
   html += '<div class="card"><div class="card-title">📋 申し込み状況</div>';
-  if (myInterviews.length === 0) {
-    html += '<p style="color:var(--light);font-size:13px;">申し込みはありません</p>';
+  if (!ivStatusVerified) {
+    html += '<div style="text-align:center;padding:20px 0;">'+
+      '<div style="font-size:28px;margin-bottom:8px;">🔒</div>'+
+      '<p style="font-size:13px;color:var(--light);margin-bottom:12px;">閲覧にはパスワードが必要です</p>'+
+      '<div style="display:flex;gap:8px;max-width:260px;margin:0 auto;">'+
+      '<input type="password" class="inp" id="iv-status-pw" placeholder="パスワード" onkeydown="if(event.key===\'Enter\')verifyIvStatusPw()">'+
+      '<button class="btn btn-primary btn-sm" onclick="verifyIvStatusPw()">確認</button>'+
+      '</div>'+
+      '<div id="iv-status-pw-err" style="color:var(--danger);font-size:12px;margin-top:8px;"></div>'+
+      '</div>';
   } else {
-    myInterviews.slice().reverse().forEach(function(iv) {
-      var fromAcct = accounts.find(function(a) { return a.id === iv.fromId; }) || {name:'不明'};
-      var toAcct = accounts.find(function(a) { return a.id === iv.toId; }) || {name:'不明'};
-      var isFrom = currentUser && iv.fromId === currentUser.id;
-      var statusColor = iv.status==='done' ? 'var(--success)' : iv.status==='accepted' ? 'var(--primary)' : 'var(--warn)';
-      var statusLabel = iv.status==='done' ? '完了' : iv.status==='accepted' ? '承認済み' : '申請中';
-      html += '<div class="interview-card '+(iv.status||'pending')+'">'+
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">'+
-        '<div style="font-weight:700;font-size:13px;">'+esc(iv.type)+'</div>'+
-        '<span class="badge" style="background:'+statusColor+'20;color:'+statusColor+';">'+statusLabel+'</span></div>'+
-        '<div style="font-size:12px;color:var(--light);">'+(isFrom ? '→ 宛先: ' : '← 差出人: ')+esc(isFrom ? toAcct.name : fromAcct.name)+'</div>'+
-        (iv.date ? '<div style="font-size:12px;color:var(--light);">希望日: '+esc(iv.date)+'</div>' : '')+
-        (iv.note ? '<div style="font-size:12px;margin-top:6px;white-space:pre-wrap;">'+esc(iv.note)+'</div>' : '')+
-        (!isFrom && iv.status==='pending' ? '<div style="margin-top:8px;display:flex;gap:8px;"><button class="btn btn-success btn-sm" onclick="acceptInterview(\''+iv.id+'\')">承認</button><button class="btn btn-danger btn-sm" onclick="declineInterview(\''+iv.id+'\')">辞退</button></div>' : '')+
-        '</div>';
-    });
+    var interviews = getInterviews();
+    var myInterviews = currentUser ? interviews.filter(function(i) { return i.fromId === currentUser.id || i.toId === currentUser.id; }) : [];
+    if (myInterviews.length === 0) {
+      html += '<p style="color:var(--light);font-size:13px;">申し込みはありません</p>';
+    } else {
+      myInterviews.slice().reverse().forEach(function(iv) {
+        var fromAcct = accounts.find(function(a) { return a.id === iv.fromId; }) || {name:'不明'};
+        var toAcct = accounts.find(function(a) { return a.id === iv.toId; }) || {name:'不明'};
+        var isFrom = currentUser && iv.fromId === currentUser.id;
+        var statusColor = iv.status==='done' ? 'var(--success)' : iv.status==='accepted' ? 'var(--primary)' : iv.status==='declined' ? 'var(--danger)' : 'var(--warn)';
+        var statusLabel = iv.status==='done' ? '完了' : iv.status==='accepted' ? '承認済み' : iv.status==='declined' ? '辞退' : '申請中';
+        html += '<div class="interview-card '+(iv.status||'pending')+'">'+
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">'+
+          '<div style="font-weight:700;font-size:13px;">'+esc(iv.type)+'</div>'+
+          '<span class="badge" style="background:'+statusColor+'20;color:'+statusColor+';">'+statusLabel+'</span></div>'+
+          '<div style="font-size:12px;color:var(--light);">'+(isFrom ? '→ 宛先: ' : '← 差出人: ')+esc(isFrom ? toAcct.name : fromAcct.name)+'</div>'+
+          (iv.date ? '<div style="font-size:12px;color:var(--light);">希望日: '+esc(iv.date)+'</div>' : '')+
+          (iv.note ? '<div style="font-size:12px;margin-top:6px;white-space:pre-wrap;">'+esc(iv.note)+'</div>' : '')+
+          (!isFrom && iv.status==='pending' ? '<div style="margin-top:8px;display:flex;gap:8px;"><button class="btn btn-success btn-sm" onclick="acceptInterview(\''+iv.id+'\')">✅ 承認</button><button class="btn btn-danger btn-sm" onclick="declineInterview(\''+iv.id+'\')">❌ 辞退</button></div>' : '')+
+          '</div>';
+      });
+    }
+    html += '<button class="btn btn-secondary btn-sm" onclick="ivStatusVerified=false;renderInterviews();" style="margin-top:12px;font-size:11px;">🔒 ロック</button>';
   }
   html += '</div></div></div>';
   el.innerHTML = html;
+  if (currentUser) updateNotifBadge();
+}
+function verifyIvStatusPw() {
+  sha256(document.getElementById('iv-status-pw').value).then(function(h) {
+    if (h === IV_STATUS_PW_HASH) { ivStatusVerified = true; renderInterviews(); }
+    else document.getElementById('iv-status-pw-err').textContent = 'パスワードが違います';
+  });
 }
 function submitInterview() {
   if (!currentUser) { showToast('ログインが必要です','warn'); return; }
   var toId = document.getElementById('iv-to').value;
   var type = document.getElementById('iv-type').value;
   if (!toId || !type) { showToast('必須項目を入力してください','warn'); return; }
+  var accounts = getAccounts();
+  var toAcct = accounts.find(function(a) { return a.id === toId; });
   var ivs = getInterviews();
-  ivs.push({
-    id: 'iv' + Date.now(),
-    fromId: currentUser.id,
-    toId: toId,
-    type: type,
-    date: document.getElementById('iv-date').value,
-    note: document.getElementById('iv-note').value,
-    status: 'pending',
-    createdAt: new Date().toISOString()
-  });
+  ivs.push({ id:'iv'+Date.now(), fromId:currentUser.id, toId:toId, type:type,
+    date:document.getElementById('iv-date').value,
+    note:document.getElementById('iv-note').value,
+    status:'pending', createdAt:new Date().toISOString() });
   saveInterviews(ivs);
-  showToast('申し込みを送りました！');
+  // 🔔 宛先に通知
+  if (toAcct) addNotification(toId, '💼 ' + currentUser.name + ' さんから面談申し込みが届いています（' + type + '）', 'interview');
+  showToast('申し込みを送りました！' + (toAcct ? ' 🔔 ' + toAcct.name + ' さんに通知されました' : ''));
   renderInterviews();
 }
 function acceptInterview(id) {
   var ivs = getInterviews();
   var idx = ivs.findIndex(function(i) { return i.id === id; });
-  if (idx >= 0) { ivs[idx].status = 'accepted'; saveInterviews(ivs); renderInterviews(); }
+  if (idx >= 0) {
+    ivs[idx].status = 'accepted'; saveInterviews(ivs);
+    addNotification(ivs[idx].fromId, '✅ ' + (currentUser ? currentUser.name : '相手') + ' さんが面談を承認しました（' + ivs[idx].type + '）', 'interview');
+    renderInterviews(); showToast('面談を承認しました');
+  }
 }
 function declineInterview(id) {
   var ivs = getInterviews();
   var idx = ivs.findIndex(function(i) { return i.id === id; });
-  if (idx >= 0) { ivs[idx].status = 'declined'; saveInterviews(ivs); renderInterviews(); }
+  if (idx >= 0) {
+    ivs[idx].status = 'declined'; saveInterviews(ivs);
+    addNotification(ivs[idx].fromId, '❌ ' + (currentUser ? currentUser.name : '相手') + ' さんが面談を辞退しました（' + ivs[idx].type + '）', 'interview');
+    renderInterviews(); showToast('面談を辞退しました');
+  }
+}
+
+// ── PROGRESS (業務進捗) ──
+function getProgressItems() {
+  try { return JSON.parse(localStorage.getItem('koboreya_progress') || '[]'); }
+  catch(e) { return []; }
+}
+function saveProgressItems(arr) { localStorage.setItem('koboreya_progress', JSON.stringify(arr)); }
+
+function renderProgress() {
+  var el = document.getElementById('progress-content');
+  if (!el) return;
+  var items = getProgressItems();
+  var canEdit = currentUser && (currentUser.role === 'admin' || currentUser.role === 'manager' || currentUser.role === 'editor');
+  var statusMap = {todo:'未着手',doing:'進行中',done:'完了',blocked:'ブロック中'};
+  var statusColor = {todo:'#f59e0b',doing:'var(--primary)',done:'var(--success)',blocked:'var(--danger)'};
+
+  var html = '';
+  // ツールバー
+  html += '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">'+
+    '<select class="inp" style="max-width:160px;" id="prog-filter-status" onchange="renderProgress()">'+
+    '<option value="">全ステータス</option>'+
+    '<option value="todo">未着手</option><option value="doing">進行中</option>'+
+    '<option value="done">完了</option><option value="blocked">ブロック中</option>'+
+    '</select>'+
+    '<input class="inp" style="max-width:200px;" id="prog-search" placeholder="🔍 検索" oninput="renderProgress()">'+
+    '<div style="flex:1;"></div>'+
+    '<button class="btn btn-secondary btn-sm" onclick="exportProgressCSV()">📥 CSV出力</button>'+
+    (canEdit ? '<button class="btn btn-primary btn-sm" onclick="addProgressItem()">＋ 追加</button>' : '')+
+    '</div>';
+
+  var filterStatus = (document.getElementById('prog-filter-status') || {value:''}).value;
+  var q = ((document.getElementById('prog-search') || {value:''}).value || '').toLowerCase();
+
+  var filtered = items.filter(function(it) {
+    if (filterStatus && it.status !== filterStatus) return false;
+    if (q && !JSON.stringify(it).toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    html += '<div class="card" style="text-align:center;padding:32px;"><div style="font-size:32px;">📊</div><p style="color:var(--light);margin-top:8px;">業務進捗はありません</p>'+(canEdit?'<button class="btn btn-primary btn-sm" onclick="addProgressItem()">最初の業務を追加</button>':'')+'</div>';
+  } else {
+    html += '<div class="tbl-wrap"><table class="tbl"><thead><tr>'+
+      '<th>業務名</th><th>担当者</th><th>期限</th><th>ステータス</th><th>進捗率</th><th>メモ</th>'+(canEdit?'<th>操作</th>':'')+
+      '</tr></thead><tbody>';
+    filtered.forEach(function(it) {
+      var color = statusColor[it.status] || 'var(--light)';
+      var label = statusMap[it.status] || it.status;
+      var pct = parseInt(it.progress) || 0;
+      html += '<tr>'+
+        '<td><strong>'+esc(it.name)+'</strong>'+(it.category?'<br><span style="font-size:11px;color:var(--light);">'+esc(it.category)+'</span>':'')+'</td>'+
+        '<td>'+esc(it.person||'')+'</td>'+
+        '<td style="font-size:12px;">'+(it.deadline ? esc(it.deadline) : '—')+'</td>'+
+        '<td><span class="progress-badge" style="background:'+color+'20;color:'+color+';">'+label+'</span></td>'+
+        '<td><div style="display:flex;align-items:center;gap:6px;min-width:80px;">'+
+          '<div style="flex:1;background:var(--border);border-radius:4px;height:6px;"><div style="width:'+pct+'%;background:'+color+';border-radius:4px;height:6px;transition:width .3s;"></div></div>'+
+          '<span style="font-size:11px;color:var(--light);min-width:28px;">'+pct+'%</span>'+
+        '</div></td>'+
+        '<td style="font-size:12px;max-width:180px;">'+linkify(it.memo||'')+'</td>'+
+        (canEdit?'<td style="white-space:nowrap;"><button class="btn btn-secondary btn-sm" onclick="editProgressItem(''+it.id+'')">✏️</button> <button class="btn btn-sm" onclick="deleteProgressItem(''+it.id+'')" style="background:#fee2e2;color:#dc2626;border:none;">🗑</button></td>':'')+
+        '</tr>';
+    });
+    html += '</tbody></table></div>';
+  }
+  el.innerHTML = html;
+}
+
+function addProgressItem() {
+  var name = prompt('業務名 *'); if (!name || !name.trim()) return;
+  var category = prompt('カテゴリ（例: 清掃, 発注, 研修）', '') || '';
+  var person = prompt('担当者', '') || '';
+  var deadline = prompt('期限（例: 2026-03-31）', '') || '';
+  var status = prompt('ステータス\ntodo=未着手 / doing=進行中 / done=完了 / blocked=ブロック中', 'todo') || 'todo';
+  if (!['todo','doing','done','blocked'].includes(status)) status = 'todo';
+  var progress = parseInt(prompt('進捗率（0〜100）', '0')) || 0;
+  var memo = prompt('メモ・備考', '') || '';
+  var items = getProgressItems();
+  items.push({
+    id: 'pr'+Date.now(), name:name.trim(), category:category, person:person,
+    deadline:deadline, status:status, progress:Math.min(100,Math.max(0,progress)),
+    memo:memo, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(),
+    createdBy: currentUser ? currentUser.id : ''
+  });
+  saveProgressItems(items);
+  renderProgress();
+  showToast('業務を追加しました ✅');
+}
+
+function editProgressItem(id) {
+  var items = getProgressItems();
+  var item = items.find(function(it) { return it.id === id; });
+  if (!item) return;
+  var name = prompt('業務名 *', item.name); if (name === null) return;
+  if (name.trim()) item.name = name.trim();
+  var category = prompt('カテゴリ', item.category || ''); if (category !== null) item.category = category;
+  var person = prompt('担当者', item.person || ''); if (person !== null) item.person = person;
+  var deadline = prompt('期限（例: 2026-03-31）', item.deadline || ''); if (deadline !== null) item.deadline = deadline;
+  var status = prompt('ステータス\ntodo / doing / done / blocked', item.status || 'todo');
+  if (status !== null && ['todo','doing','done','blocked'].includes(status)) item.status = status;
+  var progress = prompt('進捗率（0〜100）', String(item.progress || 0));
+  if (progress !== null) item.progress = Math.min(100,Math.max(0,parseInt(progress)||0));
+  var memo = prompt('メモ・備考', item.memo || ''); if (memo !== null) item.memo = memo;
+  item.updatedAt = new Date().toISOString();
+  saveProgressItems(items);
+  renderProgress();
+  showToast('業務を更新しました ✅');
+}
+
+function deleteProgressItem(id) {
+  if (!confirm('この業務進捗を削除しますか？')) return;
+  var items = getProgressItems().filter(function(it) { return it.id !== id; });
+  saveProgressItems(items);
+  renderProgress();
+}
+
+function exportProgressCSV() {
+  var items = getProgressItems();
+  var statusMap = {todo:'未着手',doing:'進行中',done:'完了',blocked:'ブロック中'};
+  var rows = [['業務名','カテゴリ','担当者','期限','ステータス','進捗率(%)','メモ','作成日','更新日']];
+  items.forEach(function(it) {
+    rows.push([
+      it.name||'', it.category||'', it.person||'', it.deadline||'',
+      statusMap[it.status]||it.status||'', String(it.progress||0),
+      (it.memo||'').replace(/\n/g,'↵'),
+      it.createdAt ? it.createdAt.slice(0,10) : '',
+      it.updatedAt ? it.updatedAt.slice(0,10) : ''
+    ]);
+  });
+  var csv = rows.map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+  var blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '業務進捗_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  showToast('CSVを出力しました 📥');
+}
+
+// ── NOTIFICATIONS ──
+function updateNotifBadge() {
+  if (!currentUser) return;
+  var count = getUnreadCount(currentUser.id);
+  var badge = document.getElementById('notif-badge');
+  if (badge) { badge.textContent = count; badge.style.display = count > 0 ? 'inline-flex' : 'none'; }
+}
+function showNotifications() {
+  if (!currentUser) return;
+  var notifs = getNotifications(currentUser.id);
+  notifs.forEach(function(n) { n.read = true; });
+  localStorage.setItem('koboreya_notif_' + currentUser.id, JSON.stringify(notifs));
+  updateNotifBadge();
+  if (notifs.length === 0) { showToast('通知はありません', 'info'); return; }
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:3000;display:flex;align-items:center;justify-content:center;';
+  var box = document.createElement('div');
+  box.style.cssText = 'background:var(--bg);border-radius:16px;width:min(480px,94vw);max-height:80vh;overflow-y:auto;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);';
+  var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><div style="font-size:16px;font-weight:700;">🔔 通知</div></div>';
+  notifs.slice(0,20).forEach(function(n) {
+    var bg = n.type==='interview' ? '#dbeafe' : '#f0fdf4';
+    html += '<div style="background:'+bg+';border-radius:10px;padding:12px;margin-bottom:8px;">'+
+      '<div style="font-size:13px;">'+n.msg+'</div>'+
+      '<div style="font-size:11px;color:var(--light);margin-top:4px;">'+fmtDateTime(n.ts)+'</div></div>';
+  });
+  html += '<button class="btn btn-secondary" onclick="this.closest('[style*=\"position:fixed\"]').remove()" style="width:100%;margin-top:8px;">閉じる</button>';
+  box.innerHTML = html;
+  overlay.appendChild(box);
+  overlay.addEventListener('click', function(e) { if(e.target===overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
 }
 
 // ── REVIEWS OPS ──
@@ -1501,7 +1771,7 @@ function renderNews(cat) {
 
   var html = '';
   // Post creation (admin/manager)
-  if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'manager')) {
+  if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'manager' || currentUser.role === 'editor')) {
     html += '<div class="card" style="margin-bottom:16px;"><div class="card-title">✏️ 新規投稿</div>'+
       '<div class="inp-group"><label class="inp-label">タイトル *</label><input class="inp" id="news-title-'+cat+'" placeholder="タイトルを入力"></div>'+
       '<div class="inp-group"><label class="inp-label">内容 *</label><textarea class="inp" id="news-body-'+cat+'" rows="4" placeholder="内容を入力..."></textarea></div>'+
@@ -1521,11 +1791,12 @@ function renderNews(cat) {
         '<div class="board-post-title">'+esc(post.title)+'</div>'+
         '<div class="board-post-info"><span>'+esc(av.name)+'</span><span>'+fmtDateTime(post.createdAt)+'</span></div>'+
         '</div>'+
-        (currentUser && (currentUser.role==='admin' || post.authorId===currentUser.id) ?
-          '<button class="btn btn-danger btn-sm" onclick="deletePost(\''+cat+'\',\''+post.id+'\')">削除</button>' : '')+
+        (currentUser && (currentUser.role==='admin' || currentUser.role==='manager' || currentUser.role==='editor' || post.authorId===currentUser.id) ?
+          '<button class="btn btn-primary btn-sm" onclick="editPost(\''+cat+'\',\''+post.id+'\')" style="margin-right:4px;">✏️ 編集</button>'+
+          '<button class="btn btn-danger btn-sm" onclick="deletePost(\''+cat+'\',\''+post.id+'\')" >削除</button>' : '')+
         '</div>'+
         '<div class="board-post-body">'+
-        '<p>'+esc(post.body)+'</p>'+
+        '<p>'+linkify(post.body || '')+'</p>'+
         (post.images && post.images.length ?
           '<div class="board-post-images">'+post.images.map(function(src){ return '<img src="'+src+'" onclick="openImgViewer(this.src)">'; }).join('')+'</div>' : '')+
         '</div>';
@@ -1619,6 +1890,21 @@ function deletePost(cat, postId) {
   newsData[cat] = (newsData[cat] || []).filter(function(p) { return p.id !== postId; });
   saveNewsData(newsData);
   renderNews(cat);
+}
+function editPost(cat, postId) {
+  var newsData = getNewsData();
+  var post = (newsData[cat] || []).find(function(p) { return p.id === postId; });
+  if (!post) return;
+  var newTitle = prompt('タイトルを編集', post.title);
+  if (newTitle === null) return;
+  var newBody = prompt('内容を編集', post.body);
+  if (newBody === null) return;
+  if (newTitle.trim()) post.title = newTitle.trim();
+  post.body = newBody;
+  post.editedAt = new Date().toISOString();
+  saveNewsData(newsData);
+  renderNews(cat);
+  showToast('投稿を編集しました ✅');
 }
 
 // ── ACCOUNTS ──
@@ -1739,7 +2025,7 @@ function renderAdminPanel() {
   accounts.forEach(function(a) {
     html += '<tr><td><strong>'+esc(a.name)+'</strong></td><td>'+esc(a.store)+'</td>'+
       '<td><select class="inp" style="width:auto;font-size:11px;" onchange="changeRole(\''+a.id+'\',this.value)">'+
-      ['admin','manager','staff'].map(function(r){ return '<option'+(a.role===r?' selected':'')+' value="'+r+'">'+r+'</option>'; }).join('')+
+      [{v:'admin',l:'管理者(Admin)'},{v:'manager',l:'店長・SV'},{v:'editor',l:'編集可スタッフ'},{v:'staff',l:'スタッフ(閲覧のみ)'}].map(function(ro){ return '<option'+(a.role===ro.v?' selected':'')+' value="'+ro.v+'">'+ro.l+'</option>'; }).join('')+
       '</select></td>'+
       '<td>'+((a.points||0).toFixed(1))+'</td>'+
       '<td><button class="btn btn-danger btn-sm" onclick="deleteAccount(\''+a.id+'\')">削除</button></td></tr>';
@@ -1788,14 +2074,17 @@ function renderClubs() {
     // Join/leave button
     var isMember = currentUser && (club.members || []).includes(currentUser.id);
     if (currentUser) {
-      html += '<div style="display:flex;gap:8px;margin-top:10px;">'+
+      html += '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'+
         '<button class="btn btn-sm '+(isMember?'btn-secondary':'btn-primary')+'" onclick="toggleClub(\''+club.id+'\')">'+
         (isMember ? '退部する' : '参加する')+
-        '</button></div>';
+        '</button>';
+      if (currentUser.role === 'admin' || currentUser.role === 'manager' || currentUser.role === 'editor') {
+        html += '<button class="btn btn-sm btn-secondary" onclick="editClub(\''+club.id+'\')">✏️ 編集</button>'+
+          '<button class="btn btn-sm" onclick="deleteClub(\''+club.id+'\'')" style="background:#fee2e2;color:#dc2626;border:none;">🗑 削除</button>';
+      }
+      html += '</div>';
     }
-    html += '</div></div>';
-  });
-  // Add club button (admin)
+    html Add club button (admin)
   if (currentUser && currentUser.role === 'admin') {
     html += '<div class="club-card" style="border:2px dashed var(--border);background:transparent;cursor:pointer;" onclick="addClub()">'+
       '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:32px;color:var(--light);">'+
@@ -1823,6 +2112,212 @@ function addClub() {
   clubs.push({id:'c'+Date.now(),name:name,icon:'🏆',color:'#dbeafe',desc:'',schedule:'',members:[],posts:[]});
   saveClubs(clubs);
   renderClubs();
+}
+function editClub(clubId) {
+  var clubs = getClubs();
+  var club = clubs.find(function(c) { return c.id === clubId; });
+  if (!club) return;
+  var name = prompt('部活名', club.name);
+  if (name === null) return;
+  if (name.trim()) club.name = name.trim();
+  var icon = prompt('アイコン（絵文字）', club.icon);
+  if (icon !== null && icon.trim()) club.icon = icon.trim();
+  var desc = prompt('説明', club.desc);
+  if (desc !== null) club.desc = desc;
+  var schedule = prompt('活動スケジュール', club.schedule);
+  if (schedule !== null) club.schedule = schedule;
+  var color = prompt('バナー色（CSSカラーコード）', club.color);
+  if (color !== null && color.trim()) club.color = color.trim();
+  saveClubs(clubs);
+  renderClubs();
+}
+function deleteClub(clubId) {
+  if (!confirm('この部活を削除しますか？この操作は取り消せません。')) return;
+  var clubs = getClubs().filter(function(c) { return c.id !== clubId; });
+  saveClubs(clubs);
+  renderClubs();
+}
+
+// ── CLUB DETAIL (掲示板 + チャット) ──
+var currentClubId = null;
+
+function openClubDetail(clubId) {
+  var clubs = getClubs();
+  var club = clubs.find(function(c) { return c.id === clubId; });
+  if (!club) return;
+  currentClubId = clubId;
+  var overlay = document.getElementById('club-detail-overlay');
+  overlay.style.display = 'flex';
+  // Header
+  var iconEl = document.getElementById('club-detail-icon');
+  iconEl.textContent = club.icon || '🏆';
+  iconEl.style.background = club.color || '#dbeafe';
+  document.getElementById('club-detail-name').textContent = club.name;
+  document.getElementById('club-detail-schedule').textContent = club.schedule || '';
+  // Default tab
+  switchClubTab('board', document.getElementById('club-tab-board'));
+}
+function closeClubDetail() {
+  document.getElementById('club-detail-overlay').style.display = 'none';
+  currentClubId = null;
+}
+function switchClubTab(tab, btn) {
+  document.getElementById('club-detail-board').style.display = tab === 'board' ? 'block' : 'none';
+  document.getElementById('club-detail-chat').style.display = tab === 'chat' ? 'flex' : 'none';
+  document.querySelectorAll('#club-detail-overlay .page-tab').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  if (tab === 'board') renderClubBoard();
+  if (tab === 'chat') renderClubChat();
+}
+
+function getClubData(clubId) {
+  try { return JSON.parse(localStorage.getItem('koboreya_club_' + clubId) || '{"posts":[],"chat":[]}'); }
+  catch(e) { return {posts:[], chat:[]}; }
+}
+function saveClubData(clubId, data) {
+  localStorage.setItem('koboreya_club_' + clubId, JSON.stringify(data));
+}
+
+function renderClubBoard() {
+  if (!currentClubId) return;
+  var clubs = getClubs();
+  var club = clubs.find(function(c) { return c.id === currentClubId; });
+  var isMember = currentUser && (club.members || []).includes(currentUser.id);
+  var isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.role === 'manager' || currentUser.role === 'editor');
+  var data = getClubData(currentClubId);
+  var posts = (data.posts || []).slice().reverse();
+  var html = '';
+  if (posts.length === 0) {
+    html = '<div style="text-align:center;padding:32px;color:var(--light);"><div style="font-size:32px;margin-bottom:8px;">📋</div><p>まだ活動報告がありません</p></div>';
+  } else {
+    posts.forEach(function(post) {
+      var av = getUserAvatar(post.authorId);
+      html += '<div class="board-post">'+
+        '<div class="board-post-header">'+
+        '<div class="board-post-avatar" style="background:'+av.bg+';">'+av.icon+'</div>'+
+        '<div class="board-post-meta">'+
+        '<div class="board-post-title">'+esc(post.title)+'</div>'+
+        '<div class="board-post-info"><span>'+esc(av.name)+'</span><span>'+fmtDateTime(post.createdAt)+'</span></div>'+
+        '</div>'+
+        ((isAdmin || (currentUser && post.authorId === currentUser.id)) ?
+          '<button class="btn btn-danger btn-sm" onclick="deleteClubPost(''+post.id+'')">削除</button>' : '')+
+        '</div>'+
+        '<div class="board-post-body"><p>'+linkify(post.body || '')+'</p>'+
+        (post.image ? '<img src="'+post.image+'" style="max-width:100%;border-radius:8px;margin-top:8px;" onclick="openImgViewer(this.src)">' : '')+
+        '</div></div>';
+    });
+  }
+  document.getElementById('club-board-content').innerHTML = html;
+  // Show form for members and admin
+  var form = document.getElementById('club-board-form');
+  if (currentUser && (isMember || isAdmin)) {
+    form.style.display = 'block';
+  } else {
+    form.style.display = 'none';
+  }
+}
+
+function submitClubPost() {
+  if (!currentClubId || !currentUser) return;
+  var text = document.getElementById('club-board-text').value.trim();
+  if (!text) { showToast('内容を入力してください', 'warn'); return; }
+  var imgInput = document.getElementById('club-board-img');
+  function doSubmit(imgData) {
+    var data = getClubData(currentClubId);
+    if (!data.posts) data.posts = [];
+    data.posts.push({
+      id: 'cp'+Date.now(),
+      title: fmtDate(Date.now()) + ' の活動報告',
+      body: text,
+      image: imgData || null,
+      authorId: currentUser.id,
+      createdAt: new Date().toISOString()
+    });
+    saveClubData(currentClubId, data);
+    document.getElementById('club-board-text').value = '';
+    if (imgInput) imgInput.value = '';
+    renderClubBoard();
+    showToast('活動報告を投稿しました ✅');
+  }
+  if (imgInput && imgInput.files && imgInput.files[0]) {
+    var reader = new FileReader();
+    reader.onload = function(e) { doSubmit(e.target.result); };
+    reader.readAsDataURL(imgInput.files[0]);
+  } else {
+    doSubmit(null);
+  }
+}
+
+function deleteClubPost(postId) {
+  if (!confirm('この投稿を削除しますか？')) return;
+  var data = getClubData(currentClubId);
+  data.posts = (data.posts || []).filter(function(p) { return p.id !== postId; });
+  saveClubData(currentClubId, data);
+  renderClubBoard();
+}
+
+function renderClubChat() {
+  if (!currentClubId) return;
+  var clubs = getClubs();
+  var club = clubs.find(function(c) { return c.id === currentClubId; });
+  var isMember = currentUser && (club.members || []).includes(currentUser.id);
+  var isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.role === 'manager');
+  var canView = isMember || isAdmin;
+  var lockedEl = document.getElementById('club-chat-locked');
+  var inputEl = document.getElementById('club-chat-input');
+  var messagesEl = document.getElementById('club-chat-messages');
+  if (!canView) {
+    lockedEl.style.display = 'block';
+    inputEl.style.display = 'none';
+    messagesEl.innerHTML = '';
+    return;
+  }
+  lockedEl.style.display = 'none';
+  inputEl.style.display = 'flex';
+  var data = getClubData(currentClubId);
+  var msgs = data.chat || [];
+  if (msgs.length === 0) {
+    messagesEl.innerHTML = '<div style="text-align:center;padding:32px;color:var(--light);">まだメッセージがありません</div>';
+  } else {
+    var html = '';
+    msgs.forEach(function(msg) {
+      var av = getUserAvatar(msg.authorId);
+      var isMe = currentUser && msg.authorId === currentUser.id;
+      html += '<div style="display:flex;gap:8px;margin-bottom:10px;'+(isMe?'flex-direction:row-reverse;':'')+'">'+
+        '<div style="width:32px;height:32px;border-radius:50%;background:'+av.bg+';display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">'+av.icon+'</div>'+
+        '<div style="max-width:70%;">'+
+        '<div style="font-size:10px;color:var(--light);margin-bottom:2px;'+(isMe?'text-align:right;':'')+'">'+esc(av.name)+' · '+fmtDateTime(msg.ts)+'</div>'+
+        '<div style="background:'+(isMe?'var(--primary)':'var(--surface)')+';color:'+(isMe?'#fff':'var(--text)')+';border-radius:'+(isMe?'12px 12px 4px 12px':'12px 12px 12px 4px')+';padding:8px 12px;font-size:13px;">'+
+        linkify(msg.text || '')+'</div></div></div>';
+    });
+    messagesEl.innerHTML = html;
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+}
+
+function submitClubChat() {
+  if (!currentClubId || !currentUser) return;
+  var input = document.getElementById('club-chat-text');
+  var text = input.value.trim();
+  if (!text) return;
+  var clubs = getClubs();
+  var club = clubs.find(function(c) { return c.id === currentClubId; });
+  var isMember = (club.members || []).includes(currentUser.id);
+  var isAdmin = currentUser.role === 'admin' || currentUser.role === 'manager';
+  if (!isMember && !isAdmin) { showToast('部活に参加するとチャットできます', 'warn'); return; }
+  var data = getClubData(currentClubId);
+  if (!data.chat) data.chat = [];
+  data.chat.push({
+    id: 'cc'+Date.now(),
+    text: text,
+    authorId: currentUser.id,
+    ts: new Date().toISOString()
+  });
+  // Keep last 200 messages
+  if (data.chat.length > 200) data.chat = data.chat.slice(-200);
+  saveClubData(currentClubId, data);
+  input.value = '';
+  renderClubChat();
 }
 
 // ── GAME ──
