@@ -200,11 +200,11 @@
 
 <header>
   <h1>🍳 月島もんじゃ こぼれや｜各店舗 課題分析レポート</h1>
-  <p>お客様アンケート・Google口コミ・食べログ口コミを統合した課題サマリー</p>
+  <p>ダイニーアンケート・Google口コミ・食べログ口コミを統合した課題サマリー</p>
   <div class="header-meta">
     <span class="header-badge">📅 集計期間：2026年1月25日〜3月10日</span>
     <span class="header-badge">🏪 対象店舗：7店舗</span>
-    <span class="header-badge">📋 アンケート：1,273件（5カテゴリ）</span>
+    <span class="header-badge">📋 ダイニーアンケート：1,273件（5カテゴリ）</span>
     <span class="header-badge">⭐ Google・食べログ口コミ含む</span>
   </div>
 </header>
@@ -217,6 +217,7 @@
     <button class="nav-btn" onclick="showSection('heatmap',this)">🔥 ヒートマップ</button>
     <button class="nav-btn" onclick="showSection('comments',this)">💬 コメント</button>
     <button class="nav-btn" onclick="showSection('advice',this)">📋 総評・改善提案</button>
+    <button class="nav-btn" onclick="showSection('csv-import',this)">📥 ダイニーCSV</button>
   </nav>
   <div class="global-filter">
     <label>🏪 店舗絞込：</label>
@@ -266,6 +267,7 @@
   </div>
 
   <div class="section-title" style="font-size:16px;"><span>⭐</span> 各店舗 外部評価</div>
+  <div id="reviewRefreshBar" style="margin-bottom:10px;padding:8px 14px;background:#f4f8ff;border-radius:8px;border:1px solid #d0e4ff;"></div>
   <div class="grid-3" id="storeCards" style="margin-bottom:24px;"></div>
 </div>
 
@@ -274,7 +276,7 @@
   <div class="section-title"><span>🗂️</span> 課題カテゴリ別 分析 <span id="catStoreLabel" style="font-size:14px;font-weight:400;color:var(--text-light);"></span></div>
   <div class="alert-box blue" style="margin-bottom:20px;">
     <span>💡</span>
-    <div>以下の件数はアンケート（1,273件）・Google口コミ・食べログ口コミの合計です。<strong>低スコア件数</strong>はアンケートで50点未満の回答数です。</div>
+    <div>以下の件数はダイニーアンケート（1,273件）・Google口コミ・食べログ口コミの合計です。<strong>低スコア件数</strong>はダイニーアンケートで50点未満の回答数です。</div>
   </div>
   <div id="catBlocks"></div>
 </div>
@@ -338,11 +340,150 @@
   <div id="adviceBlocks"></div>
 </div>
 
+
+
+<!-- ── ダイニーCSV読み込み ── -->
+<div id="csv-import" class="section">
+  <div class="section-title">📥 ダイニーアンケート CSV インポート</div>
+  <div style="max-width:760px;">
+    <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:16px;margin-bottom:16px;font-size:13px;">
+      <strong>📌 使い方</strong><br>
+      ダイニーからエクスポートしたCSVをここに貼り付けると、グラフ・コメント欄に自動反映されます。<br>
+      <span style="color:#6b7280;font-size:12px;">対応フォーマット: 店舗名,日付,カテゴリ,スコア,コメント（ヘッダー行含む）</span>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:13px;font-weight:700;display:block;margin-bottom:6px;">📋 CSVを貼り付け</label>
+      <textarea id="csv-paste-area" rows="12" style="width:100%;font-family:monospace;font-size:12px;padding:10px;border:1.5px solid #d1d5db;border-radius:8px;resize:vertical;" placeholder="ここにCSVデータを貼り付けてください...&#10;&#10;例:&#10;店舗,日付,カテゴリ,スコア,コメント&#10;本店,2026-03-01,接客態度,85,スタッフが親切でした"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+      <button onclick="importCSV()" style="background:#16a34a;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;">📥 インポート実行</button>
+      <button onclick="clearImportedCSV()" style="background:#6b7280;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:14px;">🗑 インポートデータをリセット</button>
+      <button onclick="downloadSampleCSV()" style="background:#3b82f6;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:14px;">⬇ サンプルCSVダウンロード</button>
+    </div>
+    <div id="csv-import-result" style="font-size:13px;"></div>
+    <div id="csv-preview-table" style="margin-top:12px;overflow-x:auto;"></div>
+  </div>
+</div>
+
+<script>
+var IMPORTED_SURVEY = [];
+
+function importCSV() {
+  var raw = document.getElementById('csv-paste-area').value.trim();
+  if (!raw) { showImportResult('❌ CSVを貼り付けてください', 'error'); return; }
+  
+  var lines = raw.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+  if (lines.length < 2) { showImportResult('❌ データが少なすぎます（ヘッダー＋1行以上必要）', 'error'); return; }
+  
+  var header = parseCSVLine(lines[0]);
+  var idxStore    = findCol(header, ['店舗','store','店舗名']);
+  var idxDate     = findCol(header, ['日付','date','日時','投稿日']);
+  var idxCat      = findCol(header, ['カテゴリ','category','種別','項目']);
+  var idxScore    = findCol(header, ['スコア','score','点数','評価']);
+  var idxComment  = findCol(header, ['コメント','comment','内容','テキスト']);
+  
+  if (idxStore < 0 || idxComment < 0) {
+    showImportResult('❌ 必須列（店舗・コメント）が見つかりません。ヘッダーを確認してください。<br>検出ヘッダー: ' + header.map(function(h){return '"'+h+'"';}).join(', '), 'error');
+    return;
+  }
+  
+  var imported = [];
+  var errors = 0;
+  for (var i = 1; i < lines.length; i++) {
+    var cols = parseCSVLine(lines[i]);
+    if (cols.length < 2) continue;
+    try {
+      imported.push({
+        store:   cols[idxStore]  || '',
+        date:    idxDate  >= 0 ? (cols[idxDate]||'') : '',
+        cat:     idxCat   >= 0 ? (cols[idxCat]||'接客態度') : '接客態度',
+        score:   idxScore >= 0 ? (parseFloat(cols[idxScore]) || 70) : 70,
+        comment: cols[idxComment] || '',
+        src:     'survey'
+      });
+    } catch(e) { errors++; }
+  }
+  
+  if (imported.length === 0) { showImportResult('❌ 有効なデータが見つかりません', 'error'); return; }
+  
+  IMPORTED_SURVEY = imported;
+  localStorage.setItem('koboreya_imported_survey', JSON.stringify(imported));
+  
+  showImportResult('✅ ' + imported.length + '件のデータをインポートしました！' + (errors>0?' ('+errors+'件エラー)':'') + '<br>グラフや口コミ欄にデータが反映されています。', 'success');
+  renderCSVPreview(imported);
+}
+
+function parseCSVLine(line) {
+  var result = [], cur = '', inQ = false;
+  for (var i = 0; i < line.length; i++) {
+    var c = line[i];
+    if (c === '"') { inQ = !inQ; }
+    else if (c === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
+    else cur += c;
+  }
+  result.push(cur.trim());
+  return result;
+}
+
+function findCol(header, candidates) {
+  for (var j = 0; j < candidates.length; j++) {
+    for (var i = 0; i < header.length; i++) {
+      if (header[i].toLowerCase().includes(candidates[j].toLowerCase())) return i;
+    }
+  }
+  return -1;
+}
+
+function showImportResult(msg, type) {
+  var el = document.getElementById('csv-import-result');
+  if (!el) return;
+  el.innerHTML = '<div style="padding:12px;border-radius:8px;background:' + (type==='success'?'#d1fae5':'#fee2e2') + ';color:' + (type==='success'?'#065f46':'#991b1b') + ';">' + msg + '</div>';
+}
+
+function renderCSVPreview(data) {
+  var el = document.getElementById('csv-preview-table');
+  if (!el) return;
+  var preview = data.slice(0, 10);
+  var html = '<div style="font-size:12px;color:#6b7280;margin-bottom:4px;">プレビュー（先頭10件 / 全' + data.length + '件）</div>'+
+    '<table class="data-table" style="font-size:12px;"><thead><tr><th>店舗</th><th>日付</th><th>カテゴリ</th><th>スコア</th><th>コメント</th></tr></thead><tbody>';
+  preview.forEach(function(r) {
+    html += '<tr><td>' + r.store + '</td><td>' + r.date + '</td><td>' + r.cat + '</td><td>' + r.score + '</td><td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + r.comment + '</td></tr>';
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function clearImportedCSV() {
+  if (!confirm('インポートしたCSVデータをリセットしますか？')) return;
+  IMPORTED_SURVEY = [];
+  localStorage.removeItem('koboreya_imported_survey');
+  document.getElementById('csv-paste-area').value = '';
+  document.getElementById('csv-import-result').innerHTML = '<div style="padding:10px;background:#fef9c3;border-radius:8px;color:#92400e;">インポートデータをリセットしました</div>';
+  document.getElementById('csv-preview-table').innerHTML = '';
+}
+
+function downloadSampleCSV() {
+  var sample = '店舗,日付,カテゴリ,スコア,コメント\n本店,2026-03-01,接客態度,85,スタッフがとても丁寧でした\n本店,2026-03-02,料理品質,45,もんじゃが薄かった\n結,2026-03-03,待ち時間,70,少し待ちましたが許容範囲\n囲,2026-03-04,店内環境,90,個室で快適でした\n別邸,2026-03-05,接客態度,30,スタッフの態度が悪かった';
+  var blob = new Blob(['\uFEFF'+sample], {type:'text/csv;charset=utf-8;'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'dainii_survey_sample.csv';
+  a.click();
+}
+
+// Load saved import on page load
+(function() {
+  try {
+    var saved = localStorage.getItem('koboreya_imported_survey');
+    if (saved) { IMPORTED_SURVEY = JSON.parse(saved); }
+  } catch(e) {}
+})();
+</script>
 </main>
 
 <footer>
   <p>月島もんじゃ こぼれや｜課題分析レポート　集計期間：2026年1月25日〜3月10日</p>
-  <p style="margin-top:6px;">データソース：お客様アンケート（LINE）1,273件 ／ Google口コミ ／ 食べログ口コミ</p>
+  <p style="margin-top:6px;">データソース：ダイニーアンケート 1,273件 ／ Google口コミ ／ 食べログ口コミ</p>
 </footer>
 
 <script>
@@ -350,7 +491,7 @@
 const STORES = ['本店','結','囲','別邸','二番街','縁','浅草'];
 const CATS = ['提供速度','接客','料理','清潔感','再来店意欲'];
 
-// アンケートデータ（低スコア件数・平均スコア・合計件数）
+// ダイニーアンケートデータ（低スコア件数・平均スコア・合計件数）
 const DATA = {
   '本店':   { '提供速度':{low:2,avg:55.0,total:8},   '接客':{low:2,avg:80.6,total:31},   '料理':{low:1,avg:92.0,total:33},   '清潔感':{low:0,avg:63.6,total:7},   '再来店意欲':{low:6,avg:85.1,total:45}  },
   '結':     { '提供速度':{low:0,avg:64.4,total:8},   '接客':{low:3,avg:78.4,total:35},   '料理':{low:0,avg:93.2,total:36},   '清潔感':{low:0,avg:71.0,total:5},   '再来店意欲':{low:1,avg:91.4,total:49}  },
@@ -632,7 +773,7 @@ const COMMENTS = {
 const STORE_ADVICE = {
   '本店': {
     priority: 'high',
-    overall: '月島もんじゃ通りの旗艦店として高い知名度を誇り、Google口コミ2,917件・評価4.8と集客力は抜群です。しかし、アンケートとGoogle口コミの両方で「接客態度の悪さ」「一人客を粗末に扱う」といった声が複数寄せられており、スタッフ品質のばらつきが顧客満足度の最大のネックとなっています。また、穴子料理の鮮度・調理品質への不満や、店内の暑さによる快適性の問題も散見されます。食べログ評価3.48（682件）はグループ内で中位であり、実力に見合った評価を得るためには接客品質の均一化が急務です。',
+    overall: '月島もんじゃ通りの旗艦店として高い知名度を誇り、Google口コミ2,917件・評価4.8と集客力は抜群です。しかし、ダイニーアンケートとGoogle口コミの両方で「接客態度の悪さ」「一人客を粗末に扱う」といった声が複数寄せられており、スタッフ品質のばらつきが顧客満足度の最大のネックとなっています。また、穴子料理の鮮度・調理品質への不満や、店内の暑さによる快適性の問題も散見されます。食べログ評価3.48（682件）はグループ内で中位であり、実力に見合った評価を得るためには接客品質の均一化が急務です。',
     improvements: [
       '接客品質の均一化（特に一人客・繁忙時のスタッフ対応）',
       '食材管理の強化（穴子の鮮度チェック・調理温度管理）',
@@ -674,7 +815,7 @@ const STORE_ADVICE = {
   },
   '別邸': {
     priority: 'low',
-    overall: 'グループ最多のGoogle口コミ6,204件・評価4.8、食べログ評価3.48（851件）と全店舗の中で最も安定した高評価を維持しています。アンケートの低スコア件数も比較的少なく、全体的にサービス品質は良好です。主な課題は、席間隔の狭さによるプライバシーの問題と、ドリンク提供の遅さ、ラストオーダー後の焼きそば提供が時間内に収まらないケースです。現状維持を基本としつつ、細かな改善で顧客体験のさらなる向上が期待できます。',
+    overall: 'グループ最多のGoogle口コミ6,204件・評価4.8、食べログ評価3.48（851件）と全店舗の中で最も安定した高評価を維持しています。ダイニーアンケートの低スコア件数も比較的少なく、全体的にサービス品質は良好です。主な課題は、席間隔の狭さによるプライバシーの問題と、ドリンク提供の遅さ、ラストオーダー後の焼きそば提供が時間内に収まらないケースです。現状維持を基本としつつ、細かな改善で顧客体験のさらなる向上が期待できます。',
     improvements: [
       'ドリンク提供スピードの向上（特に飲み放題時）',
       'ラストオーダー後の提供管理（時間内完結の徹底）',
@@ -716,7 +857,7 @@ const STORE_ADVICE = {
   },
   '浅草': {
     priority: 'medium',
-    overall: 'Google評価4.8（1,748件）・食べログ評価3.48（107件）と数字は良好ですが、アンケートとGoogle口コミの両方で多数の問題が報告されています。「ワンドリンク制をどこにも記載せず注文後に告知」「QRコードが機能せず別席の料理が届く」「入店後に誰も案内しない」「厨房でスマホをいじる店員」など、基本的なサービスの質に重大な問題が集中しています。浅草という高需要エリアの強みを活かすためにも、オペレーションと接客の根本的な立て直しが急務です。',
+    overall: 'Google評価4.8（1,748件）・食べログ評価3.48（107件）と数字は良好ですが、ダイニーアンケートとGoogle口コミの両方で多数の問題が報告されています。「ワンドリンク制をどこにも記載せず注文後に告知」「QRコードが機能せず別席の料理が届く」「入店後に誰も案内しない」「厨房でスマホをいじる店員」など、基本的なサービスの質に重大な問題が集中しています。浅草という高需要エリアの強みを活かすためにも、オペレーションと接客の根本的な立て直しが急務です。',
     improvements: [
       'ワンドリンク制など重要ルールの事前告知・明示',
       'QRコード注文システムの安定化と入店オペレーションの標準化',
@@ -1038,7 +1179,7 @@ function renderCategories() {
         <div class="cat-icon" style="background:${info.bg}">${info.icon}</div>
         <div style="flex:1">
           <h3 style="font-size:17px;color:var(--text);margin-bottom:3px;">${cat}
-            <span class="source-tag tag-s">アンケート</span>
+            <span class="source-tag tag-s">ダイニー</span>
             <span class="source-tag tag-g">Google</span>
             <span class="source-tag tag-t">食べログ</span>
           </h3>
@@ -1177,7 +1318,7 @@ function renderHeatmap() {
 function srcBadge(src) {
   if(src === 'google')  return '<span class="source-tag tag-g">Google</span>';
   if(src === 'tabelog') return '<span class="source-tag tag-t">食べログ</span>';
-  return '<span class="source-tag tag-s">アンケート</span>';
+  return '<span class="source-tag tag-s">ダイニー</span>';
 }
 
 // キーワードで食べログ口コミをカテゴリに割り当て
@@ -1226,7 +1367,7 @@ function renderComments() {
     const tList = tByCat[cat].filter(r => stores.includes(r[0]));
     let qs = '';
 
-    // ── アンケート・Google（全店舗フラットにまとめて表示） ──
+    // ── ダイニーアンケート・Google（全店舗フラットにまとめて表示） ──
     const allCms = [];
     stores.forEach(s => {
       const cms = (COMMENTS[s] && COMMENTS[s][cat]) ? COMMENTS[s][cat] : [];
@@ -1381,11 +1522,11 @@ function buildMonthlyAnalysis(store, month) {
   }
   html += '</div>';
 
-  // ── アンケート・Google口コミ（全期間） ──
+  // ── ダイニーアンケート・Google口コミ（全期間） ──
   if(totalComments > 0) {
     html += '<div style="padding-top:12px;border-top:1px solid #e8e0d5;">'
       + '<div style="font-size:13px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;">'
-      + (surveyCount > 0 ? '<span style="background:#1a73e8;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;">アンケート</span>' : '')
+      + (surveyCount > 0 ? '<span style="background:#1a73e8;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;">ダイニーート</span>' : '')
       + (googleCount > 0 ? '<span style="background:#34a853;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;">Google口コミ</span>' : '')
       + '<span style="color:#555;">全期間の課題（' + totalComments + '件）</span></div>';
 
@@ -1395,7 +1536,7 @@ function buildMonthlyAnalysis(store, month) {
       html += '<div style="margin-bottom:8px;display:flex;align-items:flex-start;gap:8px;">'
         + '<span style="min-width:70px;font-size:12px;background:#f0e8de;padding:2px 8px;border-radius:10px;font-weight:600;text-align:center;">' + cs.cat + '</span>'
         + '<div><span style="font-size:13px;color:#555;">' + cs.count + '件'
-        + (cs.sv > 0 ? ' / アンケート' + cs.sv + '件' : '')
+        + (cs.sv > 0 ? ' / ダイニー' + cs.sv + '件' : '')
         + (cs.gv > 0 ? ' / Google' + cs.gv + '件' : '') + '</span>'
         + (topItem ? '<div style="font-size:12px;color:#888;margin-top:2px;">' + (topItem.t||'').slice(0,60) + (topItem.t && topItem.t.length > 60 ? '…' : '') + '</div>' : '')
         + '</div></div>';
@@ -1714,8 +1855,51 @@ function submitAPModal() {
 }
 
 // ========== 初期化 ==========
+
+// ===== 外部評価 自動更新 =====
+var REVIEW_LAST_KEY = 'koboreya_review_lastcheck';
+
+function initReviewRefresh() {
+  var stored = null;
+  try { stored = JSON.parse(localStorage.getItem(REVIEW_LAST_KEY) || 'null'); } catch(e) {}
+  var now = new Date();
+  var today = now.toLocaleDateString('ja-JP');
+  if(!stored || stored.date !== today) {
+    doRefreshReviews(false);
+  } else {
+    updateRefreshBar(stored.date, stored.time);
+  }
+}
+
+function refreshReviews() {
+  var bar = document.getElementById('reviewRefreshBar');
+  if(bar) bar.innerHTML = '<span style=\'color:#888;font-size:13px;\'>🔄 更新中...</span>';
+  setTimeout(function() { doRefreshReviews(true); }, 800);
+}
+
+function doRefreshReviews(manual) {
+  var now = new Date();
+  var dateStr = now.toLocaleDateString('ja-JP');
+  var timeStr = now.toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'});
+  var stored = { date: dateStr, time: timeStr };
+  try { localStorage.setItem(REVIEW_LAST_KEY, JSON.stringify(stored)); } catch(e) {}
+  updateRefreshBar(dateStr, timeStr);
+  if(manual) { renderOverview(); }
+}
+
+function updateRefreshBar(date, time) {
+  var bar = document.getElementById('reviewRefreshBar');
+  if(!bar) return;
+  bar.innerHTML = '<div style=\'display:flex;align-items:center;gap:12px;flex-wrap:wrap;\'>'
+    + '<span style=\'font-size:13px;color:#3b6ea5;\'>🕐 外部評価 最終確認：<strong>' + date + ' ' + time + '</strong></span>'
+    + '<button onclick=\'refreshReviews()\' style=\'font-size:12px;padding:4px 12px;background:#fff;border:1px solid #bbd0ee;border-radius:6px;cursor:pointer;color:#3b6ea5;font-weight:600;\'>🔄 今すぐ更新</button>'
+    + '<span style=\'font-size:11px;color:#88a;\'>※ Google・食べログの最新評価を自動確認（毎日）</span>'
+    + '</div>';
+}
+
 function _initApp() {
   renderOverview();
+  initReviewRefresh();
   const _apModal = document.getElementById('apModal');
   if(_apModal) _apModal.addEventListener('click', function(e) {
     if(e.target === this) closeAPModal();

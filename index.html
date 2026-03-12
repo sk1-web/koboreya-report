@@ -331,6 +331,7 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
     <div class="sb-item" data-page="store-rules"><span class="sb-icon">📜</span>店舗ルール</div>
     <div class="sb-item" data-page="store-contacts"><span class="sb-icon">📞</span>連絡先一覧</div>
     <div class="sb-item" data-page="store-progress"><span class="sb-icon">📊</span>業務進捗</div>
+    <div class="sb-item" data-page="hiring"><span class="sb-icon">👥</span>採用進捗</div>
     <div class="sb-group">人材育成</div>
     <div class="sb-item" data-page="training-progress"><span class="sb-icon">📈</span>育成進捗管理</div>
     <div class="sb-item" data-page="manuals"><span class="sb-icon">📚</span>各種マニュアル</div>
@@ -345,7 +346,11 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
     <div class="sb-group">メンバー</div>
     <div class="sb-item active" data-page="accounts"><span class="sb-icon">👥</span>アカウント管理</div>
     <div class="sb-item" data-page="clubs"><span class="sb-icon">⚽</span>部活管理</div>
-    <div class="sb-group">エンタメ</div>
+        <div class="sb-group">仕事・連携</div>
+    <div class="sb-item" data-page="job-board"><span class="sb-icon">📌</span>仕事掲示板</div>
+    <div class="sb-item" data-page="commit-staff"><span class="sb-icon">🎯</span>社員コミットシート</div>
+    <div class="sb-item" data-page="commit-store"><span class="sb-icon">🏪</span>店舗コミットシート</div>
+<div class="sb-group">エンタメ</div>
     <div class="sb-item" data-page="game"><span class="sb-icon">🎮</span>こぼれや番</div>
   </nav>
 </div>
@@ -362,6 +367,7 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
         🔔 <span id="notif-badge" style="position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;border-radius:50%;width:16px;height:16px;font-size:10px;display:none;align-items:center;justify-content:center;font-weight:700;"></span>
       </button>
       <button class="topbar-btn" onclick="doLogout()">ログアウト</button>
+<button class="topbar-btn" id="lang-btn" onclick="toggleLang()" style="font-size:12px;">🌐 EN</button>
     </div>
   </div>
   <div id="birthday-banner" class="birthday-banner" style="display:none;">
@@ -430,6 +436,12 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
     <div id="page-store-contacts" class="page">
       <div class="page-header"><h2>📞 連絡先一覧</h2></div>
       <div id="contacts-content"></div>
+    </div>
+
+    <!-- ── 採用進捗 ── -->
+    <div id="page-hiring" class="page">
+      <div class="page-header"><h2>👥 アルバイト採用進捗</h2><p>応募・面接・採用状況の管理</p></div>
+      <div id="hiring-content"></div>
     </div>
 
     <!-- ── 店舗管理: 業務進捗 ── -->
@@ -550,7 +562,25 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
       </div>
     </div>
 
-    <!-- ── シミュレーションゲーム ── -->
+        <!-- ── 社員コミットシート ── -->
+    <div id="page-commit-staff" class="page">
+      <div class="page-header"><h2>🎯 社員コミットシート</h2><p>半年目標・月次振り返りを共有</p></div>
+      <div id="commit-staff-content"></div>
+    </div>
+
+    <!-- ── 店舗コミットシート ── -->
+    <div id="page-commit-store" class="page">
+      <div class="page-header"><h2>🏪 店舗コミットシート</h2><p>店舗の半年目標・月次振り返り</p></div>
+      <div id="commit-store-content"></div>
+    </div>
+
+    <!-- ── 仕事掲示板 ── -->
+    <div id="page-job-board" class="page">
+      <div class="page-header"><h2>📌 仕事掲示板</h2><p>やってほしい仕事を投げる・挙手して完了でポイント獲得</p></div>
+      <div id="job-board-content"></div>
+    </div>
+
+<!-- ── シミュレーションゲーム ── -->
     <div id="page-game" class="page">
       <div class="page-header"><h2>🎮 こぼれや番</h2><p>月島もんじゃ経営シミュレーション</p></div>
       <div id="game-content"></div>
@@ -569,6 +599,9 @@ var PAGE_TITLES = {
   'store-meetings':'会議体・研修','store-rules':'店舗ルール','store-contacts':'連絡先一覧',
   'training-progress':'育成進捗管理','manuals':'各種マニュアル',
   'meyasu':'目安箱','interview-req':'面談申し込み','store-progress':'業務進捗',
+'job-board':'仕事掲示板',
+'commit-staff':'社員コミットシート','commit-store':'店舗コミットシート',
+'hiring':'採用進捗',
   'reviews-ops':'臨店・口コミ',
   'news-store':'店長会報告','news-hq':'本部報告',
   'accounts':'アカウント管理','clubs':'部活管理','game':'こぼれや番'
@@ -994,6 +1027,10 @@ function renderPage(id) {
   else if (id === 'meyasu') renderMeyasu();
   else if (id === 'interview-req') renderInterviews();
   else if (id === 'store-progress') renderProgress();
+  else if (id === 'job-board') renderJobBoard();
+  else if (id === 'commit-staff') renderCommitStaff();
+  else if (id === 'commit-store') renderCommitStore();
+  else if (id === 'hiring') renderHiring();
   else if (id === 'reviews-ops') renderReviewsOps();
   else if (id === 'news-store') renderNews('store');
   else if (id === 'news-hq') renderNews('hq');
@@ -1079,6 +1116,38 @@ function getUserAvatar(userId) {
   var ti = TYPE_INFO[u.personalityType] || TYPE_INFO.action;
   return {icon: ti.icon, bg: ti.bg, name: u.name, type: u.personalityType};
 }
+// ── LANGUAGE TOGGLE ──
+var currentLang = 'ja';
+var LANG = {
+  en: {
+    '店舗売上':'Sales Dashboard','業務一覧':'Task List','年間スケジュール':'Annual Schedule',
+    '会議体・研修':'Meetings & Training','店舗ルール':'Store Rules','連絡先一覧':'Contacts',
+    '業務進捗':'Work Progress','育成進捗管理':'Training Progress','各種マニュアル':'Manuals',
+    '目安箱':'Suggestion Box','面談申し込み':'Interview Request','臨店・口コミ':'Reviews & Ops',
+    '店長会報告':'Manager Reports','本部報告':'HQ Reports','アカウント管理':'Accounts',
+    '部活管理':'Club Mgmt','こぼれや番':'Koboreya Game','仕事掲示板':'Job Board',
+    '社員コミットシート':'Commit Sheet','店舗コミットシート':'Store Commit','採用進捗':'Hiring Progress',
+    'ログアウト':'Logout','編集モード':'Edit Mode','編集中':'Editing'
+  }
+};
+function toggleLang() {
+  currentLang = currentLang === 'ja' ? 'en' : 'ja';
+  document.getElementById('lang-btn').textContent = currentLang === 'ja' ? '🌐 EN' : '🌐 JP';
+  // Update sidebar labels
+  document.querySelectorAll('.sb-item, .sb-group, .topbar-btn').forEach(function(el) {
+    var orig = el.getAttribute('data-ja') || el.textContent.trim();
+    if (!el.getAttribute('data-ja')) el.setAttribute('data-ja', orig);
+    el.childNodes.forEach(function(node) {
+      if (node.nodeType === 3) {
+        var ja = node.textContent.trim();
+        if (currentLang === 'en' && LANG.en[ja]) node.textContent = ' ' + LANG.en[ja] + ' ';
+        else if (currentLang === 'ja' && el.getAttribute('data-ja')) node.textContent = ' ' + ja + ' ';
+      }
+    });
+  });
+  document.getElementById('lang-btn').textContent = currentLang === 'ja' ? '🌐 EN' : '🌐 JP';
+}
+
 function toggleEditMode() {
   editMode = !editMode;
   document.body.classList.toggle('edit-mode', editMode);
@@ -1273,44 +1342,47 @@ function cycleTraining(userId, itemId) {
 // ── RENDER MANUALS ──
 function renderManuals() {
   var el = document.getElementById('manuals-content');
-  var html = '<div class="grid-2">';
-  MANUAL_ITEMS.forEach(function(m, i) {
-    html += '<div class="manual-item"><div class="manual-icon">'+m.icon+'</div>'+
-      '<div class="manual-info"><div class="manual-title">'+esc(m.title)+'</div>'+
-      '<div class="manual-meta">'+esc(m.desc)+'</div></div>'+
-      '<span class="badge badge-gray">'+esc(m.cat)+'</span>'+
-      (m.file ? '<a href="'+esc(m.file)+'" target="_blank" class="btn btn-sm btn-primary" style="text-decoration:none;">開く</a>' :
-        '<span style="font-size:11px;color:var(--light);">準備中</span>')+'</div>';
-  });
-  html += '</div>';
-  // Upload area for admin
-  if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'manager')) {
-    html += '<div class="card" style="margin-top:16px;border:2px dashed var(--border);background:transparent;"><div class="card-title">📎 ファイルを追加（管理者）</div>'+
-      '<p style="font-size:13px;color:var(--light);">マニュアルファイルは管理者が追加できます。現在は準備中です。</p></div>';
-  }
+  var trainingData = getTrainingUserData();
+  var html = '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">'+
+    '<button class="btn btn-primary btn-sm" id="man-tab-docs" onclick="switchManualTab(\'docs\')">📁 資料一覧</button>'+
+    '<button class="btn btn-secondary btn-sm" id="man-tab-excel" onclick="switchManualTab(\'excel\')">📊 Excel研修</button>'+
+    '<button class="btn btn-secondary btn-sm" id="man-tab-pptx" onclick="switchManualTab(\'pptx\')">📑 PowerPoint研修</button>'+
+    '</div>'+
+    '<div id="man-tab-content"></div>';
   el.innerHTML = html;
+  switchManualTab('docs');
 }
 
-// ── 目安箱 ──
-var MEYASU_PW_HASH = '226f76b55acb49701e06ded1d95165d179458f6fc37f5c6fc760ae30dec1c378'; // 310
-var MEYASU_CATEGORIES = {
-  business:{label:'業務面',badge:'badge-blue',questions:[
-    {q:'業務量は適切ですか？',name:'q_b1'},{q:'役割・責任は明確ですか？',name:'q_b2'},
-    {q:'必要な情報・サポートは十分ですか？',name:'q_b3'},{q:'改善提案が受け入れられていますか？',name:'q_b4'}]},
-  attendance:{label:'勤怠面',badge:'badge-green',questions:[
-    {q:'シフトは希望に配慮されていますか？',name:'q_a1'},{q:'休暇は取りやすいですか？',name:'q_a2'},
-    {q:'労働時間は適切ですか？',name:'q_a3'}]},
-  interpersonal:{label:'対人面',badge:'badge-pink',questions:[
-    {q:'上司・先輩との関係は良好ですか？',name:'q_i1'},{q:'同僚との関係は良好ですか？',name:'q_i2'},
-    {q:'意見を言いやすい環境ですか？',name:'q_i3'},{q:'相談できる人がいますか？',name:'q_i4'}]},
-  environment:{label:'職場環境',badge:'badge-yellow',questions:[
-    {q:'清潔さ・安全性は保たれていますか？',name:'q_e1'},{q:'設備・備品は整っていますか？',name:'q_e2'}]},
-  customer:{label:'お客様対応',badge:'badge-purple',questions:[
-    {q:'お客様対応の品質は高いですか？',name:'q_c1'},{q:'クレーム対応マニュアルは充実していますか？',name:'q_c2'}]},
-  harassment:{label:'ハラスメント',badge:'badge-red',questions:[]},
-  other:{label:'その他',badge:'badge-gray',questions:[]}
-};
-var meyasuTab = 'form', meyasuRatings = {}, meyasuPwVerified = false;
+function switchManualTab(tab) {
+  ['docs','excel','pptx'].forEach(function(t) {
+    var btn = document.getElementById('man-tab-'+t);
+    if (btn) btn.className = 'btn btn-sm ' + (t===tab?'btn-primary':'btn-secondary');
+  });
+  var el = document.getElementById('man-tab-content');
+  if (!el) return;
+  if (tab === 'docs') {
+    var html = '<div class="grid-2">';
+    MANUAL_ITEMS.forEach(function(m) {
+      html += '<div class="manual-item"><div class="manual-icon">'+m.icon+'</div>'+
+        '<div class="manual-info"><div class="manual-title">'+esc(m.title)+'</div>'+
+        '<div class="manual-meta">'+esc(m.desc)+'</div></div>'+
+        '<span class="badge badge-gray">'+esc(m.cat)+'</span>'+
+        (m.file ? '<a href="'+esc(m.file)+'" target="_blank" class="btn btn-sm btn-primary" style="text-decoration:none;">開く</a>' :
+          '<span style="font-size:11px;color:var(--light);">準備中</span>')+'</div>';
+    });
+    html += '</div>';
+    if (currentUser && (currentUser.role==='admin'||currentUser.role==='manager')) {
+      html += '<div class="card" style="margin-top:16px;border:2px dashed var(--border);background:transparent;"><div class="card-title">📎 ファイルを追加（管理者）</div><p style="font-size:13px;color:var(--light);">マニュアルファイルは管理者が追加できます。現在は準備中です。</p></div>';
+    }
+    el.innerHTML = html;
+  } else if (tab === 'excel') {
+    renderTrainingTab(el, 'excel', EXCEL_TRAINING);
+  } else if (tab === 'pptx') {
+    renderTrainingTab(el, 'pptx', PPTX_TRAINING);
+  }
+}
+
+
 function saveMeyasuEntry(e) { var d=getMeyasuData(); d.push(e); localStorage.setItem('koboreya_meyasu',JSON.stringify(d)); }
 function renderMeyasu() {
   var el = document.getElementById('meyasu-content');
@@ -1439,10 +1511,19 @@ function bindMeyasuEvents() {
 }
 
 // ── RENDER INTERVIEWS ──
+// ステータスフロー: pending_approval → approved → pending(相手が承認待ち) → accepted/declined → done
+// pending_approval: admin承認待ち
+// approved: adminが承認済み、相手に通知
+// pending: 相手が確認前(旧フロー互換)
+// accepted / declined: 相手が対応済み
+// done: 完了
+
 function renderInterviews() {
   var el = document.getElementById('interview-content');
   var accounts = getAccounts();
+  var isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.role === 'manager');
   var html = '<div class="grid-2"><div>';
+
   // 申し込みフォーム
   html += '<div class="card"><div class="card-title">📝 面談を申し込む</div>';
   var toOpts = accounts.filter(function(a) { return !currentUser || a.id !== currentUser.id; })
@@ -1452,8 +1533,12 @@ function renderInterviews() {
     ['1on1面談','業績フィードバック','キャリア相談','困り事相談','その他'].map(function(t){ return '<option>'+t+'</option>'; }).join('')+'</select></div>'+
     '<div class="inp-group"><label class="inp-label">希望日時</label><input type="date" class="inp" id="iv-date"></div>'+
     '<div class="inp-group"><label class="inp-label">メモ・伝えたいこと</label><textarea class="inp" id="iv-note" rows="3" placeholder="相談内容や準備してほしいことなど"></textarea></div>'+
+    '<div style="background:#fef9c3;border-radius:8px;padding:10px;font-size:12px;color:#92400e;margin-bottom:12px;">'+
+    '⚠️ 申し込み後、管理者（admin）の承認が必要です。承認後に相手に通知されます。</div>'+
     '<button class="btn btn-primary" onclick="submitInterview()">📤 申し込む</button></div>';
+
   html += '</div><div>';
+
   // 申し込み状況（PW保護）
   html += '<div class="card"><div class="card-title">📋 申し込み状況</div>';
   if (!ivStatusVerified) {
@@ -1468,74 +1553,171 @@ function renderInterviews() {
       '</div>';
   } else {
     var interviews = getInterviews();
-    var myInterviews = currentUser ? interviews.filter(function(i) { return i.fromId === currentUser.id || i.toId === currentUser.id; }) : [];
+    var myInterviews = currentUser ? interviews.filter(function(i) {
+      return i.fromId === currentUser.id || i.toId === currentUser.id || isAdmin;
+    }) : [];
     if (myInterviews.length === 0) {
       html += '<p style="color:var(--light);font-size:13px;">申し込みはありません</p>';
     } else {
       myInterviews.slice().reverse().forEach(function(iv) {
-        var fromAcct = accounts.find(function(a) { return a.id === iv.fromId; }) || {name:'不明'};
-        var toAcct = accounts.find(function(a) { return a.id === iv.toId; }) || {name:'不明'};
-        var isFrom = currentUser && iv.fromId === currentUser.id;
-        var statusColor = iv.status==='done' ? 'var(--success)' : iv.status==='accepted' ? 'var(--primary)' : iv.status==='declined' ? 'var(--danger)' : 'var(--warn)';
-        var statusLabel = iv.status==='done' ? '完了' : iv.status==='accepted' ? '承認済み' : iv.status==='declined' ? '辞退' : '申請中';
-        html += '<div class="interview-card '+(iv.status||'pending')+'">'+
-          '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">'+
-          '<div style="font-weight:700;font-size:13px;">'+esc(iv.type)+'</div>'+
-          '<span class="badge" style="background:'+statusColor+'20;color:'+statusColor+';">'+statusLabel+'</span></div>'+
-          '<div style="font-size:12px;color:var(--light);">'+(isFrom ? '→ 宛先: ' : '← 差出人: ')+esc(isFrom ? toAcct.name : fromAcct.name)+'</div>'+
-          (iv.date ? '<div style="font-size:12px;color:var(--light);">希望日: '+esc(iv.date)+'</div>' : '')+
-          (iv.note ? '<div style="font-size:12px;margin-top:6px;white-space:pre-wrap;">'+esc(iv.note)+'</div>' : '')+
-          (!isFrom && iv.status==='pending' ? '<div style="margin-top:8px;display:flex;gap:8px;"><button class="btn btn-success btn-sm" onclick="acceptInterview(\''+iv.id+'\')">✅ 承認</button><button class="btn btn-danger btn-sm" onclick="declineInterview(\''+iv.id+'\')">❌ 辞退</button></div>' : '')+
-          '</div>';
+        html += renderInterviewCard(iv, accounts, isAdmin);
       });
     }
     html += '<button class="btn btn-secondary btn-sm" onclick="ivStatusVerified=false;renderInterviews();" style="margin-top:12px;font-size:11px;">🔒 ロック</button>';
   }
-  html += '</div></div></div>';
+  html += '</div>';
+
+  // 管理者：承認待ちパネル
+  if (isAdmin) {
+    var interviews = getInterviews();
+    var pending = interviews.filter(function(i){ return i.status === 'pending_approval'; });
+    if (pending.length > 0) {
+      html += '<div class="card" style="margin-top:12px;border:2px solid var(--warn);">'+
+        '<div class="card-title">⏳ 承認待ち（'+pending.length+'件）</div>';
+      pending.forEach(function(iv) {
+        html += renderInterviewCard(iv, accounts, isAdmin, true);
+      });
+      html += '</div>';
+    }
+  }
+  html += '</div></div>';
   el.innerHTML = html;
   if (currentUser) updateNotifBadge();
 }
+
+function renderInterviewCard(iv, accounts, isAdmin, forceShowApproval) {
+  var fromAcct = accounts.find(function(a){ return a.id===iv.fromId; })||{name:'不明',store:''};
+  var toAcct = accounts.find(function(a){ return a.id===iv.toId; })||{name:'不明',store:''};
+  var isFrom = currentUser && iv.fromId === currentUser.id;
+  var isTo = currentUser && iv.toId === currentUser.id;
+
+  var statusMap = {
+    'pending_approval': {label:'⏳ 承認待ち', color:'var(--warn)'},
+    'approved':         {label:'✅ 管理者承認済', color:'var(--primary)'},
+    'pending':          {label:'📬 相手に通知済', color:'var(--primary)'},
+    'accepted':         {label:'✅ 承認済み', color:'var(--success)'},
+    'declined':         {label:'❌ 辞退', color:'var(--danger)'},
+    'done':             {label:'🏁 完了', color:'#6b7280'},
+    'rejected':         {label:'🚫 却下', color:'var(--danger)'},
+  };
+  var st = statusMap[iv.status] || {label:iv.status, color:'var(--light)'};
+
+  var html = '<div class="interview-card" style="margin-bottom:10px;border-left:4px solid '+st.color+';">'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:6px;">'+
+    '<div><div style="font-weight:700;font-size:13px;">'+esc(iv.type)+'</div>'+
+    '<div style="font-size:11px;color:var(--light);">申込者: '+esc(fromAcct.name)+'（'+esc(fromAcct.store)+'）→ 相手: '+esc(toAcct.name)+'（'+esc(toAcct.store)+'）</div></div>'+
+    '<span class="badge" style="background:'+st.color+'20;color:'+st.color+';">'+st.label+'</span></div>'+
+    (iv.date?'<div style="font-size:12px;color:var(--light);">🗓 希望日: '+esc(iv.date)+'</div>':'')+
+    (iv.note?'<div style="font-size:12px;margin-top:6px;background:var(--surface);padding:8px;border-radius:6px;white-space:pre-wrap;">'+esc(iv.note)+'</div>':'')+
+    (iv.adminNote?'<div style="font-size:12px;margin-top:6px;background:#fef9c3;padding:8px;border-radius:6px;">📝 管理者コメント: '+esc(iv.adminNote)+'</div>':'')+
+    '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">';
+
+  // 管理者の承認ボタン（pending_approval状態）
+  if ((isAdmin || forceShowApproval) && iv.status === 'pending_approval') {
+    html += '<button class="btn btn-success btn-sm" onclick="approveInterview(''+iv.id+'')">✅ 承認する</button>'+
+      '<button class="btn btn-danger btn-sm" onclick="rejectInterview(''+iv.id+'')">🚫 却下する</button>';
+  }
+  // 相手が受け取り側で承認済み状態
+  if (isTo && (iv.status === 'approved' || iv.status === 'pending')) {
+    html += '<button class="btn btn-success btn-sm" onclick="acceptInterview(''+iv.id+'')">✅ 承認</button>'+
+      '<button class="btn btn-danger btn-sm" onclick="declineInterview(''+iv.id+'')">❌ 辞退</button>';
+  }
+  // 完了マーク（管理者 or 申込者）
+  if (isAdmin && iv.status === 'accepted') {
+    html += '<button class="btn btn-sm" onclick="doneInterview(''+iv.id+'')" style="background:#e0e7ff;color:#3730a3;border:none;">🏁 完了にする</button>';
+  }
+  html += '</div></div>';
+  return html;
+}
+
 function verifyIvStatusPw() {
   sha256(document.getElementById('iv-status-pw').value).then(function(h) {
     if (h === IV_STATUS_PW_HASH) { ivStatusVerified = true; renderInterviews(); }
     else document.getElementById('iv-status-pw-err').textContent = 'パスワードが違います';
   });
 }
+
 function submitInterview() {
   if (!currentUser) { showToast('ログインが必要です','warn'); return; }
   var toId = document.getElementById('iv-to').value;
   var type = document.getElementById('iv-type').value;
   if (!toId || !type) { showToast('必須項目を入力してください','warn'); return; }
   var accounts = getAccounts();
-  var toAcct = accounts.find(function(a) { return a.id === toId; });
   var ivs = getInterviews();
-  ivs.push({ id:'iv'+Date.now(), fromId:currentUser.id, toId:toId, type:type,
-    date:document.getElementById('iv-date').value,
-    note:document.getElementById('iv-note').value,
-    status:'pending', createdAt:new Date().toISOString() });
+  var newIv = {
+    id: 'iv'+Date.now(), fromId:currentUser.id, toId:toId, type:type,
+    date: document.getElementById('iv-date').value,
+    note: document.getElementById('iv-note').value,
+    status: 'pending_approval',  // 管理者承認待ち
+    createdAt: new Date().toISOString()
+  };
+  ivs.push(newIv);
   saveInterviews(ivs);
-  // 🔔 宛先に通知
-  if (toAcct) addNotification(toId, '💼 ' + currentUser.name + ' さんから面談申し込みが届いています（' + type + '）', 'interview');
-  showToast('申し込みを送りました！' + (toAcct ? ' 🔔 ' + toAcct.name + ' さんに通知されました' : ''));
+  // 管理者（admin）全員に通知
+  accounts.filter(function(a){ return a.role==='admin'||a.role==='manager'; }).forEach(function(a) {
+    addNotification(a.id, '⏳ 【面談申し込み承認依頼】'+currentUser.name+'→'+(accounts.find(function(x){return x.id===toId;})||{name:'?'}).name+' （'+type+'）', 'interview');
+  });
+  showToast('申し込みを送りました！管理者の承認をお待ちください 📬');
   renderInterviews();
 }
+
+function approveInterview(id) {
+  var ivs = getInterviews();
+  var idx = ivs.findIndex(function(i){ return i.id===id; });
+  if (idx < 0) return;
+  var iv = ivs[idx];
+  var adminNote = prompt('承認コメント（任意）', '') || '';
+  iv.status = 'approved';
+  iv.adminNote = adminNote;
+  iv.approvedBy = currentUser ? currentUser.id : '';
+  iv.approvedAt = new Date().toISOString();
+  saveInterviews(ivs);
+  // 申込者・相手に通知
+  addNotification(iv.fromId, '✅ 面談申し込みが管理者に承認されました（'+iv.type+'）', 'interview');
+  addNotification(iv.toId,   '💼 '+((getAccounts().find(function(a){return a.id===iv.fromId;})||{name:'?'}).name)+' さんから面談申し込みが届いています（'+iv.type+'）', 'interview');
+  renderInterviews();
+  showToast('承認しました ✅ 申込者・相手に通知を送りました');
+}
+
+function rejectInterview(id) {
+  var ivs = getInterviews();
+  var idx = ivs.findIndex(function(i){ return i.id===id; });
+  if (idx < 0) return;
+  var reason = prompt('却下理由（申込者に通知されます）', '');
+  if (reason === null) return;
+  ivs[idx].status = 'rejected';
+  ivs[idx].adminNote = reason;
+  ivs[idx].rejectedAt = new Date().toISOString();
+  saveInterviews(ivs);
+  addNotification(ivs[idx].fromId, '🚫 面談申し込みが却下されました（'+ivs[idx].type+'）'+(reason?' 理由: '+reason:''), 'interview');
+  renderInterviews();
+  showToast('却下しました');
+}
+
 function acceptInterview(id) {
   var ivs = getInterviews();
-  var idx = ivs.findIndex(function(i) { return i.id === id; });
+  var idx = ivs.findIndex(function(i){ return i.id===id; });
   if (idx >= 0) {
     ivs[idx].status = 'accepted'; saveInterviews(ivs);
-    addNotification(ivs[idx].fromId, '✅ ' + (currentUser ? currentUser.name : '相手') + ' さんが面談を承認しました（' + ivs[idx].type + '）', 'interview');
+    addNotification(ivs[idx].fromId, '✅ '+(currentUser?currentUser.name:'相手')+' さんが面談を承認しました（'+ivs[idx].type+'）', 'interview');
     renderInterviews(); showToast('面談を承認しました');
   }
 }
+
 function declineInterview(id) {
   var ivs = getInterviews();
-  var idx = ivs.findIndex(function(i) { return i.id === id; });
+  var idx = ivs.findIndex(function(i){ return i.id===id; });
   if (idx >= 0) {
     ivs[idx].status = 'declined'; saveInterviews(ivs);
-    addNotification(ivs[idx].fromId, '❌ ' + (currentUser ? currentUser.name : '相手') + ' さんが面談を辞退しました（' + ivs[idx].type + '）', 'interview');
+    addNotification(ivs[idx].fromId, '❌ '+(currentUser?currentUser.name:'相手')+' さんが面談を辞退しました（'+ivs[idx].type+'）', 'interview');
     renderInterviews(); showToast('面談を辞退しました');
   }
+}
+
+function doneInterview(id) {
+  var ivs = getInterviews();
+  var idx = ivs.findIndex(function(i){ return i.id===id; });
+  if (idx >= 0) { ivs[idx].status='done'; ivs[idx].doneAt=new Date().toISOString(); saveInterviews(ivs); renderInterviews(); showToast('完了にしました 🏁'); }
 }
 
 // ── PROGRESS (業務進捗) ──
@@ -1673,6 +1855,761 @@ function exportProgressCSV() {
   a.click();
   showToast('CSVを出力しました 📥');
 }
+
+
+// ── JOB BOARD (仕事掲示板) ──
+function getJobs() {
+  try { return JSON.parse(localStorage.getItem('koboreya_jobs') || '[]'); } catch(e) { return []; }
+}
+function saveJobs(arr) { localStorage.setItem('koboreya_jobs', JSON.stringify(arr)); }
+
+function renderJobBoard() {
+  var el = document.getElementById('job-board-content');
+  if (!el) return;
+  var jobs = getJobs();
+  var canPost = currentUser && (currentUser.role === 'admin' || currentUser.role === 'manager' || currentUser.role === 'editor');
+  var html = '';
+
+  // Post form
+  if (canPost) {
+    html += '<div class="card" style="margin-bottom:16px;"><div class="card-title">📌 仕事を投稿する</div>'+
+      '<div class="inp-group"><label class="inp-label">仕事タイトル *</label><input class="inp" id="job-title" placeholder="例: 倉庫整理をお願いしたい"></div>'+
+      '<div class="inp-group"><label class="inp-label">詳細・内容 *</label><textarea class="inp" id="job-desc" rows="3" placeholder="仕事の詳細を記載してください..."></textarea></div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+
+      '<div class="inp-group" style="flex:1;min-width:140px;"><label class="inp-label">ポイント報酬</label><input type="number" class="inp" id="job-pts" value="1" min="0.5" max="100" step="0.5"></div>'+
+      '<div class="inp-group" style="flex:1;min-width:140px;"><label class="inp-label">期限</label><input type="date" class="inp" id="job-deadline"></div>'+
+      '<div class="inp-group" style="flex:1;min-width:140px;"><label class="inp-label">カテゴリ</label><select class="inp" id="job-cat"><option value="general">一般</option><option value="cleaning">清掃</option><option value="admin">事務</option><option value="training">研修</option><option value="other">その他</option></select></div>'+
+      '</div>'+
+      '<button class="btn btn-primary" onclick="postJob()">📤 投稿する</button></div>';
+  }
+
+  // Filter tabs
+  html += '<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">'+
+    '<button class="btn btn-sm btn-primary" id="jf-open" onclick="filterJobs('open')">🟢 募集中</button>'+
+    '<button class="btn btn-sm btn-secondary" id="jf-mine" onclick="filterJobs('mine')">🙋 挙手済み</button>'+
+    '<button class="btn btn-sm btn-secondary" id="jf-done" onclick="filterJobs('done')">✅ 完了</button>'+
+    '<button class="btn btn-sm btn-secondary" id="jf-all" onclick="filterJobs('all')">📋 全件</button></div>';
+  html += '<div id="job-list"></div>';
+  el.innerHTML = html;
+  filterJobs('open');
+}
+
+var jobFilter = 'open';
+function filterJobs(f) {
+  jobFilter = f;
+  ['open','mine','done','all'].forEach(function(k) {
+    var btn = document.getElementById('jf-'+k);
+    if (btn) btn.className = 'btn btn-sm ' + (k===f ? 'btn-primary' : 'btn-secondary');
+  });
+  var jobs = getJobs();
+  var filtered = jobs.filter(function(j) {
+    if (f === 'open') return j.status === 'open';
+    if (f === 'mine') return currentUser && (j.volunteers||[]).includes(currentUser.id);
+    if (f === 'done') return j.status === 'done';
+    return true;
+  }).slice().reverse();
+  var el = document.getElementById('job-list');
+  if (!el) return;
+  if (filtered.length === 0) {
+    el.innerHTML = '<div class="card" style="text-align:center;padding:32px;color:var(--light);">該当する仕事はありません</div>';
+    return;
+  }
+  var accounts = getAccounts();
+  var catIcon = {general:'📋',cleaning:'🧹',admin:'📝',training:'📚',other:'📌'};
+  var html = '';
+  filtered.forEach(function(j) {
+    var poster = accounts.find(function(a){ return a.id === j.posterId; }) || {name:'不明'};
+    var volunteers = (j.volunteers||[]).map(function(vid){ var a=accounts.find(function(x){return x.id===vid;}); return a?a.name:'不明'; });
+    var isVolunteered = currentUser && (j.volunteers||[]).includes(currentUser.id);
+    var canManage = currentUser && (currentUser.id === j.posterId || currentUser.role === 'admin' || currentUser.role === 'manager');
+    var statusColor = j.status==='done' ? 'var(--success)' : j.status==='open' ? 'var(--primary)' : 'var(--warn)';
+    var statusLabel = j.status==='done' ? '✅ 完了' : j.status==='in_progress' ? '🔄 進行中' : '🟢 募集中';
+    html += '<div class="card" style="margin-bottom:10px;border-left:4px solid '+statusColor+';">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">'+
+      '<div style="flex:1;">'+
+      '<div style="font-size:15px;font-weight:700;margin-bottom:4px;">'+(catIcon[j.cat]||'📌')+' '+esc(j.title)+'</div>'+
+      '<div style="font-size:12px;color:var(--light);margin-bottom:6px;">投稿者: '+esc(poster.name)+' · '+(j.deadline?'期限: '+esc(j.deadline)+' · ':'')+fmtDate(j.createdAt)+'</div>'+
+      '<div style="font-size:13px;margin-bottom:8px;">'+linkify(j.desc||'')+'</div>'+
+      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+
+      '<span class="badge" style="background:'+statusColor+'20;color:'+statusColor+';">'+statusLabel+'</span>'+
+      '<span class="badge" style="background:#fef9c3;color:#92400e;">⭐ '+esc(String(j.points||1))+' pt</span>'+
+      (volunteers.length > 0 ? '<span style="font-size:12px;color:var(--light);">挙手: '+volunteers.map(function(n){return esc(n);}).join(', ')+'</span>' : '')+
+      '</div></div>'+
+      '<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">'+
+      (j.status === 'open' && currentUser && !isVolunteered ? '<button class="btn btn-primary btn-sm" onclick="volunteerJob(''+j.id+'')">🙋 挙手する</button>' : '')+
+      (j.status === 'open' && isVolunteered ? '<button class="btn btn-secondary btn-sm" onclick="unvolunteerJob(''+j.id+'')">取り消し</button>' : '')+
+      (canManage && j.status !== 'done' ? '<button class="btn btn-success btn-sm" onclick="completeJob(''+j.id+'')">✅ 完了にする</button>' : '')+
+      (canManage && j.status !== 'done' ? '<button class="btn btn-sm" onclick="deleteJob(''+j.id+'')" style="background:#fee2e2;color:#dc2626;border:none;">🗑 削除</button>' : '')+
+      '</div></div></div>';
+  });
+  el.innerHTML = html;
+}
+
+function postJob() {
+  if (!currentUser) return;
+  var title = document.getElementById('job-title').value.trim();
+  var desc = document.getElementById('job-desc').value.trim();
+  if (!title || !desc) { showToast('タイトルと内容を入力してください','warn'); return; }
+  var pts = parseFloat(document.getElementById('job-pts').value) || 1;
+  var jobs = getJobs();
+  jobs.push({
+    id: 'j'+Date.now(), title:title, desc:desc, points:pts,
+    cat: document.getElementById('job-cat').value,
+    deadline: document.getElementById('job-deadline').value,
+    posterId: currentUser.id, status:'open', volunteers:[],
+    createdAt: new Date().toISOString()
+  });
+  saveJobs(jobs);
+  document.getElementById('job-title').value='';
+  document.getElementById('job-desc').value='';
+  renderJobBoard();
+  showToast('仕事を投稿しました 📌');
+}
+
+function volunteerJob(id) {
+  if (!currentUser) return;
+  var jobs = getJobs();
+  var job = jobs.find(function(j){ return j.id===id; });
+  if (!job) return;
+  if (!job.volunteers) job.volunteers = [];
+  if (!job.volunteers.includes(currentUser.id)) {
+    job.volunteers.push(currentUser.id);
+    if (job.status === 'open') job.status = 'in_progress';
+  }
+  saveJobs(jobs);
+  // 投稿者に通知
+  addNotification(job.posterId, '🙋 ' + currentUser.name + ' さんが「' + job.title + '」に挙手しました', 'job');
+  filterJobs(jobFilter);
+  showToast('挙手しました！完了後にポイントが付与されます 🎉');
+}
+
+function unvolunteerJob(id) {
+  if (!currentUser) return;
+  var jobs = getJobs();
+  var job = jobs.find(function(j){ return j.id===id; });
+  if (!job) return;
+  job.volunteers = (job.volunteers||[]).filter(function(v){ return v!==currentUser.id; });
+  if (job.volunteers.length === 0) job.status = 'open';
+  saveJobs(jobs);
+  filterJobs(jobFilter);
+}
+
+function completeJob(id) {
+  if (!currentUser) return;
+  var jobs = getJobs();
+  var job = jobs.find(function(j){ return j.id===id; });
+  if (!job) return;
+  if (!confirm('この仕事を完了にして挙手者にポイントを付与しますか？\n付与ポイント: '+job.points+'pt × 挙手者数')) return;
+  job.status = 'done';
+  job.completedAt = new Date().toISOString();
+  // ポイント付与
+  var accounts = getAccounts();
+  (job.volunteers||[]).forEach(function(vid) {
+    var idx = accounts.findIndex(function(a){ return a.id===vid; });
+    if (idx >= 0) {
+      accounts[idx].points = (accounts[idx].points||0) + (job.points||1);
+      if (!accounts[idx].activityLog) accounts[idx].activityLog = [];
+      accounts[idx].activityLog.push({ts:new Date().toISOString(), delta:job.points||1, reason:'仕事掲示板: '+job.title});
+      addNotification(vid, '⭐ 「'+job.title+'」完了！ +'+job.points+'pt 付与されました', 'job');
+    }
+  });
+  saveAccounts(accounts);
+  saveJobs(jobs);
+  filterJobs(jobFilter);
+  showToast('完了！挙手者 '+job.volunteers.length+' 名に '+job.points+'pt を付与しました 🎉');
+}
+
+
+// ── COMMIT SHEETS (コミットシート) ──
+function getCommits(type) {
+  try { return JSON.parse(localStorage.getItem('koboreya_commit_'+type) || '{}'); } catch(e) { return {}; }
+}
+function saveCommits(type, data) { localStorage.setItem('koboreya_commit_'+type, JSON.stringify(data)); }
+
+var MONTHS = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+var CURRENT_YEAR = new Date().getFullYear();
+var CURRENT_MONTH = new Date().getMonth();
+var HALF = CURRENT_MONTH < 6 ? '上期' : '下期';
+
+function renderCommitStaff() {
+  var el = document.getElementById('commit-staff-content');
+  if (!el) return;
+  var accounts = getAccounts();
+  if (accounts.length === 0) { el.innerHTML = '<div class="card" style="text-align:center;padding:32px;"><p>スタッフが登録されていません</p></div>'; return; }
+  var commits = getCommits('staff');
+  var html = '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">'+
+    '<select class="inp" style="max-width:200px;" id="cs-acct-sel" onchange="renderCommitStaffDetail()">'+
+    accounts.map(function(a){ return '<option value="'+a.id+'"'+(currentUser&&a.id===currentUser.id?' selected':'')+'>'+esc(a.name)+'（'+esc(a.store)+'）</option>'; }).join('')+
+    '</select>'+
+    '<span style="font-size:13px;color:var(--light);align-self:center;">'+CURRENT_YEAR+'年 '+HALF+'</span></div>'+
+    '<div id="cs-detail"></div>';
+  el.innerHTML = html;
+  renderCommitStaffDetail();
+  // リマインダー
+  checkCommitReminder('staff');
+}
+
+function renderCommitStaffDetail() {
+  var sel = document.getElementById('cs-acct-sel');
+  if (!sel) return;
+  var uid = sel.value;
+  var accounts = getAccounts();
+  var acct = accounts.find(function(a){ return a.id===uid; });
+  if (!acct) return;
+  var commits = getCommits('staff');
+  var key = uid+'_'+CURRENT_YEAR+'_'+HALF;
+  var data = commits[key] || {goal:'', months:{}};
+  var isOwn = currentUser && currentUser.id === uid;
+  var canEdit = isOwn;
+  var el = document.getElementById('cs-detail');
+  if (!el) return;
+  var ti = TYPE_INFO[acct.personalityType]||TYPE_INFO.action;
+  var html = '<div class="card">'+
+    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);">'+
+    '<div style="width:44px;height:44px;border-radius:50%;background:'+ti.bg+';display:flex;align-items:center;justify-content:center;font-size:22px;">'+ti.icon+'</div>'+
+    '<div><div style="font-size:16px;font-weight:700;">'+esc(acct.name)+'</div><div style="font-size:12px;color:var(--light);">'+esc(acct.store)+' · '+esc(acct.role)+'</div></div></div>'+
+    '<div class="inp-group"><label class="inp-label" style="font-size:14px;font-weight:700;">🎯 '+CURRENT_YEAR+'年'+HALF+'の目標</label>'+
+    (canEdit ? '<textarea class="inp" id="cs-goal" rows="4" placeholder="半年間で達成したいことを記入してください...">'+esc(data.goal||'')+'</textarea>'+
+      '<button class="btn btn-primary btn-sm" onclick="saveStaffGoal(\''+uid+'\')" style="margin-top:6px;">💾 保存</button>' :
+      '<div style="background:var(--surface);padding:12px;border-radius:8px;font-size:13px;min-height:60px;">'+linkify(data.goal||'（未設定）')+'</div>')+
+    '</div>';
+
+  // 月次振り返り
+  var halfMonths = CURRENT_HALF_MONTHS();
+  html += '<div style="margin-top:20px;"><div style="font-size:14px;font-weight:700;margin-bottom:12px;">📅 月次振り返り</div>';
+  halfMonths.forEach(function(m) {
+    var mkey = CURRENT_YEAR+'-'+String(m+1).padStart(2,'0');
+    var mdata = data.months[mkey] || {reflection:'', comments:[]};
+    var isPast = m <= CURRENT_MONTH;
+    html += '<div style="background:var(--surface);border-radius:10px;padding:14px;margin-bottom:10px;">'+
+      '<div style="font-weight:700;margin-bottom:8px;">'+MONTHS[m]+'</div>'+
+      (canEdit && isPast ? '<textarea class="inp" id="cs-ref-'+mkey+'" rows="2" placeholder="この月の振り返りを記入...">'+esc(mdata.reflection||'')+'</textarea>'+
+        '<button class="btn btn-secondary btn-sm" onclick="saveStaffReflection(\''+uid+'\',\''+mkey+'\')" style="margin-top:4px;font-size:11px;">保存</button>' :
+        '<div style="font-size:13px;min-height:32px;color:'+(mdata.reflection?'var(--text)':'var(--light)')+';">'+(mdata.reflection?linkify(mdata.reflection):'振り返り未記入')+'</div>')+
+      // コメント欄
+      '<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px;">'+
+      '<div style="font-size:11px;color:var(--light);margin-bottom:6px;">💬 コメント（'+(mdata.comments||[]).length+'件）</div>'+
+      (mdata.comments||[]).map(function(c){
+        var ca = getAccounts().find(function(a){return a.id===c.authorId;})||{name:'不明'};
+        return '<div style="background:var(--bg);border-radius:8px;padding:8px;margin-bottom:4px;font-size:12px;">'+
+          '<span style="font-weight:600;">'+esc(ca.name)+'</span>: '+esc(c.text)+
+          '<span style="color:var(--light);font-size:10px;margin-left:8px;">'+fmtDate(c.ts)+'</span></div>';
+      }).join('')+
+      (currentUser ? '<div style="display:flex;gap:6px;margin-top:4px;">'+
+        '<input class="inp" id="cs-cm-'+uid+'-'+mkey+'" placeholder="コメントを入力..." style="flex:1;font-size:12px;">'+
+        '<button class="btn btn-primary btn-sm" onclick="addCommitComment(\'staff\',\''+uid+'\',\''+mkey+'\')" style="font-size:11px;">送信</button>'+
+        '</div>' : '')+
+      '</div></div>';
+  });
+  html += '</div></div>';
+  el.innerHTML = html;
+}
+
+function CURRENT_HALF_MONTHS() {
+  return CURRENT_MONTH < 6 ? [0,1,2,3,4,5] : [6,7,8,9,10,11];
+}
+
+function saveStaffGoal(uid) {
+  var ta = document.getElementById('cs-goal');
+  if (!ta) return;
+  var commits = getCommits('staff');
+  var key = uid+'_'+CURRENT_YEAR+'_'+HALF;
+  if (!commits[key]) commits[key] = {goal:'',months:{}};
+  commits[key].goal = ta.value;
+  saveCommits('staff', commits);
+  showToast('目標を保存しました ✅');
+}
+
+function saveStaffReflection(uid, mkey) {
+  var ta = document.getElementById('cs-ref-'+mkey);
+  if (!ta) return;
+  var commits = getCommits('staff');
+  var key = uid+'_'+CURRENT_YEAR+'_'+HALF;
+  if (!commits[key]) commits[key] = {goal:'',months:{}};
+  if (!commits[key].months[mkey]) commits[key].months[mkey] = {reflection:'',comments:[]};
+  commits[key].months[mkey].reflection = ta.value;
+  saveCommits('staff', commits);
+  showToast('振り返りを保存しました ✅');
+}
+
+function addCommitComment(type, uid, mkey) {
+  if (!currentUser) return;
+  var input = document.getElementById('cs-cm-'+uid+'-'+mkey);
+  if (!input || !input.value.trim()) return;
+  var commits = getCommits(type);
+  var key = uid+'_'+CURRENT_YEAR+'_'+HALF;
+  if (!commits[key]) commits[key] = {goal:'',months:{}};
+  if (!commits[key].months[mkey]) commits[key].months[mkey] = {reflection:'',comments:[]};
+  commits[key].months[mkey].comments.push({
+    id:'c'+Date.now(), text:input.value.trim(), authorId:currentUser.id, ts:new Date().toISOString()
+  });
+  saveCommits(type, commits);
+  // notify owner
+  if (uid !== currentUser.id) addNotification(uid, '💬 '+currentUser.name+' さんがコミットシートにコメントしました', 'commit');
+  input.value='';
+  if (type==='staff') renderCommitStaffDetail();
+  else renderCommitStoreDetail();
+}
+
+function checkCommitReminder(type) {
+  if (!currentUser) return;
+  var commits = getCommits(type);
+  var key = currentUser.id+'_'+CURRENT_YEAR+'_'+HALF;
+  var data = commits[key] || {};
+  var mkey = CURRENT_YEAR+'-'+String(CURRENT_MONTH+1).padStart(2,'0');
+  var hasGoal = data.goal && data.goal.trim();
+  var hasReflection = data.months && data.months[mkey] && data.months[mkey].reflection;
+  if (!hasGoal) {
+    setTimeout(function() { showToast('🎯 '+CURRENT_YEAR+'年'+HALF+'の目標がまだ設定されていません！', 'warn'); }, 1500);
+  } else if (!hasReflection && CURRENT_MONTH >= (HALF==='上期'?0:6)) {
+    setTimeout(function() { showToast('📝 今月（'+MONTHS[CURRENT_MONTH]+'）の振り返りがまだです！', 'warn'); }, 2000);
+  }
+}
+
+// 店舗コミットシート
+var STORES = ['本店','結','囲','別邸','二番街','縁','浅草'];
+function renderCommitStore() {
+  var el = document.getElementById('commit-store-content');
+  if (!el) return;
+  var commits = getCommits('store');
+  var html = '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">'+
+    '<select class="inp" style="max-width:160px;" id="cs-store-sel" onchange="renderCommitStoreDetail()">'+
+    STORES.map(function(s){ return '<option value="'+s+'"'+(currentUser&&currentUser.store===s?' selected':'')+'>'+esc(s)+'</option>'; }).join('')+
+    '</select>'+
+    '<span style="font-size:13px;color:var(--light);align-self:center;">'+CURRENT_YEAR+'年 '+HALF+'</span></div>'+
+    '<div id="cs-store-detail"></div>';
+  el.innerHTML = html;
+  renderCommitStoreDetail();
+  checkCommitReminder('store');
+}
+
+function renderCommitStoreDetail() {
+  var sel = document.getElementById('cs-store-sel');
+  if (!sel) return;
+  var store = sel.value;
+  var commits = getCommits('store');
+  var key = store+'_'+CURRENT_YEAR+'_'+HALF;
+  var data = commits[key] || {goal:'', months:{}};
+  var canEdit = currentUser && (currentUser.store===store || currentUser.role==='admin' || currentUser.role==='manager');
+  var el = document.getElementById('cs-store-detail');
+  if (!el) return;
+  var html = '<div class="card">'+
+    '<div style="font-size:18px;font-weight:700;margin-bottom:16px;">🏪 '+esc(store)+'店</div>'+
+    '<div class="inp-group"><label class="inp-label" style="font-size:14px;font-weight:700;">🎯 '+CURRENT_YEAR+'年'+HALF+'の店舗目標</label>'+
+    (canEdit ? '<textarea class="inp" id="cs-store-goal" rows="4" placeholder="店舗の半年目標を記入...">'+esc(data.goal||'')+'</textarea>'+
+      '<button class="btn btn-primary btn-sm" onclick="saveStoreGoal(\''+store+'\')" style="margin-top:6px;">💾 保存</button>' :
+      '<div style="background:var(--surface);padding:12px;border-radius:8px;font-size:13px;min-height:60px;">'+linkify(data.goal||'（未設定）')+'</div>')+
+    '</div>';
+  var halfMonths = CURRENT_HALF_MONTHS();
+  html += '<div style="margin-top:20px;"><div style="font-size:14px;font-weight:700;margin-bottom:12px;">📅 月次振り返り</div>';
+  halfMonths.forEach(function(m) {
+    var mkey = CURRENT_YEAR+'-'+String(m+1).padStart(2,'0');
+    var mdata = data.months[mkey] || {reflection:'', comments:[]};
+    var isPast = m <= CURRENT_MONTH;
+    html += '<div style="background:var(--surface);border-radius:10px;padding:14px;margin-bottom:10px;">'+
+      '<div style="font-weight:700;margin-bottom:8px;">'+MONTHS[m]+'</div>'+
+      (canEdit && isPast ? '<textarea class="inp" id="cs-sref-'+mkey+'" rows="2" placeholder="この月の振り返りを記入...">'+esc(mdata.reflection||'')+'</textarea>'+
+        '<button class="btn btn-secondary btn-sm" onclick="saveStoreReflection(\''+store+'\',\''+mkey+'\')" style="margin-top:4px;font-size:11px;">保存</button>' :
+        '<div style="font-size:13px;min-height:32px;color:'+(mdata.reflection?'var(--text)':'var(--light)')+';">'+(mdata.reflection?linkify(mdata.reflection):'振り返り未記入')+'</div>')+
+      '<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px;">'+
+      '<div style="font-size:11px;color:var(--light);margin-bottom:6px;">💬 コメント（'+(mdata.comments||[]).length+'件）</div>'+
+      (mdata.comments||[]).map(function(c){
+        var ca = getAccounts().find(function(a){return a.id===c.authorId;})||{name:'不明'};
+        return '<div style="background:var(--bg);border-radius:8px;padding:8px;margin-bottom:4px;font-size:12px;">'+
+          '<span style="font-weight:600;">'+esc(ca.name)+'</span>: '+esc(c.text)+
+          '<span style="color:var(--light);font-size:10px;margin-left:8px;">'+fmtDate(c.ts)+'</span></div>';
+      }).join('')+
+      (currentUser ? '<div style="display:flex;gap:6px;margin-top:4px;">'+
+        '<input class="inp" id="cs-cm-'+store+'-'+mkey+'" placeholder="コメントを入力..." style="flex:1;font-size:12px;">'+
+        '<button class="btn btn-primary btn-sm" onclick="addCommitComment(\'store\',\''+store+'\',\''+mkey+'\')" style="font-size:11px;">送信</button>'+
+        '</div>' : '')+
+      '</div></div>';
+  });
+  html += '</div></div>';
+  el.innerHTML = html;
+}
+
+function saveStoreGoal(store) {
+  var ta = document.getElementById('cs-store-goal');
+  if (!ta) return;
+  var commits = getCommits('store');
+  var key = store+'_'+CURRENT_YEAR+'_'+HALF;
+  if (!commits[key]) commits[key] = {goal:'',months:{}};
+  commits[key].goal = ta.value;
+  saveCommits('store', commits);
+  showToast('店舗目標を保存しました ✅');
+}
+
+function saveStoreReflection(store, mkey) {
+  var ta = document.getElementById('cs-sref-'+mkey);
+  if (!ta) return;
+  var commits = getCommits('store');
+  var key = store+'_'+CURRENT_YEAR+'_'+HALF;
+  if (!commits[key]) commits[key] = {goal:'',months:{}};
+  if (!commits[key].months[mkey]) commits[key].months[mkey] = {reflection:'',comments:[]};
+  commits[key].months[mkey].reflection = ta.value;
+  saveCommits('store', commits);
+  showToast('振り返りを保存しました ✅');
+}
+
+function deleteJob(id) {
+  if (!confirm('この仕事を削除しますか？')) return;
+  saveJobs(getJobs().filter(function(j){ return j.id!==id; }));
+  filterJobs(jobFilter);
+}
+
+
+// ── HIRING PROGRESS (採用進捗) ──
+function getHiring() {
+  try { return JSON.parse(localStorage.getItem('koboreya_hiring') || '[]'); } catch(e) { return []; }
+}
+function saveHiring(arr) { localStorage.setItem('koboreya_hiring', JSON.stringify(arr)); }
+
+function renderHiring() {
+  var el = document.getElementById('hiring-content');
+  if (!el) return;
+  var canEdit = currentUser && (currentUser.role==='admin'||currentUser.role==='manager'||currentUser.role==='editor');
+  var records = getHiring();
+  var html = '';
+  // Summary cards
+  var totalApplied = records.reduce(function(s,r){ return s+(r.applied||0); },0);
+  var totalInterview = records.reduce(function(s,r){ return s+(r.interviewed||0); },0);
+  var totalHired = records.reduce(function(s,r){ return s+(r.hired||0); },0);
+  var totalPlan = records.reduce(function(s,r){ return s+(r.planned||0); },0);
+  var hireRate = totalInterview > 0 ? Math.round(totalHired/totalInterview*100) : 0;
+  html += '<div class="grid-4" style="margin-bottom:16px;">'+
+    '<div class="card" style="text-align:center;padding:16px;"><div style="font-size:28px;font-weight:800;color:var(--primary);">'+totalApplied+'</div><div style="font-size:12px;color:var(--light);">総応募数</div></div>'+
+    '<div class="card" style="text-align:center;padding:16px;"><div style="font-size:28px;font-weight:800;color:var(--warn);">'+totalInterview+'</div><div style="font-size:12px;color:var(--light);">面接数</div></div>'+
+    '<div class="card" style="text-align:center;padding:16px;"><div style="font-size:28px;font-weight:800;color:var(--success);">'+totalHired+'</div><div style="font-size:12px;color:var(--light);">採用数</div></div>'+
+    '<div class="card" style="text-align:center;padding:16px;"><div style="font-size:28px;font-weight:800;color:var(--primary);">'+hireRate+'%</div><div style="font-size:12px;color:var(--light);">面接→採用率</div></div>'+
+    '</div>';
+  // Per-store table
+  html += '<div class="card">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">'+
+    '<div class="card-title">📊 店舗別採用状況</div>'+
+    (canEdit ? '<div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" onclick="addHiringRecord()">＋ 追加</button><button class="btn btn-secondary btn-sm" onclick="exportHiringCSV()">📥 CSV</button></div>' : '<button class="btn btn-secondary btn-sm" onclick="exportHiringCSV()">📥 CSV</button>')+
+    '</div>'+
+    '<div class="tbl-wrap"><table class="tbl"><thead><tr>'+
+    '<th>店舗</th><th>採用予定</th><th>応募数</th><th>面接数</th><th>採用数</th><th>採用率</th><th>充足率</th><th>媒体</th><th>メモ</th>'+(canEdit?'<th>操作</th>':'')+
+    '</tr></thead><tbody>';
+  if (records.length === 0) {
+    html += '<tr><td colspan="'+(canEdit?'10':'9')+'" style="text-align:center;color:var(--light);padding:24px;">データがありません</td></tr>';
+  } else {
+    records.forEach(function(r) {
+      var rate = r.interviewed > 0 ? Math.round((r.hired||0)/r.interviewed*100) : 0;
+      var fill = r.planned > 0 ? Math.round((r.hired||0)/r.planned*100) : 0;
+      var rateColor = rate >= 70 ? 'var(--success)' : rate >= 40 ? 'var(--warn)' : 'var(--danger)';
+      var fillColor = fill >= 80 ? 'var(--success)' : fill >= 50 ? 'var(--warn)' : 'var(--danger)';
+      html += '<tr>'+
+        '<td><strong>'+esc(r.store)+'</strong>'+(r.period?'<br><span style="font-size:10px;color:var(--light);">'+esc(r.period)+'</span>':'')+'</td>'+
+        '<td style="text-align:center;">'+esc(String(r.planned||0))+'名</td>'+
+        '<td style="text-align:center;">'+esc(String(r.applied||0))+'</td>'+
+        '<td style="text-align:center;">'+esc(String(r.interviewed||0))+'</td>'+
+        '<td style="text-align:center;font-weight:700;color:var(--success);">'+esc(String(r.hired||0))+'</td>'+
+        '<td style="text-align:center;color:'+rateColor+';font-weight:700;">'+rate+'%</td>'+
+        '<td style="text-align:center;color:'+fillColor+';font-weight:700;">'+fill+'%</td>'+
+        '<td style="font-size:11px;">'+esc(r.source||'')+'</td>'+
+        '<td style="font-size:11px;max-width:140px;">'+esc(r.memo||'')+'</td>'+
+        (canEdit?'<td style="white-space:nowrap;"><button class="btn btn-secondary btn-sm" onclick="editHiringRecord(\''+r.id+'\'\")">✏️</button> <button class="btn btn-sm" onclick="deleteHiringRecord(\''+r.id+'\'\")" style="background:#fee2e2;color:#dc2626;border:none;">🗑</button></td>':'')+
+        '</tr>';
+    });
+  }
+  html += '</tbody></table></div></div>';
+  el.innerHTML = html;
+}
+
+function addHiringRecord() {
+  var store = prompt('店舗名'); if (!store||!store.trim()) return;
+  var period = prompt('期間（例: 2026年Q1）','') || '';
+  var planned = parseInt(prompt('採用予定人数','0'))||0;
+  var applied = parseInt(prompt('応募数','0'))||0;
+  var interviewed = parseInt(prompt('面接数','0'))||0;
+  var hired = parseInt(prompt('採用数','0'))||0;
+  var source = prompt('採用媒体（例: Indeed, バイトル）','') || '';
+  var memo = prompt('メモ','') || '';
+  var records = getHiring();
+  records.push({id:'h'+Date.now(),store:store.trim(),period,planned,applied,interviewed,hired,source,memo,createdAt:new Date().toISOString()});
+  saveHiring(records);
+  renderHiring();
+  showToast('採用記録を追加しました ✅');
+}
+
+function editHiringRecord(id) {
+  var records = getHiring();
+  var r = records.find(function(x){ return x.id===id; });
+  if (!r) return;
+  var store = prompt('店舗名',r.store); if(store===null)return; if(store.trim())r.store=store.trim();
+  var period = prompt('期間',r.period||''); if(period!==null)r.period=period;
+  var planned = prompt('採用予定人数',String(r.planned||0)); if(planned!==null)r.planned=parseInt(planned)||0;
+  var applied = prompt('応募数',String(r.applied||0)); if(applied!==null)r.applied=parseInt(applied)||0;
+  var interviewed = prompt('面接数',String(r.interviewed||0)); if(interviewed!==null)r.interviewed=parseInt(interviewed)||0;
+  var hired = prompt('採用数',String(r.hired||0)); if(hired!==null)r.hired=parseInt(hired)||0;
+  var source = prompt('採用媒体',r.source||''); if(source!==null)r.source=source;
+  var memo = prompt('メモ',r.memo||''); if(memo!==null)r.memo=memo;
+  saveHiring(records);
+  renderHiring();
+  showToast('更新しました ✅');
+}
+
+function deleteHiringRecord(id) {
+  if(!confirm('この記録を削除しますか？'))return;
+  saveHiring(getHiring().filter(function(r){return r.id!==id;}));
+  renderHiring();
+}
+
+function exportHiringCSV() {
+  var records = getHiring();
+  var rows=[['店舗','期間','採用予定','応募数','面接数','採用数','採用率(%)','充足率(%)','媒体','メモ']];
+  records.forEach(function(r){
+    var rate = r.interviewed>0?Math.round((r.hired||0)/r.interviewed*100):0;
+    var fill = r.planned>0?Math.round((r.hired||0)/r.planned*100):0;
+    rows.push([r.store,r.period||'',r.planned||0,r.applied||0,r.interviewed||0,r.hired||0,rate,fill,r.source||'',r.memo||'']);
+  });
+  var csv = rows.map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+  var blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='採用進捗_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+  showToast('CSVを出力しました 📥');
+}
+
+
+
+var EXCEL_TRAINING = [
+  {id:'ex1',level:'初級',title:'Excelの基本操作',desc:'セルの入力・コピー・貼り付け・書式設定の基礎を学ぶ',
+   content:'<ul><li>セルへのデータ入力と編集</li><li>行・列の挿入・削除</li><li>書式設定（フォント・色・罫線）</li><li>シートの追加・名前変更</li><li>Ctrl+C/V/Z/S などの基本ショートカット</li></ul>',
+   refs:['https://support.microsoft.com/ja-jp/excel','https://www.google.com/intl/ja/sheets/about/'],
+   quiz:[
+     {q:'Excelでセルをコピーするショートカットキーは？',opts:['Ctrl+C','Ctrl+V','Ctrl+X','Ctrl+Z'],ans:0},
+     {q:'行を挿入するには？',opts:['行番号を右クリック→挿入','Ctrl+Insert','File→New Row','Delete+Insert'],ans:0},
+     {q:'上書き保存のショートカットは？',opts:['Ctrl+S','Ctrl+W','Ctrl+P','Ctrl+O'],ans:0},
+   ]},
+  {id:'ex2',level:'初級',title:'基本的な数式と関数',desc:'SUM・AVERAGE・COUNTなど基本関数の使い方',
+   content:'<ul><li>=SUM(A1:A10) で合計</li><li>=AVERAGE(B1:B10) で平均</li><li>=COUNT(C1:C10) で数値の個数</li><li>=COUNTA で空白以外の個数</li><li>=MAX/MIN で最大・最小値</li><li>オートSUM機能（Alt+=）</li></ul>',
+   refs:['https://support.microsoft.com/ja-jp/office/excel-関数-機能別一覧-5f91f4e9-7b42-46d2-9bd1-63f26a86c0eb'],
+   quiz:[
+     {q:'セルA1からA5の合計を求める式は？',opts:['=SUM(A1:A5)','=ADD(A1,A5)','=TOTAL(A1:A5)','=A1+A2+A3+A4+A5のみ'],ans:0},
+     {q:'平均を求める関数は？',opts:['=AVERAGE()','=MEAN()','=AVG()','=MID()'],ans:0},
+     {q:'数値の個数を数える関数は？',opts:['=COUNT()','=NUM()','=COUNTA()','=TOTAL()'],ans:0},
+   ]},
+  {id:'ex3',level:'中級',title:'VLOOKUP・INDEX/MATCH',desc:'テーブル間のデータ参照・検索関数をマスター',
+   content:'<ul><li>=VLOOKUP(検索値, 範囲, 列番号, FALSE)</li><li>VLOOKUPの限界（左側参照不可）</li><li>=INDEX(範囲, MATCH(検索値, 検索範囲, 0))</li><li>INDEX/MATCHの柔軟な使い方</li><li>エラー処理: =IFERROR(VLOOKUP(...), "なし")</li></ul>',
+   refs:['https://support.microsoft.com/ja-jp/office/vlookup-関数-0bbc8083-26fe-4963-8ab8-93a18ad188a1'],
+   quiz:[
+     {q:'VLOOKUPで完全一致検索をする場合、第4引数は？',opts:['FALSE','TRUE','0のみ','省略'],ans:0},
+     {q:'VLOOKUPで検索できる方向は？',opts:['左から右のみ','右から左のみ','両方','縦横どちらも'],ans:0},
+     {q:'IFERROR関数の使い方は？',opts:['=IFERROR(式, エラー時の値)','=IFERROR(エラー時, 式)','=IF(ERROR, 式)','=TRY(式)'],ans:0},
+   ]},
+  {id:'ex4',level:'中級',title:'ピボットテーブル',desc:'大量データを素早く集計・分析するピボットテーブルの使い方',
+   content:'<ul><li>ピボットテーブルの作成（挿入→ピボットテーブル）</li><li>行・列・値・フィルターの設定</li><li>集計方法の変更（合計・平均・個数など）</li><li>スライサーでフィルタリング</li><li>ピボットグラフの作成</li></ul>',
+   refs:['https://support.microsoft.com/ja-jp/office/ピボットテーブルを作成してワークシート-データを分析する-a9a84538-bfe9-40a9-a8e9-f99134456576'],
+   quiz:[
+     {q:'ピボットテーブルはどのメニューから作成？',opts:['挿入→ピボットテーブル','データ→ピボット','ホーム→集計','表示→ピボット'],ans:0},
+     {q:'ピボットテーブルでデータを絞り込むUIは？',opts:['スライサー','フィルター関数','VLOOKUP','条件付き書式'],ans:0},
+     {q:'集計フィールドで平均を表示するには？',opts:['値フィールドの設定→平均','=AVERAGE関数を使う','行フィールドに設定','列フィールドに設定'],ans:0},
+   ]},
+  {id:'ex5',level:'上級',title:'マクロ・VBA入門',desc:'繰り返し作業を自動化するマクロとVBAの基礎',
+   content:'<ul><li>マクロの記録と実行（開発→マクロの記録）</li><li>VBAエディタの開き方（Alt+F11）</li><li>Sub プロシージャの書き方</li><li>Cells(行, 列)でのセル操作</li><li>For〜Next ループ</li><li>If〜Then〜Else 条件分岐</li><li>MsgBox でダイアログ表示</li></ul>',
+   refs:['https://learn.microsoft.com/ja-jp/office/vba/api/overview/excel'],
+   quiz:[
+     {q:'VBAエディタを開くショートカットは？',opts:['Alt+F11','Ctrl+F11','Shift+F11','F11'],ans:0},
+     {q:'VBAでセルA1に値を入力するコードは？',opts:['Cells(1,1).Value = "値"','Cell(A1) = "値"','Range.A1 = "値"','Set(1,1) = "値"'],ans:0},
+     {q:'1〜10を繰り返すVBAループは？',opts:['For i=1 To 10 / Next i','While i<10 / End','Loop 10','Repeat 10 times'],ans:0},
+   ]},
+];
+
+var PPTX_TRAINING = [
+  {id:'pp1',level:'初級',title:'PowerPointの基本操作',desc:'スライドの作成・テキスト入力・レイアウト変更の基礎',
+   content:'<ul><li>新規プレゼンテーションの作成</li><li>スライドの追加・削除・順序変更</li><li>テキストボックスへの入力と書式設定</li><li>スライドレイアウトの変更</li><li>テーマ・デザインの適用</li><li>スライドショーの開始（F5）</li></ul>',
+   refs:['https://support.microsoft.com/ja-jp/powerpoint'],
+   quiz:[
+     {q:'スライドショーを最初から開始するショートカットは？',opts:['F5','F1','Ctrl+P','F11'],ans:0},
+     {q:'スライドを追加するには？',opts:['Enter（アウトライン表示）または右クリック→スライドの追加','Ctrl+N','Ctrl+A','Alt+Ins'],ans:0},
+     {q:'テーマを変更するメニューは？',opts:['デザイン→テーマ','ホーム→スタイル','挿入→テーマ','表示→デザイン'],ans:0},
+   ]},
+  {id:'pp2',level:'初級',title:'図形・画像の挿入',desc:'スマートアートや図形、画像を使った視覚的スライドの作り方',
+   content:'<ul><li>図形の挿入（挿入→図形）</li><li>SmartArtの使い方（組織図・フロー図など）</li><li>画像の挿入とトリミング</li><li>図形の整列・グループ化</li><li>テキストと図形の組み合わせ</li><li>アイコン・3Dモデルの活用</li></ul>',
+   refs:['https://support.microsoft.com/ja-jp/office/smartart-グラフィックを作成する-fafafd4d-905b-49b0-8892-a604aca73809'],
+   quiz:[
+     {q:'SmartArtはどのメニューから挿入？',opts:['挿入→SmartArt','ホーム→図形','デザイン→SmartArt','表示→SmartArt'],ans:0},
+     {q:'複数の図形を同時に移動させるには？',opts:['グループ化（Ctrl+G）してから移動','Shift+ドラッグで全選択','図形ロックを使う','レイヤーを統合する'],ans:0},
+     {q:'画像をスライドに挿入するメニューは？',opts:['挿入→画像','ホーム→挿入','ファイル→インポート','デザイン→画像'],ans:0},
+   ]},
+  {id:'pp3',level:'中級',title:'アニメーション・画面切替',desc:'プロ品質のアニメーションと画面切替効果の設定',
+   content:'<ul><li>アニメーションタブでの効果追加</li><li>開始タイミング（クリック時・直前と同時・直前の後）</li><li>アニメーションウィンドウでの管理</li><li>画面切替効果（切替タブ）</li><li>タイミングの自動設定</li><li>モーションパスの使い方</li></ul>',
+   refs:['https://support.microsoft.com/ja-jp/office/アニメーションを追加する-b6a44e1b-c548-4b2c-8b4c-f52de6f4e0d9'],
+   quiz:[
+     {q:'アニメーションのタイミング設定で「直前のアニメーションの後」とは？',opts:['前のアニメーション終了後に自動開始','クリック後に開始','同時に開始','手動でのみ開始'],ans:0},
+     {q:'画面切替の設定はどのタブ？',opts:['切替','アニメーション','デザイン','スライドショー'],ans:0},
+     {q:'アニメーションを管理するパネルは？',opts:['アニメーションウィンドウ','タスクウィンドウ','スライドパネル','効果オプション'],ans:0},
+   ]},
+  {id:'pp4',level:'中級',title:'プレゼン構成とデザイン原則',desc:'伝わるプレゼン資料を作るための設計・デザインの考え方',
+   content:'<ul><li>PREP法（結論→理由→例→結論）</li><li>1スライド1メッセージの原則</li><li>テキスト量を減らしビジュアルで伝える</li><li>色の使い方（3色ルール）</li><li>フォントの統一（和文・英文それぞれ1〜2種類）</li><li>余白の重要性</li><li>グラフの選び方（棒・折れ線・円）</li></ul>',
+   refs:['https://creator.line.me/ja/studio/'],
+   quiz:[
+     {q:'PREP法の正しい順序は？',opts:['結論→理由→例→結論','理由→例→結論→結論','例→理由→結論→理由','結論→例→理由→まとめ'],ans:0},
+     {q:'1スライドに使う色数の推奨は？',opts:['3色以内','制限なし','5色以内','1色のみ'],ans:0},
+     {q:'時系列のデータ表示に最適なグラフは？',opts:['折れ線グラフ','円グラフ','散布図','ツリーマップ'],ans:0},
+   ]},
+  {id:'pp5',level:'上級',title:'発表テクニックと配付資料',desc:'聴衆を引き込むプレゼンの実践スキルと資料作成',
+   content:'<ul><li>発表者ツールの使い方（スピーカーノート表示）</li><li>レーザーポインタ・ズーム機能</li><li>アウトライン表示での構成管理</li><li>配付資料のレイアウト設定</li><li>PDFへのエクスポート</li><li>動画・音声の埋め込み</li><li>共同編集（SharePoint/OneDrive）</li></ul>',
+   refs:['https://support.microsoft.com/ja-jp/office/発表者ツールを使用してスライドを表示する-4de90e28-487e-435c-9dc6-b5b5ab32a4fd'],
+   quiz:[
+     {q:'スピーカーノートを見ながら発表するモードは？',opts:['発表者ツール','スライドショー標準','アウトライン表示','ノートビュー'],ans:0},
+     {q:'PowerPointファイルをPDFにエクスポートするには？',opts:['ファイル→エクスポート→PDF/XPS','名前を付けて保存→.pdf','印刷→PDF','共有→PDF'],ans:0},
+     {q:'スライドショー中にレーザーポインタを使うキーは？',opts:['Ctrl+L','Ctrl+P','Ctrl+R','Ctrl+K'],ans:0},
+   ]},
+];
+
+function getTrainingUserData() {
+  try { return JSON.parse(localStorage.getItem('koboreya_training_ud') || '{}'); } catch(e) { return {}; }
+}
+function saveTrainingUserData(data) { localStorage.setItem('koboreya_training_ud', JSON.stringify(data)); }
+
+function renderTrainingTab(el, type, items) {
+  if (!currentUser) { el.innerHTML = '<div class="card" style="text-align:center;padding:32px;"><p>ログインが必要です</p></div>'; return; }
+  var ud = getTrainingUserData();
+  var uid = currentUser.id;
+  var html = '<div id="training-list-'+type+'">';
+  var levels = ['初級','中級','上級'];
+  levels.forEach(function(lv) {
+    var lvItems = items.filter(function(it){ return it.level===lv; });
+    if (lvItems.length === 0) return;
+    html += '<div style="margin-bottom:20px;"><div style="font-size:13px;font-weight:700;color:var(--light);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">── '+lv+' ──</div><div class="grid-2">';
+    lvItems.forEach(function(item) {
+      var key = uid+'_'+type+'_'+item.id;
+      var done = ud[key+'_done'];
+      var quizDone = ud[key+'_quiz'];
+      html += '<div class="card" style="cursor:pointer;border-left:4px solid '+(done?'var(--success)':'var(--border)')+';" onclick="openTraining(\''+type+'\',\''+item.id+'\'\")">'+
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'+
+        '<div style="font-size:15px;font-weight:700;">'+esc(item.title)+'</div>'+
+        '<div style="display:flex;gap:4px;">'+
+        (done?'<span class="badge" style="background:#d1fae5;color:#065f46;">✓ 完了</span>':'')+
+        (quizDone?'<span class="badge" style="background:#dbeafe;color:#1e40af;">📝 合格</span>':'')+
+        '</div></div>'+
+        '<div style="font-size:12px;color:var(--light);margin-top:4px;">'+esc(item.desc)+'</div></div>';
+    });
+    html += '</div></div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+var currentTraining = null;
+function openTraining(type, id) {
+  var items = type==='excel' ? EXCEL_TRAINING : PPTX_TRAINING;
+  var item = items.find(function(it){ return it.id===id; });
+  if (!item) return;
+  currentTraining = {type:type, item:item};
+  var ud = getTrainingUserData();
+  var key = currentUser.id+'_'+type+'_'+id;
+  var overlay = document.createElement('div');
+  overlay.id = 'training-overlay';
+  overlay.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:3000;display:flex;align-items:center;justify-content:center;';
+  var lvColor = item.level==='初級'?'var(--success)':item.level==='中級'?'var(--primary)':'#7c3aed';
+  var html='<div style="background:var(--bg);border-radius:16px;width:min(640px,96vw);max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.4);">'+
+    '<div style="padding:16px 20px;background:'+lvColor+'18;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">'+
+    '<div><span class="badge" style="background:'+lvColor+'20;color:'+lvColor+';margin-bottom:4px;">'+item.level+'</span>'+
+    '<div style="font-size:17px;font-weight:700;">'+esc(item.title)+'</div></div>'+
+    '<button onclick="document.getElementById(\'training-overlay\').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--light);">✕</button>'+
+    '</div>'+
+    '<div style="overflow-y:auto;flex:1;padding:20px;">'+
+    '<div style="font-size:13px;color:var(--light);margin-bottom:12px;">'+esc(item.desc)+'</div>'+
+    '<div style="background:var(--surface);border-radius:10px;padding:16px;font-size:13px;line-height:1.8;">'+item.content+'</div>'+
+    (item.refs&&item.refs.length?'<div style="margin-top:12px;"><div style="font-size:12px;color:var(--light);margin-bottom:6px;">📎 参考資料</div>'+
+      item.refs.map(function(r){ return '<a href="'+r+'" target="_blank" rel="noopener" style="display:block;font-size:12px;color:var(--primary);margin-bottom:4px;">'+r+'</a>'; }).join('')+'</div>':'')+
+    (!ud[key+'_done']?'<button class="btn btn-success" onclick="markTrainingDone()" style="width:100%;margin-top:16px;">✅ 内容を確認しました</button>':'<p style="text-align:center;color:var(--success);margin-top:12px;">✅ 学習完了</p>')+
+    '<div id="quiz-section" style="margin-top:20px;">'+(ud[key+'_quiz']?renderQuizResult(item):'<button class="btn btn-primary" onclick="startQuiz()" style="width:100%;margin-top:8px;">📝 小テストに挑戦</button>')+'</div>'+
+    '</div></div>';
+  overlay.innerHTML = html;
+  document.body.appendChild(overlay);
+}
+
+function markTrainingDone() {
+  if (!currentTraining||!currentUser) return;
+  var key = currentUser.id+'_'+currentTraining.type+'_'+currentTraining.item.id;
+  var ud = getTrainingUserData();
+  if (!ud[key+'_done']) {
+    ud[key+'_done'] = new Date().toISOString();
+    saveTrainingUserData(ud);
+    // ポイント付与
+    var accounts = getAccounts();
+    var idx = accounts.findIndex(function(a){ return a.id===currentUser.id; });
+    if (idx>=0) {
+      accounts[idx].points = (accounts[idx].points||0) + 0.5;
+      if (!accounts[idx].activityLog) accounts[idx].activityLog=[];
+      accounts[idx].activityLog.push({ts:new Date().toISOString(),delta:0.5,reason:'研修完了: '+currentTraining.item.title});
+      saveAccounts(accounts);
+      currentUser.points = accounts[idx].points;
+    }
+    showToast('✅ 学習完了 +0.5pt 付与！');
+    var ol = document.getElementById('training-overlay');
+    if (ol) ol.remove();
+    openTraining(currentTraining.type, currentTraining.item.id);
+  }
+}
+
+var quizAnswers = {};
+function startQuiz() {
+  if (!currentTraining) return;
+  quizAnswers = {};
+  var item = currentTraining.item;
+  var qs = item.quiz||[];
+  var html = '<div style="background:var(--surface);border-radius:10px;padding:16px;"><div style="font-size:14px;font-weight:700;margin-bottom:14px;">📝 小テスト（'+qs.length+'問）</div>';
+  qs.forEach(function(q,qi) {
+    html += '<div style="margin-bottom:16px;"><div style="font-size:13px;font-weight:600;margin-bottom:8px;">'+(qi+1)+'. '+esc(q.q)+'</div>'+
+      q.opts.map(function(opt,oi) {
+        return '<label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px;border:1.5px solid var(--border);margin-bottom:4px;">'+
+          '<input type="radio" name="quiz-q'+qi+'" value="'+oi+'" onchange="quizAnswers['+qi+']='+oi+'">'+esc(opt)+'</label>';
+      }).join('')+'</div>';
+  });
+  html += '<button class="btn btn-primary" onclick="submitQuiz()" style="width:100%;">提出する</button></div>';
+  document.getElementById('quiz-section').innerHTML = html;
+}
+
+function submitQuiz() {
+  if (!currentTraining) return;
+  var item = currentTraining.item;
+  var qs = item.quiz||[];
+  var correct = 0;
+  qs.forEach(function(q,qi){ if (quizAnswers[qi]===q.ans) correct++; });
+  var passed = correct >= Math.ceil(qs.length*0.7);
+  var key = currentUser.id+'_'+currentTraining.type+'_'+item.id;
+  var ud = getTrainingUserData();
+  var html = '<div style="background:'+(passed?'#d1fae5':'#fee2e2')+';border-radius:10px;padding:16px;text-align:center;">'+
+    '<div style="font-size:32px;">'+(passed?'🎉':'😢')+'</div>'+
+    '<div style="font-size:18px;font-weight:700;margin:8px 0;">'+(passed?'合格！':'不合格')+'</div>'+
+    '<div style="font-size:14px;">'+correct+' / '+qs.length+' 正解</div>';
+  qs.forEach(function(q,qi) {
+    var userAns = quizAnswers[qi];
+    var isCorrect = userAns === q.ans;
+    html += '<div style="text-align:left;margin-top:8px;font-size:12px;background:rgba(255,255,255,.6);border-radius:8px;padding:8px;">'+
+      (isCorrect?'✅':'❌')+' '+(qi+1)+'. '+esc(q.q)+'<br>'+
+      '正解: '+esc(q.opts[q.ans])+(userAns!==undefined&&!isCorrect?'　あなたの解答: '+esc(q.opts[userAns]):'')+'</div>';
+  });
+  if (passed && !ud[key+'_quiz']) {
+    ud[key+'_quiz'] = new Date().toISOString();
+    saveTrainingUserData(ud);
+    html += '<div style="margin-top:12px;color:var(--success);font-weight:700;">⭐ +1pt 付与！</div>';
+    var accounts = getAccounts();
+    var idx = accounts.findIndex(function(a){return a.id===currentUser.id;});
+    if (idx>=0) {
+      accounts[idx].points=(accounts[idx].points||0)+1;
+      if(!accounts[idx].activityLog)accounts[idx].activityLog=[];
+      accounts[idx].activityLog.push({ts:new Date().toISOString(),delta:1,reason:'小テスト合格: '+item.title});
+      saveAccounts(accounts); currentUser.points=accounts[idx].points;
+    }
+  }
+  if (!passed) html += '<button class="btn btn-secondary" onclick="startQuiz()" style="margin-top:8px;width:100%;">再挑戦する</button>';
+  html += '</div>';
+  document.getElementById('quiz-section').innerHTML = html;
+}
+
+function renderQuizResult(item) {
+  var ud = getTrainingUserData();
+  var key = currentUser.id+'_'+currentTraining.type+'_'+item.id;
+  return ud[key+'_quiz'] ? '<div style="text-align:center;color:var(--success);padding:12px;"><div style="font-size:24px;">🏆</div><div>小テスト合格済み</div></div>' : '';
+}
+
 
 // ── NOTIFICATIONS ──
 function updateNotifBadge() {
@@ -1934,7 +2871,7 @@ function renderRanking() {
       '<div class="account-meta">'+esc(acct.store)+' · <span class="badge" style="background:'+ti.bg+';color:'+ti.color+';">'+ti.name+'</span></div>'+
       '<div class="points-bar"><div class="points-bar-fill" style="width:'+barPct+'%;"></div></div>'+
       '</div>'+
-      '<div class="account-pts">'+pts+' pts</div>'+
+      '<div class="account-pts" style="cursor:pointer;" onclick="showPointsDetail(\''+acct.id+'\')\">' +pts+' pts<br><span style="font-size:10px;color:var(--light);">内訳 ▸</span></div>'+
       '</div>';
   });
   html += '</div>';
@@ -1968,7 +2905,7 @@ function filterAccountList() {
     html += '<tr><td><strong>'+esc(a.name)+'</strong></td><td>'+esc(a.store)+'</td><td>'+esc(a.role)+'</td>'+
       '<td><span class="badge" style="background:'+ti.bg+';color:'+ti.color+';">'+ti.icon+' '+ti.name+'</span></td>'+
       '<td>'+esc(a.birthday||'-')+'</td>'+
-      '<td><strong>'+((a.points||0).toFixed(1))+'</strong></td>'+
+      '<td><strong>'+((a.points||0).toFixed(1))+'</strong> <button class="btn btn-sm btn-secondary" onclick="showPointsDetail(\''+a.id+'\')" style="font-size:10px;padding:2px 8px;">内訳</button></td>'+
       '<td>'+esc(a.createdAt ? a.createdAt.split('T')[0] : '')+'</td></tr>';
   });
   html += '</tbody></table></div>';
@@ -2016,6 +2953,43 @@ function renderCompatMap() {
   html += '</tbody></table></div></div>';
   el.innerHTML = html;
 }
+function showPointsDetail(userId) {
+  var accounts = getAccounts();
+  var acct = accounts.find(function(a){ return a.id===userId; });
+  if (!acct) return;
+  var log = (acct.activityLog||[]).slice().reverse();
+  var overlay = document.createElement('div');
+  overlay.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:3000;display:flex;align-items:center;justify-content:center;';
+  var ti = TYPE_INFO[acct.personalityType]||TYPE_INFO.action;
+  var html='<div style="background:var(--bg);border-radius:16px;width:min(500px,94vw);max-height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3);">'+
+    '<div style="padding:16px 20px;background:'+ti.bg+';border-radius:16px 16px 0 0;">'+
+    '<div style="font-size:16px;font-weight:700;color:'+ti.color+';">'+ti.icon+' '+esc(acct.name)+'のポイント内訳</div>'+
+    '<div style="font-size:24px;font-weight:800;color:'+ti.color+';margin-top:4px;">'+((acct.points||0).toFixed(1))+' pts</div>'+
+    '</div>'+
+    '<div style="overflow-y:auto;padding:16px;flex:1;">';
+  if (log.length === 0) {
+    html += '<p style="text-align:center;color:var(--light);padding:32px;">ポイント履歴がありません</p>';
+  } else {
+    html += '<table class="tbl" style="font-size:12px;"><thead><tr><th>日時</th><th>増減</th><th>理由</th></tr></thead><tbody>';
+    log.slice(0,50).forEach(function(entry) {
+      var delta = entry.delta||entry.points||0;
+      var color = delta >= 0 ? 'var(--success)' : 'var(--danger)';
+      var sign = delta >= 0 ? '+' : '';
+      html += '<tr>'+
+        '<td style="color:var(--light);white-space:nowrap;">'+fmtDateTime(entry.ts)+'</td>'+
+        '<td style="font-weight:700;color:'+color+';text-align:center;">'+sign+delta.toFixed(1)+'</td>'+
+        '<td>'+esc(entry.reason||entry.action||'')+'</td></tr>';
+    });
+    html += '</tbody></table>';
+  }
+  html += '</div><div style="padding:12px 20px;border-top:1px solid var(--border);">'+
+    '<button class="btn btn-secondary" onclick="this.closest(\'[style*="position:fixed\"]\'').remove()" style="width:100%;">閉じる</button></div></div>';
+  overlay.innerHTML = html;
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+
 function renderAdminPanel() {
   var el = document.getElementById('accounts-sub-admin');
   var accounts = getAccounts();
