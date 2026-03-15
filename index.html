@@ -351,7 +351,7 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
     <div class="sb-item" data-page="commit-staff"><span class="sb-icon">🎯</span>社員コミットシート</div>
     <div class="sb-item" data-page="commit-store"><span class="sb-icon">🏪</span>店舗コミットシート</div>
 <div class="sb-group">エンタメ</div>
-    <div class="sb-item" data-page="game"><span class="sb-icon">🎮</span>こぼれや番</div>
+    
   </nav>
 </div>
 
@@ -581,10 +581,7 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
     </div>
 
 <!-- ── シミュレーションゲーム ── -->
-    <div id="page-game" class="page">
-      <div class="page-header"><h2>🎮 こぼれや番</h2><p>月島もんじゃ経営シミュレーション</p></div>
-      <div id="game-content"></div>
-    </div>
+    
 
   </div>
 </div>
@@ -604,7 +601,7 @@ var PAGE_TITLES = {
 'hiring':'採用進捗',
   'reviews-ops':'臨店・口コミ',
   'news-store':'店長会報告','news-hq':'本部報告',
-  'accounts':'アカウント管理','clubs':'部活管理','game':'こぼれや番'
+  'accounts':'アカウント管理','clubs':'部活管理'
 };
 
 var TYPE_INFO = {
@@ -650,7 +647,7 @@ var QUIZ = [
 ];
 
 var MANUAL_ITEMS = [
-  {icon:'🍽️',title:'接客マニュアル',desc:'ホール接客の基本・お客様対応フロー',cat:'接客',file:''},
+  {icon:'🍽️',title:'接客マニュアル',desc:'ホール接客の基本・お客様対応フロー',cat:'接客',file:'接客マニュアル_こぼれや.pptx'},
   {icon:'🫕',title:'キッチンマニュアル',desc:'仕込み・調理・衛生管理の手順',cat:'キッチン',file:''},
   {icon:'🔥',title:'火災・避難訓練研修',desc:'火災発生時の対応・避難手順',cat:'安全',file:''},
   {icon:'🧼',title:'衛生管理研修',desc:'食品衛生・手洗い・アレルギー対応',cat:'衛生',file:''},
@@ -1036,7 +1033,7 @@ function renderPage(id) {
   else if (id === 'news-hq') renderNews('hq');
   else if (id === 'accounts') renderAccounts();
   else if (id === 'clubs') renderClubs();
-  else if (id === 'game') renderGame();
+  
 }
 
 // ── PAGE TAB HANDLERS ──
@@ -1348,13 +1345,171 @@ function renderManuals() {
     '<button class="btn btn-secondary btn-sm" id="man-tab-excel" onclick="switchManualTab(\'excel\')">📊 Excel研修</button>'+
     '<button class="btn btn-secondary btn-sm" id="man-tab-pptx" onclick="switchManualTab(\'pptx\')">📑 PowerPoint研修</button>'+
     '</div>'+
+    '<button class="btn btn-secondary btn-sm" id="man-tab-quiz" onclick="switchManualTab(\'quiz\')">✏️ 接客小テスト</button>'+
+    '</div>'+
     '<div id="man-tab-content"></div>';
   el.innerHTML = html;
   switchManualTab('docs');
 }
 
+
+// ── 接客マニュアル 小テスト ──
+var MANUAL_QUIZ = {
+  '\u521d\u7d1a': [
+    { q: '\u3053\u307c\u308c\u3084\u306e\u30b5\u30fc\u30d3\u30b9\u30df\u30c3\u30b7\u30e7\u30f3\u306f\u6b21\u306e\u3046\u3061\u3069\u308c\u3067\u3059\u304b\uff1f', opts: ['\u5168\u3066\u306e\u304a\u5ba2\u69d8\u306b\u3053\u307c\u308c\u3084\u306e\u9b45\u529b\u3092\u4f1d\u3048\u3001\u9b45\u4e86\u3059\u308b\u3002','\u304a\u5ba2\u69d8\u306b\u6700\u9ad8\u306e\u98df\u4f53\u9a13\u3092\u63d0\u4f9b\u3059\u308b\u3002','\u5b89\u5168\u30fb\u5b89\u5fc3\u30fb\u6e05\u6f54\u3092\u7b2c\u4e00\u306b\u8003\u3048\u308b\u30b5\u30fc\u30d3\u30b9\u3092\u63d0\u4f9b\u3059\u308b\u3002','\u3082\u3093\u3058\u3083\u713c\u304d\u306e\u6587\u5316\u3092\u5168\u56fd\u306b\u5e83\u3081\u308b\u3002'], ans: 0, exp: '\u3053\u307c\u308c\u3084\u306e\u30df\u30c3\u30b7\u30e7\u30f3\u306f\u300c\u5168\u3066\u306e\u304a\u5ba2\u69d8\u306b\u3053\u307c\u308c\u3084\u306e\u9b45\u529b\u3092\u4f1d\u3048\u3001\u9b45\u4e86\u3059\u308b\u3002\u300d\u3067\u3059\u3002' },
+    { q: '\u6765\u5e97\u5bfe\u5fdc\u3067\u5165\u5e97\u6642\u306b\u6700\u521d\u306b\u78ba\u8a8d\u3059\u308b\u3053\u3068\u306f\u4f55\u3067\u3059\u304b\uff1f', opts: ['\u3054\u4e88\u7d04\u304b\u3069\u3046\u304b\u3092\u78ba\u8a8d\u3059\u308b','\u4f55\u540d\u69d8\u304b\u3092\u78ba\u8a8d\u3059\u308b','ebica\u3067\u7a7a\u5e2d\u78ba\u8a8d\u3092\u3059\u308b','\u5e97\u5185\u30b9\u30bf\u30c3\u30d5\u306b\u30b0\u30ec\u30fc\u30c9\u3092\u30c1\u30a7\u30c3\u30af\u3059\u308b'], ans: 1, exp: '\u5165\u5e97\u6642\u306f\u307e\u305a\u300c\u4f55\u540d\u69d8\u3067\u3059\u304b\u300d\u3068\u4eba\u6570\u3092\u78ba\u8a8d\u3057\u307e\u3059\u3002\u6700\u521d\u306b\u300c\u3054\u4e88\u7d04\u3067\u3059\u304b\uff1f\u300d\u3068\u8074\u304f\u306e\u306fNG\u3067\u3059\uff08\u6c17\u4f4d\u304c\u9ad8\u3044\u5370\u8c61\u3092\u4e0e\u3048\u308b\u305f\u3081\uff09\u3002' },
+    { q: '\u6642\u9593\u5236\u30fb1\u30c9\u30ea\u30f3\u30af1\u30d5\u30fc\u30c9\u5236\u306e\u8aac\u660e\u306f\u3069\u306e\u30bf\u30a4\u30df\u30f3\u30b0\u3067\u884c\u3044\u307e\u3059\u304b\uff1f', opts: ['\u7740\u5e2d\u5f8c\u3001\u30e1\u30cb\u30e5\u30fc\u3092\u6e21\u3059\u6642','\u6ce8\u6587\u3092\u53d6\u308b\u6642','\u5165\u53e3\uff08\u5165\u5e97\u6642\u8aac\u660e\u306e\u30bf\u30a4\u30df\u30f3\u30b0\uff09\u3067\u4f1d\u3048\u308b','\u521d\u56de\u306e\u713c\u304d\u6642\u306b\u4f1d\u3048\u308b'], ans: 2, exp: '\u6642\u9593\u5236\u30fb1\u30c9\u30ea\u30f3\u30af1\u30d5\u30fc\u30c9\u5236\u306f\u5165\u53e3\u3067\uff08\u5165\u5e97\u6642\u8aac\u660e\u306e\u30bf\u30a4\u30df\u30f3\u30b0\u3067\uff09\u4f1d\u3048\u307e\u3059\u3002' },
+    { q: '\u8eab\u3060\u3057\u306a\u307f\u306e\u30eb\u30fc\u30eb\u3068\u3057\u3066\u6b63\u3057\u3044\u3082\u306e\u306f\u3069\u308c\u3067\u3059\u304b\uff1f', opts: ['\u5c0f\u3055\u306a\u30d4\u30a2\u30b91\u3064\u306f\u7740\u7528\u3057\u3066\u3088\u3044','\u696d\u52d9\u4e2d\u306f\u30a2\u30af\u30bb\u30b5\u30ea\u30fc\u985e\u3092\u5168\u3066\u5916\u3059','\u30b7\u30f3\u30d7\u30eb\u306a\u30cd\u30a4\u30eb\u306f\u8a31\u53ef\u3055\u308c\u3066\u3044\u308b','\u30ab\u30e9\u30fc\u30b3\u30f3\u30bf\u30af\u30c8\u306f\u6d3e\u624b\u3067\u306a\u3051\u308c\u3070OK'], ans: 1, exp: '\u696d\u52d9\u4e2d\u306f\u30d4\u30a2\u30b9\u30fb\u6307\u8f2a\u30fb\u30cd\u30c3\u30af\u30ec\u30b9\u7b49\u306e\u30a2\u30af\u30bb\u30b5\u30ea\u30fc\u985e\u306f\u5168\u3066\u5916\u3057\u307e\u3059\u3002\u30ab\u30e9\u30fc\u30b3\u30f3\u30bf\u30af\u30c8\u3082\u7740\u7528\u7981\u6b62\u3067\u3059\u3002' },
+    { q: 'QR\u30b3\u30fc\u30c9\u304c\u8aad\u307f\u53d6\u308c\u306a\u3044\u5834\u5408\u3001\u30b9\u30bf\u30c3\u30d5\u306f\u3069\u3046\u5bfe\u5fdc\u3057\u307e\u3059\u304b\uff1f', opts: ['QR\u3067\u306e\u6ce8\u6587\u3057\u304b\u53d7\u3051\u4ed8\u3051\u307e\u305b\u3093\u3068\u65ad\u308b','\u65b0\u3057\u3044QR\u3092\u518d\u5370\u5237\u3057\u3066\u6e21\u3059\u304b\u3001\u76f4\u63a5\u6ce8\u6587\u3092\u53d7\u3051\u308b','\u5e97\u9577\u306b\u5831\u544a\u3057\u3066\u5f85\u6a5f\u3059\u308b','\u30e1\u30cb\u30e5\u30fc\u30d6\u30c3\u30af\u3092\u6e21\u3057\u3066\u81ea\u5206\u3067\u8a18\u5165\u3057\u3066\u3082\u3089\u3046'], ans: 1, exp: 'QR\u304c\u4f7f\u3048\u306a\u3044\u5834\u5408\u306f\u3001\u30b9\u30bf\u30c3\u30d5\u304c\u76f4\u63a5\u6ce8\u6587\u3092\u53d7\u3051\u308b\u304b\u65b0\u3057\u3044QR\u3092\u518d\u5370\u5237\u3057\u3066\u6e21\u3057\u307e\u3059\u3002\u6b21\u56de\u304b\u3089QR\u3067\u306e\u6ce8\u6587\u3092\u4f1d\u3048\u307e\u3059\u3002' }
+  ],
+  '\u4e2d\u7d1a': [
+    { q: '\u30b5\u30fc\u30d3\u30b9\u306e3\u3064\u306e\u67f1\u3068\u3057\u3066\u6b63\u3057\u3044\u7d44\u307f\u5408\u308f\u305b\u306f\u3069\u308c\u3067\u3059\u304b\uff1f', opts: ['\u30b9\u30d4\u30fc\u30c9\u30fb\u54c1\u8cea\u30fb\u5b89\u5168','\u30af\u30ea\u30fc\u30f3\u30fb\u30db\u30b9\u30d4\u30bf\u30ea\u30c6\u30a3\u30fb\u30a2\u30af\u30b7\u30e7\u30f3','\u7b11\u9854\u30fb\u58f0\u304b\u3051\u30fb\u6c17\u914d\u308a','\u6328\u62f6\u30fb\u6e05\u6f54\u30fb\u8fc5\u901f'], ans: 1, exp: '\u30b5\u30fc\u30d3\u30b9\u306e3\u3064\u306e\u67f1\u306f\u300c\u30af\u30ea\u30fc\u30f3\uff08\u6e05\u6f54\uff09\u300d\u300c\u30db\u30b9\u30d4\u30bf\u30ea\u30c6\u30a3\uff08\u304a\u3082\u3066\u306a\u3057\uff09\u300d\u300c\u30a2\u30af\u30b7\u30e7\u30f3\uff08\u884c\u52d5\uff09\u300d\u3067\u3059\u3002' },
+    { q: '\u713c\u304d\u6642\u306b\u3053\u307c\u308c\u3084\u306e5\u7b87\u6761\uff08\u3053\u3060\u308f\u308a\uff09\u3092\u4f1d\u3048\u308b\u30bf\u30a4\u30df\u30f3\u30b0\u3068\u3057\u3066\u6b63\u3057\u3044\u306e\u306f\u3069\u308c\u3067\u3059\u304b\uff1f', opts: ['\u6765\u5e97\u6642\u306e\u5165\u53e3\u3067\u4f1d\u3048\u308b','\u5b9a\u756a\u30e1\u30cb\u30e5\u30fc\u3092\u4f1d\u3048\u308b\u9593\u306b\u8a00\u3046','1\u56de\u76ee\u306e\u713c\u304d\u6642\u306b\u4f1d\u3048\u308b\uff083\u500b\u713c\u304d\u4ee5\u4e0a\u306e\u5e2f\u3092\u9664\u304f\uff09','\u30e9\u30b9\u30c8\u30aa\u30fc\u30c0\u30fc\u306e\u969b\u306b\u4f1d\u3048\u308b'], ans: 2, exp: '5\u7b87\u6761\u306f1\u56de\u76ee\u306e\u713c\u304d\u6642\u306b\u4f1d\u3048\u307e\u3059\u3002\u305f\u3060\u30683\u500b\u713c\u304d\u4ee5\u4e0a\u306e\u5e2f\u306b\u306f\u4f1d\u3048\u306a\u304f\u3066OKです\u3002\u304a\u5ba2\u69d8\u540c\u58eb\u304c\u8a71\u3057\u3066\u3044\u308b\u5834\u5408\u3082\u7121\u7406\u306b\u5272\u308a\u8fbc\u307e\u306a\u3044\u3002' },
+    { q: 'Google\u53e3\u30b3\u30df\u4f9d\u983c\u30ab\u30fc\u30c9\u3092\u6e21\u3059\u6b63\u3057\u3044\u30bf\u30a4\u30df\u30f3\u30b0\u306f\u3069\u308c\u3067\u3059\u304b\uff1f', opts: ['1\u56de\u76ee\u306e\u713c\u304d\u6642\u306b\u6e21\u3059','\u304a\u4f1a\u8a08\u306e\u6642\u306b\u6e21\u3059','2\u56de\u76ee\u4ee5\u964d\u306e\u713c\u304d\u6642\u306b\u6e21\u3059','\u5165\u5e97\u6642\u8aac\u660e\u306e\u969b\u306b\u6e21\u3059'], ans: 2, exp: 'Google\u53e3\u30b3\u30df\u4f9d\u983c\u30ab\u30fc\u30c9\u306f2\u56de\u76ee\u4ee5\u964d\u306e\u713c\u304d\u6642\u306b\u6e21\u3057\u307e\u3059\u3002\u6e21\u3059\u524d\u306b\u5fc5\u305a\u4f1a\u8a71\u3067\u8ddd\u96e2\u3092\u7e2e\u3081\u3066\u304a\u304f\u3053\u3068\u304c\u5927\u5207\u3067\u3059\u3002' },
+    { q: '\u30e9\u30b9\u30c8\u30aa\u30fc\u30c0\u30fc\u306f\u7d42\u4e86\u4f55\u5206\u524d\u306b\u884c\u3044\u307e\u3059\u304b\uff1f', opts: ['10\u5206\u524d','15\u5206\u524d','20\u5206\u524d','30\u5206\u524d'], ans: 3, exp: '\u30e9\u30b9\u30c8\u30aa\u30fc\u30c0\u30fc\u306f\u7d42\u4e8630\u5206\u524d\u306b\u884c\u3044\u307e\u3059\u3002\u30e9\u30b9\u30aa\u3092\u53d6\u3063\u305f\u3053\u3068\u306f\u30ad\u30c3\u30c1\u30f3\u30fb\u30db\u30fc\u30eb\u8cac\u4efb\u8005\u306b\u3082\u5171\u6709\u3057\u307e\u3059\u3002' },
+    { q: '\u51fa\u6c41\u306f\u4f55\u30d9\u30fc\u30b9\u3067\u3001\u4f55\u7a2e\u985e\u306e\u5177\u6750\u3092\u4f55\u6642\u9593\u4ee5\u4e0a\u715c\u8fbc\u3093\u3067\u3044\u307e\u3059\u304b\uff1f', opts: ['\u6606\u5e03\u30d9\u30fc\u30b9\u3067\u8008\u7a2e\u985e\u30923\u6642\u9593\u4ee5\u4e0a','\u8c5a\u9aa8\u30d9\u30fc\u30b9\u3067\u5341\u7a2e\u985e\u30925\u6642\u9593\u4ee5\u4e0a','\u9d8f\u30ac\u30e9\u30d9\u30fc\u30b9\u3067\u5341\u4e8c\u7a2e\u985e\u30926\u6642\u9593\u4ee5\u4e0a','\u9b5a\u4ecb\u30d9\u30fc\u30b9\u3067\u4e03\u7a2e\u985e\u30924\u6642\u9593\u4ee5\u4e0a'], ans: 1, exp: '\u3053\u307c\u308c\u3084\u306e\u51fa\u6c41\u306f\u8c5a\u9aa8\u30d9\u30fc\u30b9\u3067\u5341\u7a2e\u985e\u306e\u5177\u6750\u3092\u4e94\u6642\u9593\u4ee5\u4e0a\u715c\u8fbc\u3093\u3060\u3053\u3060\u308f\u308a\u306e\u51fa\u6c41\u3067\u3059\u3002' }
+  ],
+  '\u4e0a\u7d1a': [
+    { q: '\u51fa\u6c41\u306b\u4f7f\u7528\u3059\u308b\u6c34\u3068\u3057\u3066\u6b63\u3057\u3044\u3082\u306e\u306f\u3069\u308c\u3067\u3059\u304b\uff1f', opts: ['\u8edf\u6c34\u306e\u5e02\u8ca9\u30df\u30cd\u30e9\u30eb\u30a6\u30a9\u30fc\u30bf\u30fc','\u5bcc\u58eb\u5c71\u306e\u6e90\u6d41\u6c34\uff08\u5730\u4e0b40\u5e74\u7027\u904e\u3055\u308c\u305f\u8d85\u8edf\u6c34\uff09','\u7cbe\u88fd\u6c34\uff08\u84b8\u7559\u6c34\uff09','\u5929\u7136\u6e67\u304d\u6c34\uff08\u63a1\u6c34\u5730\u975e\u516c\u958b\uff09'], ans: 1, exp: '\u5bcc\u58eb\u5c71\u5730\u4e0b\u3067\u56db\u5341\u5e74\u7027\u904e\u3055\u308c\u305f\u8d85\u8edf\u6c34\uff08\u6e90\u6d41\u6c34\uff09\u3092\u4f7f\u7528\u3057\u3066\u3044\u307e\u3059\u3002\u6c34\u9053\u6c34\u3092\u4f7f\u308f\u306a\u3044\u3082\u3093\u3058\u3084\u5c4b\u306f\u3053\u307c\u308c\u3084\u304f\u3089\u3044\u3068\u8a00\u3048\u308b\u307b\u3069\u306e\u3053\u3060\u308f\u308a\u3067\u3059\u3002' },
+    { q: '\u3053\u307c\u308c\u3084\u3067\u4f7f\u7528\u3057\u3066\u3044\u308b\u63da\u3052\u7389\u306f\u3069\u3053\u306e\u3082\u306e\u3067\u3059\u304b\uff1f', opts: ['\u30df\u30b7\u30e5\u30e9\u30f3\u63b2\u8f09\u5e97\u30fb\u9280\u5ea7\u306e\u5929\u3077\u3089\u5c4b','\u7bc4\u5730\u5e02\u5834\u306e\u8001\u8217\u5929\u3077\u3089\u5c02\u9580\u5e97','\u8c4a\u6d32\u5e02\u5834\u306e\u4ed2\u5356\u5c4b\u304c\u63d0\u4f9b\u3059\u308b\u3082\u306e','\u81ea\u5bb6\u88fd\uff08\u5e97\u8217\u3067\u6bce\u65e5\u63da\u3052\u308b\u3082\u306e\uff09'], ans: 0, exp: '\u63da\u3052\u7389\u306f\u30df\u30b7\u30e5\u30e9\u30f3\u63b2\u8f09\u5e97\u3067\u3042\u308b\u9280\u5ea7\u306e\u5929\u3077\u3089\u5c4b\u306e\u3082\u306e\u3092\u4f7f\u7528\u3057\u3066\u3044\u307e\u3059\u3002\u300c\u3082\u3093\u3058\u3083\u306e\u5473\u306f\u51fa\u6c41\u3068\u63da\u3052\u7389\u3067\u6c7a\u307e\u308b\u300d\u3068\u3044\u3046\u3053\u3060\u308f\u308a\u3067\u3059\u3002' },
+    { q: '\u30e9\u30f3\u30af\u5236\u5ea6\u3067\u30b0\u30ec\u30fc\u30c95\uff085\u6bb5\u968e\u76ee\uff09\u306e\u547c\u79f0\u306f\u4f55\u3067\u3059\u304b\uff1f', opts: ['Gold\uff08\u30b4\u30fc\u30eb\u30c9\uff09','Platinum\uff08\u30d7\u30e9\u30c1\u30ca\uff09','Diamond\uff08\u30c0\u30a4\u30e4\u30e2\u30f3\u30c9\uff09','Star\uff08\u30b9\u30bf\u30fc\uff09'], ans: 1, exp: '\u30b0\u30ec\u30fc\u30c95\u306fPlatinum\uff08\u30d7\u30e9\u30c1\u30ca\u30e0\uff09\u3067\u3059\u3002\u9ad8\u5ea6\u306a\u30ea\u30fc\u30c0\u30fc\u30b7\u30c3\u30d7\u3092\u767a\u63ee\u3067\u304d\u308b\u30b9\u30bf\u30c3\u30d5\u3067\u3059\u3002' },
+    { q: '\u6b20\u52e4\u6642\u306e\u6b63\u3057\u3044\u5bfe\u5fdc\u306e\u9806\u756a\u306f\u3069\u308c\u3067\u3059\u304b\uff1f', opts: ['LINE\u30b0\u30eb\u30fc\u30d7\u3067\u4ee3\u308f\u308a\u3092\u52df\u96c6\u2192\u5e97\u9577\u306b\u5831\u544a','\u5e97\u8217\u55b6\u696d\u8cac\u4efb\u8005\u306b\u9023\u7d61\u2192\u81ea\u5206\u3067\u4ee3\u308f\u308a\u3092\u63a2\u3059\uff08\u5168\u4f53LINE\u306f\u4e0d\u53ef\uff09\u2192\u7d50\u679c\u3092\u5831\u544a','\u5148\u306b\u4ee3\u308f\u308a\u3092\u63a2\u3057\u3066\u304b\u3089\u5e97\u9577\u306b\u9023\u7d61','\u6b20\u52e4\u65e5\u306e\u524d\u65e5\u591c\u307e\u3067\u306b\u5e97\u9577\u306b\u30e1\u30c3\u30bb\u30fc\u30b8\u3092\u9001\u308b'], ans: 1, exp: '\u2460\u5f53\u65e5\u306e\u5e97\u8217\u55b6\u696d\u8cac\u4efb\u8005\u306b\u9023\u7d61\u3001\u2461\u81ea\u5206\u3067\u4ee3\u308f\u308a\u3092\u63a2\u3059\uff08\u5168\u4f53LINE\u306f\u4e0d\u53ef\uff09\u3001\u2462\u898b\u3064\u304b\u3063\u305f/\u898b\u3064\u304b\u3089\u306a\u304b\u3063\u305f\u5834\u5408\u3082\u305d\u306e\u65e8\u3092\u5831\u544a\u3001\u3068\u3044\u3046\u9806\u756a\u304c\u6b63\u89e3\u3067\u3059\u3002' },
+    { q: '\u30d0\u30c3\u30b7\u30f3\u30b0\u6642\u306b\u4f7f\u7528\u3059\u308b\u9053\u5177\u3068\u3057\u3066\u6b63\u3057\u3044\u7d44\u307f\u5408\u308f\u305b\u306f\u3069\u308c\u3067\u3059\u304b\uff1f', opts: ['\u30b9\u30dd\u30f3\u30b8\u30fb\u6d17\u5264\u30fb\u30bf\u30aa\u30eb\u30fb\u6d88\u6bd2\u30b9\u30d7\u30ec\u30fc','\u30b9\u30af\u30ec\u30fc\u30d1\u30fc\u30fb\u30c0\u30b9\u30bf\u30fc\u30fb\u9ac8\u305f\u308f\u3057\u30fb\u30a2\u30eb\u30b3\u30fc\u30eb','\u30b4\u30e0\u624b\u8002\u30fb\u30d6\u30e9\u30b7\u30fb\u30a2\u30eb\u30b3\u30fc\u30eb\u30fb\u30da\u30fc\u30d1\u30fc\u30bf\u30aa\u30eb','\u305f\u308f\u3057\u30fb\u98df\u5668\u6d17\u3044\u6d17\u5264\u30fb\u4e7e\u71e5\u30af\u30ed\u30b9\u30fb\u9664\u83cc\u30b7\u30fc\u30c8'], ans: 1, exp: '\u30d0\u30c3\u30b7\u30f3\u30b0\u6642\u306f\u30b9\u30af\u30ec\u30fc\u30d1\u30fc\u30fb\u30c0\u30b9\u30bf\u30fc\u30fb\u9ac8\u305f\u308f\u3057\u30fb\u30a2\u30eb\u30b3\u30fc\u30eb\u3092\u6301\u53c2\u3057\u307e\u3059\u3002\u9c49\u305f\u308f\u3057\u3068\u30a2\u30eb\u30b3\u30fc\u30eb\u306e\u4f7f\u7528\u306f\u5fc5\u9808\u3067\u3001\u9c49\u677f\u306e\u7e01\u307e\u3067\u7d39\u3044\u306b\u3057\u307e\u3059\u3002' }
+  ]
+};
+
+var manualQuizState = null;
+
+function startManualQuiz(level) {
+  var questions = MANUAL_QUIZ[level];
+  manualQuizState = { level: level, questions: questions, current: 0, score: 0, answers: [] };
+  renderManualQuizQuestion();
+}
+
+function renderManualQuizQuestion() {
+  var el = document.getElementById('manual-quiz-area');
+  if (!el || !manualQuizState) return;
+  var s = manualQuizState;
+  var q = s.questions[s.current];
+  var total = s.questions.length;
+  var pct = Math.round((s.current / total) * 100);
+  var html = '<div style="background:var(--surface);border-radius:12px;padding:20px;max-width:600px;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">' +
+    '<span style="font-size:12px;color:var(--light);">' + s.level + ' テスト</span>' +
+    '<span style="font-size:13px;font-weight:700;">' + (s.current+1) + ' / ' + total + '問</span>' +
+    '</div>' +
+    '<div style="height:6px;border-radius:6px;background:var(--border);margin-bottom:16px;overflow:hidden;">' +
+    '<div style="height:100%;border-radius:6px;background:var(--primary);width:' + pct + '%;"></div></div>' +
+    '<div style="font-size:15px;font-weight:700;line-height:1.6;margin-bottom:18px;">' + esc(q.q) + '</div>' +
+    '<div id="quiz-opts-' + s.current + '" style="display:flex;flex-direction:column;gap:8px;">';
+  q.opts.forEach(function(opt, i) {
+    html += '<button id="qopt-' + i + '" onclick="answerManualQuiz(' + i + ')" style="text-align:left;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);cursor:pointer;font-size:13px;line-height:1.5;">' +
+      '<span style="display:inline-block;width:22px;height:22px;border-radius:50%;background:var(--border);font-size:11px;font-weight:700;text-align:center;line-height:22px;margin-right:8px;">' + ['A','B','C','D'][i] + '</span>' +
+      esc(opt) + '</button>';
+  });
+  html += '</div></div>';
+  el.innerHTML = html;
+}
+
+function answerManualQuiz(idx) {
+  if (!manualQuizState) return;
+  var s = manualQuizState;
+  var q = s.questions[s.current];
+  var correct = (idx === q.ans);
+  if (correct) s.score++;
+  s.answers.push({ q: q.q, chose: idx, correct: correct, exp: q.exp, correctOpt: q.opts[q.ans] });
+  var el = document.getElementById('manual-quiz-area');
+  var opts = el.querySelectorAll('button[id^="qopt-"]');
+  opts.forEach(function(btn, i) {
+    btn.disabled = true;
+    if (i === q.ans) { btn.style.background='#d1fae5'; btn.style.borderColor='#10b981'; btn.style.color='#065f46'; }
+    else if (i === idx && !correct) { btn.style.background='#fee2e2'; btn.style.borderColor='#ef4444'; btn.style.color='#991b1b'; }
+  });
+  var expDiv = document.createElement('div');
+  expDiv.style.cssText = 'margin-top:12px;padding:12px;background:' + (correct ? '#d1fae5' : '#fee2e2') + ';border-radius:8px;font-size:12px;line-height:1.6;';
+  expDiv.innerHTML = (correct ? '<b style="color:#065f46;">✅ 正解！</b>' : '<b style="color:#991b1b;">❌ 不正解</b> 正解: ' + esc(q.opts[q.ans])) + '<br><span>' + esc(q.exp) + '</span>';
+  var inner = el.querySelector('div');
+  inner.appendChild(expDiv);
+  var nextBtn = document.createElement('button');
+  nextBtn.className = 'btn btn-primary';
+  nextBtn.style.cssText = 'margin-top:12px;width:100%;';
+  var isLast = (s.current + 1 >= s.questions.length);
+  nextBtn.textContent = isLast ? '結果を見る' : '次の問題へ →';
+  nextBtn.onclick = function() {
+    s.current++;
+    if (s.current < s.questions.length) { renderManualQuizQuestion(); }
+    else { showManualQuizResult(); }
+  };
+  inner.appendChild(nextBtn);
+}
+
+function showManualQuizResult() {
+  var el = document.getElementById('manual-quiz-area');
+  if (!el || !manualQuizState) return;
+  var s = manualQuizState;
+  var pct = Math.round((s.score / s.questions.length) * 100);
+  var pass = pct >= 80;
+  var pts = s.level === '\u521d\u7d1a' ? 1 : s.level === '\u4e2d\u7d1a' ? 2 : 3;
+  if (pass && currentUser) {
+    var accounts = getAccounts();
+    var idx = accounts.findIndex(function(a) { return a.id === currentUser.id; });
+    var key = 'quiz_manual_' + s.level;
+    if (idx >= 0 && !accounts[idx][key]) {
+      accounts[idx][key] = new Date().toISOString();
+      accounts[idx].points = (accounts[idx].points || 0) + pts;
+      if (!accounts[idx].activityLog) accounts[idx].activityLog = [];
+      accounts[idx].activityLog.push({ ts: new Date().toISOString(), delta: pts, reason: '\u63a5\u5ba2\u30de\u30cb\u30e5\u30a2\u30eb\u5c0f\u30c6\u30b9\u30c8\u5408\u683c: ' + s.level });
+      saveAccounts(accounts);
+      currentUser.points = accounts[idx].points;
+    }
+  }
+  var html = '<div style="background:var(--surface);border-radius:12px;padding:24px;max-width:600px;text-align:center;">' +
+    '<div style="font-size:48px;margin-bottom:8px;">' + (pass ? '🎉' : '📚') + '</div>' +
+    '<div style="font-size:20px;font-weight:700;margin-bottom:4px;">' + s.level + ' テスト結果</div>' +
+    '<div style="font-size:36px;font-weight:900;color:' + (pass ? 'var(--success)' : 'var(--danger)') + ';margin:12px 0;">' + s.score + ' / ' + s.questions.length + '</div>' +
+    '<div style="font-size:15px;margin-bottom:8px;">正答率 ' + pct + '%</div>' +
+    '<div style="display:inline-block;padding:6px 20px;border-radius:20px;font-size:14px;font-weight:700;background:' + (pass ? '#d1fae5' : '#fee2e2') + ';color:' + (pass ? '#065f46' : '#991b1b') + ';margin-bottom:16px;">' + (pass ? '✅ 合格！ +' + pts + 'pt' : '❌ 不合格（合格基準80%以上）') + '</div>' +
+    '<div style="margin-bottom:20px;text-align:left;">';
+  s.answers.forEach(function(a, i) {
+    html += '<div style="padding:10px;border-left:3px solid ' + (a.correct ? 'var(--success)' : 'var(--danger)') + ';margin-bottom:8px;background:var(--bg);border-radius:0 8px 8px 0;">' +
+      '<div style="font-size:12px;font-weight:700;margin-bottom:4px;">' + (a.correct ? '✅' : '❌') + ' Q' + (i+1) + ': ' + esc(a.q) + '</div>' +
+      (!a.correct ? '<div style="font-size:11px;color:var(--light);">正解: ' + esc(a.correctOpt) + '</div>' : '') +
+      '</div>';
+  });
+  html += '</div>' +
+    '<button class="btn btn-secondary" onclick="renderManualQuiz()" style="margin-right:8px;">← レベル選択</button>' +
+    '<button class="btn btn-primary" onclick="startManualQuiz(\'' + s.level + '\')">もう一度挑戦</button>' +
+    '</div>';
+  el.innerHTML = html;
+}
+
+function renderManualQuiz() {
+  var el = document.getElementById('man-tab-content');
+  if (!el) return;
+  var lvConf = [
+    { lv: '\u521d\u7d1a', icon: '🟢', color: '#10b981', bg: '#d1fae5', pts: '+1pt', desc: '\u57fa\u672c\u30de\u30ca\u30fc\u30fb\u6765\u5e97\u5bfe\u5fdc' },
+    { lv: '\u4e2d\u7d1a', icon: '🔵', color: 'var(--primary)', bg: '#dbeafe', pts: '+2pt', desc: '\u713c\u304d\u30fb\u53e3\u30b3\u30df\u30fb\u30eb\u30fc\u30eb' },
+    { lv: '\u4e0a\u7d1a', icon: '🟣', color: '#7c3aed', bg: '#ede9fe', pts: '+3pt', desc: '\u3053\u3060\u308f\u308a\u30fb\u6df1\u6398\u308a\u77e5\u8b58' }
+  ];
+  var html = '<div style="max-width:600px;">' +
+    '<div style="font-size:14px;color:var(--light);margin-bottom:20px;">接客マニュアルの内容を確認するテストです。各レベルを合格すると✨ポイントが付与されます。</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;">';
+  lvConf.forEach(function(lc) {
+    var cleared = currentUser && currentUser['quiz_manual_' + lc.lv];
+    html += '<div onclick="document.getElementById(\'manual-quiz-area\').style.display=\'block\';startManualQuiz(\'' + lc.lv + '\')" style="border:2px solid ' + (cleared ? lc.color : 'var(--border)') + ';border-radius:12px;padding:16px;text-align:center;cursor:pointer;background:' + (cleared ? lc.bg : 'var(--surface)') + ';">' +
+      '<div style="font-size:28px;margin-bottom:6px;">' + lc.icon + '</div>' +
+      '<div style="font-size:15px;font-weight:700;color:' + lc.color + ';">' + lc.lv + '</div>' +
+      '<div style="font-size:11px;color:var(--light);margin-top:4px;">' + lc.desc + '</div>' +
+      '<div style="font-size:12px;font-weight:700;color:' + lc.color + ';margin-top:6px;">' + (cleared ? '✅ 合格済み' : lc.pts) + '</div>' +
+      '</div>';
+  });
+  html += '</div><div id="manual-quiz-area"></div></div>';
+  el.innerHTML = html;
+}
+
+
 function switchManualTab(tab) {
-  ['docs','excel','pptx'].forEach(function(t) {
+  ['docs','excel','pptx','quiz'].forEach(function(t) {
     var btn = document.getElementById('man-tab-'+t);
     if (btn) btn.className = 'btn btn-sm ' + (t===tab?'btn-primary':'btn-secondary');
   });
@@ -1379,10 +1534,41 @@ function switchManualTab(tab) {
     renderTrainingTab(el, 'excel', EXCEL_TRAINING);
   } else if (tab === 'pptx') {
     renderTrainingTab(el, 'pptx', PPTX_TRAINING);
+  } else if (tab === 'quiz') {
+    renderManualQuiz();
   }
 }
 
 
+
+// ── 目安箱 定数・変数 ──
+var MEYASU_CATEGORIES = {
+  service:     { label: '接客・サービス', badge: 'badge-blue', questions: [
+    {q: '入店対応・笑顔・声かけの評価', name: 'smile'},
+    {q: '案内・着席時説明の丁寧さ', name: 'guidance'},
+    {q: 'お客様への気配り・ラウンド', name: 'care'},
+    {q: 'お見送りの対応', name: 'sendoff'}
+  ]},
+  kitchen:     { label: 'キッチン・料理', badge: 'badge-green', questions: [
+    {q: '料理の提供スピード', name: 'speed'},
+    {q: '焼き・料理の品質', name: 'quality'},
+    {q: '清潔・衛生管理', name: 'hygiene'}
+  ]},
+  environment: { label: '職場環境', badge: 'badge-yellow', questions: [
+    {q: '職場の雰囲気・チームワーク', name: 'atmosphere'},
+    {q: '整理整頓・清潔感', name: 'cleanliness'}
+  ]},
+  management:  { label: '店舗運営', badge: 'badge-purple', questions: [
+    {q: 'シフト・勤怠管理', name: 'shift'},
+    {q: '目標・方針の明確さ', name: 'goals'}
+  ]},
+  harassment:  { label: 'ハラスメント', badge: 'badge-red', questions: [] },
+  other:       { label: 'その他・改善提案', badge: 'badge-gray', questions: [] }
+};
+var MEYASU_PW_HASH = '226f76b55acb49701e06ded1d95165d179458f6fc37f5c6fc760ae30dec1c378';
+var meyasuTab = 'form';
+var meyasuPwVerified = false;
+var meyasuRatings = {};
 function saveMeyasuEntry(e) { var d=getMeyasuData(); d.push(e); localStorage.setItem('koboreya_meyasu',JSON.stringify(d)); }
 function renderMeyasu() {
   var el = document.getElementById('meyasu-content');
@@ -1867,7 +2053,7 @@ function renderJobBoard() {
   var el = document.getElementById('job-board-content');
   if (!el) return;
   var jobs = getJobs();
-  var canPost = currentUser && (currentUser.role === 'admin' || currentUser.role === 'manager' || currentUser.role === 'editor');
+  var canPost = !!currentUser;
   var html = '';
 
   // Post form
@@ -3031,45 +3217,15 @@ function showProfile() {
 // ── CLUBS ──
 function renderClubs() {
   var el = document.getElementById('clubs-content');
-  var clubs = getClubs();
-  var accounts = getAccounts();
-  var html = '<div class="grid-3">';
-  clubs.forEach(function(club) {
-    html += '<div class="club-card">'+
-      '<div class="club-banner" style="background:'+club.color+';">'+club.icon+'</div>'+
-      '<div class="club-body">'+
-      '<div style="font-size:15px;font-weight:700;">'+esc(club.name)+'</div>'+
-      '<div style="font-size:12px;color:var(--light);margin-top:3px;">'+esc(club.schedule)+'</div>'+
-      '<div style="font-size:12px;margin-top:6px;">'+esc(club.desc)+'</div>'+
-      '<div class="club-members" style="margin-top:10px;">';
-    (club.members || []).forEach(function(mid) {
-      var av = getUserAvatar(mid);
-      html += '<div class="club-member-icon" style="background:'+av.bg+';cursor:pointer;" title="'+av.name+'">'+av.icon+'</div>';
-    });
-    html += '</div>';
-    // Join/leave button
-    var isMember = currentUser && (club.members || []).includes(currentUser.id);
-    if (currentUser) {
-      html += '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'+
-        '<button class="btn btn-sm '+(isMember?'btn-secondary':'btn-primary')+'" onclick="toggleClub(\''+club.id+'\')">'+
-        (isMember ? '退部する' : '参加する')+
-        '</button>';
-      if (currentUser.role === 'admin' || currentUser.role === 'manager' || currentUser.role === 'editor') {
-        html += '<button class="btn btn-sm btn-secondary" onclick="editClub(\''+club.id+'\')">✏️ 編集</button>'+
-          '<button class="btn btn-sm" onclick="deleteClub(\''+club.id+'\')" style="background:#fee2e2;color:#dc2626;border:none;">🗑 削除</button>';
-      }
-      html += '</div>';
-    }
-  });
-  // Add club button (admin)
-  if (currentUser && currentUser.role === 'admin') {
-    html += '<div class="club-card" style="border:2px dashed var(--border);background:transparent;cursor:pointer;" onclick="addClub()">'+
-      '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:32px;color:var(--light);">'+
-      '<div style="font-size:32px;">+</div><div style="font-size:13px;margin-top:6px;">部活を追加</div></div></div>';
-  }
-  html += '</div>';
-  el.innerHTML = html;
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:60px 20px;">'+
+    '<div style="font-size:60px;margin-bottom:16px;">⚽</div>'+
+    '<div style="font-size:20px;font-weight:700;margin-bottom:8px;">部活・サークル管理</div>'+
+    '<div style="display:inline-block;background:#fef3c7;color:#92400e;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:600;margin-bottom:16px;">🚧 準備中</div>'+
+    '<p style="color:var(--light);font-size:14px;max-width:360px;margin:0 auto;">部活・サークル機能は現在準備中です。<br>もうしばらくお待ちください。</p>'+
+    '</div>';
 }
+
 function toggleClub(clubId) {
   if (!currentUser) return;
   var clubs = getClubs();
