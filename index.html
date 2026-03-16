@@ -643,11 +643,11 @@ var QUIZ = [
 ];
 
 var MANUAL_ITEMS = [
-  {icon:'🍽️',title:'接客マニュアル',desc:'ホール接客の基本・お客様対応フロー',cat:'接客',file:'接客マニュアル_こぼれや.pptx'},
+  {icon:'🍽️',title:'接客マニュアル',desc:'ホール接客の基本・お客様対応フロー',cat:'接客',file:'接客マニュアル_こぼれや.pdf'},
   {icon:'🫕',title:'キッチンマニュアル',desc:'仕込み・調理・衛生管理の手順',cat:'キッチン',file:''},
   {icon:'🔥',title:'火災・避難訓練研修',desc:'火災発生時の対応・避難手順',cat:'安全',file:''},
   {icon:'🧼',title:'衛生管理研修',desc:'食品衛生・手洗い・アレルギー対応',cat:'衛生',file:''},
-  {icon:'📝',title:'接客テスト',desc:'接客知識の確認テスト',cat:'テスト',file:''},
+  {icon:'📝',title:'接客テスト',desc:'接客知識の確認テスト',cat:'テスト',file:'quiz'},
   {icon:'📝',title:'キッチンテスト',desc:'調理・食品衛生の確認テスト',cat:'テスト',file:''},
   {icon:'📝',title:'衛生管理テスト',desc:'衛生知識の確認テスト',cat:'テスト',file:''},
 ];
@@ -1358,7 +1358,6 @@ function renderManuals() {
     '<button class="btn btn-secondary btn-sm" id="man-tab-excel" onclick="switchManualTab(\'excel\')">📊 Excel研修</button>'+
     '<button class="btn btn-secondary btn-sm" id="man-tab-pptx" onclick="switchManualTab(\'pptx\')">📑 PowerPoint研修</button>'+
     '</div>'+
-    '<button class="btn btn-secondary btn-sm" id="man-tab-quiz" onclick="switchManualTab(\'quiz\')">✏️ 接客小テスト</button>'+
     '</div>'+
     '<div id="man-tab-content"></div>';
   el.innerHTML = html;
@@ -1521,8 +1520,9 @@ function renderManualQuiz() {
 }
 
 
+function openManualQuiz() { switchManualTab('quiz'); }
 function switchManualTab(tab) {
-  ['docs','excel','pptx','quiz'].forEach(function(t) {
+  ['docs','excel','pptx'].forEach(function(t) {
     var btn = document.getElementById('man-tab-'+t);
     if (btn) btn.className = 'btn btn-sm ' + (t===tab?'btn-primary':'btn-secondary');
   });
@@ -1535,7 +1535,9 @@ function switchManualTab(tab) {
         '<div class="manual-info"><div class="manual-title">'+esc(m.title)+'</div>'+
         '<div class="manual-meta">'+esc(m.desc)+'</div></div>'+
         '<span class="badge badge-gray">'+esc(m.cat)+'</span>'+
-        (m.file ? '<a href="'+esc(m.file)+'" target="_blank" class="btn btn-sm btn-primary" style="text-decoration:none;">開く</a>' :
+        (m.file === 'quiz' ?
+          '<button class="btn btn-sm btn-primary" onclick="openManualQuiz()">&#x270F;&#xFE0F; テストを受ける</button>' :
+          m.file ? '<a href="'+esc(m.file)+'" target="_blank" class="btn btn-sm btn-primary" style="text-decoration:none;">開く</a>' :
           '<span style="font-size:11px;color:var(--light);">準備中</span>')+'</div>';
     });
     html += '</div>';
