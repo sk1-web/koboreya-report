@@ -974,8 +974,8 @@ function addPoints(userId, pts, reason) {
   accounts[idx].activityLog = accounts[idx].activityLog || [];
   accounts[idx].activityLog.push({
     ts: new Date().toISOString(),
-    type: reason,
-    pts: pts
+    delta: pts,
+    reason: reason
   });
   // Keep log to 500 items
   if (accounts[idx].activityLog.length > 500) {
