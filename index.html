@@ -335,6 +335,7 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
     <div class="sb-group">人材育成</div>
     <div class="sb-item" data-page="training-progress"><span class="sb-icon">📈</span>育成進捗管理</div>
     <div class="sb-item" data-page="manuals"><span class="sb-icon">📚</span>各種マニュアル</div>
+    <div class="sb-item" data-page="manager-test-results"><span class="sb-icon">🏆</span>店長力テスト</div>
     <div class="sb-group">コミュニケーション</div>
     <div class="sb-item" data-page="meyasu"><span class="sb-icon">📬</span>目安箱</div>
     <div class="sb-item" data-page="interview-req"><span class="sb-icon">💼</span>面談申し込み</div>
@@ -442,6 +443,12 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
     <div id="page-hiring" class="page">
       <div class="page-header"><h2>👥 アルバイト採用進捗</h2><p>応募・面接・採用状況の管理</p></div>
       <div id="hiring-content"></div>
+    </div>
+
+    <!-- ── 店長力テスト ── -->
+    <div id="page-manager-test-results" class="page">
+      <div class="page-header"><h2>🏆 店長力テスト</h2><p>スキル診断・成長の見える化</p></div>
+      <div id="mtr-content"></div>
     </div>
 
     <!-- ── 店舗管理: 業務進捗 ── -->
@@ -591,6 +598,7 @@ var PAGE_TITLES = {
   'sales':'店舗売上','store-tasks':'業務一覧','store-schedule':'年間スケジュール',
   'store-meetings':'会議体・研修','store-rules':'店舗ルール','store-contacts':'連絡先一覧',
   'training-progress':'育成進捗管理','manuals':'各種マニュアル',
+  'manager-test-results':'店長力テスト',
   'meyasu':'目安箱','interview-req':'面談申し込み','store-progress':'業務進捗',
 'job-board':'仕事掲示板',
 'commit-staff':'社員コミットシート','commit-store':'店舗コミットシート',
@@ -1026,6 +1034,7 @@ function renderPage(id) {
   else if (id === 'hiring') renderHiring();
   else if (id === 'reviews-ops') renderReviewsOps();
   else if (id === 'news-store') renderNews('store');
+  else if (id === 'manager-test-results') renderManagerTestResults();
   
   else if (id === 'accounts') renderAccounts();
   else if (id === 'clubs') renderClubs();
@@ -2465,6 +2474,100 @@ function getHiring() {
   try { return JSON.parse(localStorage.getItem('koboreya_hiring') || '[]'); } catch(e) { return []; }
 }
 function saveHiring(arr) { localStorage.setItem('koboreya_hiring', JSON.stringify(arr)); }
+
+function renderManagerTestResults() {
+  var el = document.getElementById('mtr-content');
+  if (!el) return;
+  var isAdmin = currentUser && (currentUser.role==='admin'||currentUser.role==='manager');
+  var allTests = [];
+  try { allTests = JSON.parse(localStorage.getItem('koboreya_manager_tests')||'[]'); } catch(e){}
+  var myTests = isAdmin ? allTests : allTests.filter(function(t){return t.userId===currentUser.id;});
+  var CATS = [
+    {id:'people',name:'ピープルマネジメント力',color:'#e74c3c'},
+    {id:'org',name:'組織活性力',color:'#e67e22'},
+    {id:'floor',name:'現場基礎力',color:'#2ecc71'},
+    {id:'biz',name:'ビジネス思考力',color:'#3498db'},
+    {id:'self',name:'セルフマネジメント力',color:'#9b59b6'}
+  ];
+  function grade(p){
+    if(p>=90)return{l:'S',c:'#8e44ad'};if(p>=80)return{l:'A',c:'#27ae60'};
+    if(p>=70)return{l:'B',c:'#2980b9'};if(p>=60)return{l:'C',c:'#e67e22'};
+    return{l:'D',c:'#c0392b'};
+  }
+  function fmtD(iso){var d=new Date(iso);return d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate();}
+  var html = '';
+  // Link to test
+  html += '<div style="margin-bottom:16px;text-align:right">' +
+    '<a href="manager_test.html" target="_blank" style="background:var(--primary);color:#fff;padding:9px 18px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:14px">🏆 テストを受ける</a></div>';
+  if(myTests.length === 0){
+    html += '<div style="text-align:center;padding:60px 20px;color:#aaa;font-size:14px">まだ受験履歴がありません。<br>上のボタンからテストを受けてください。</div>';
+    el.innerHTML = html; return;
+  }
+  // Summary cards (own stats or all)
+  var sorted = myTests.slice().reverse();
+  if(isAdmin){
+    // user summary table
+    var accounts = getAccounts();
+    var userMap = {};
+    myTests.forEach(function(t){
+      if(!userMap[t.userId]) userMap[t.userId]={userId:t.userId,name:t.userName,tests:[]};
+      userMap[t.userId].tests.push(t);
+    });
+    html += '<div class="card" style="margin-bottom:16px;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">' +
+      '<thead><tr style="background:#f5ede6">' +
+      '<th style="padding:10px;text-align:left">氏名</th><th style="padding:10px;text-align:center">受験回数</th>' +
+      '<th style="padding:10px;text-align:center">最新スコア</th><th style="padding:10px;text-align:center">ランク</th>' +
+      '<th style="padding:10px;text-align:center">最終受験日</th>' +
+      CATS.map(function(c){return '<th style="padding:10px;text-align:center;color:'+c.color+'">'+c.name.replace('マネジメント力','MG').replace('セルフマネジメント力','セルフ')+'</th>';}).join('') +
+      '</tr></thead><tbody>';
+    Object.values(userMap).forEach(function(u){
+      var latest = u.tests[u.tests.length-1];
+      var g = grade(latest.totalPct);
+      html += '<tr style="border-bottom:1px solid #f5ede6">' +
+        '<td style="padding:10px;font-weight:600">'+esc(u.name)+'</td>' +
+        '<td style="padding:10px;text-align:center">'+u.tests.length+'回</td>' +
+        '<td style="padding:10px;text-align:center;font-size:18px;font-weight:900;color:var(--primary)">'+latest.totalPct+'%</td>' +
+        '<td style="padding:10px;text-align:center"><span style="background:'+g.c+';color:#fff;padding:2px 10px;border-radius:20px;font-weight:bold">'+g.l+'</span></td>' +
+        '<td style="padding:10px;text-align:center;color:#888">'+fmtD(latest.date)+'</td>' +
+        CATS.map(function(c){var cs=latest.catScores[c.id];return '<td style="padding:10px;text-align:center;font-weight:bold;color:'+c.color+'">'+cs.pct+'%</td>';}).join('') +
+        '</tr>';
+    });
+    html += '</tbody></table></div>';
+  } else {
+    // own score summary
+    var latest = sorted[0];
+    var g = grade(latest.totalPct);
+    html += '<div style="background:linear-gradient(135deg,#8b1a1a,#c0392b);color:#fff;border-radius:14px;padding:24px;margin-bottom:16px;text-align:center">' +
+      '<div style="font-size:13px;opacity:0.85;margin-bottom:4px">最新スコア</div>' +
+      '<div style="font-size:52px;font-weight:900;line-height:1">'+latest.totalPct+'%</div>' +
+      '<div style="font-size:13px;opacity:0.85;margin-top:6px">'+g.l+'ランク　受験回数: '+myTests.length+'回</div></div>';
+    // Cat bars for latest
+    var barsHtml = CATS.map(function(c){var cs=latest.catScores[c.id];
+      return '<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">' +
+        '<span style="font-weight:600">'+c.name+'</span><span style="font-weight:bold;color:'+c.color+'">'+cs.pct+'%</span></div>' +
+        '<div style="background:#f0e8e0;border-radius:10px;height:10px;overflow:hidden"><div style="width:'+cs.pct+'%;height:100%;background:'+c.color+';border-radius:10px"></div></div></div>';
+    }).join('');
+    html += '<div class="card" style="margin-bottom:16px"><h3 style="font-size:15px;font-weight:bold;color:var(--primary);margin-bottom:14px">最新スキル分析</h3>'+barsHtml+'</div>';
+  }
+  // History list
+  html += '<h3 style="font-size:15px;font-weight:bold;color:var(--primary);margin-bottom:12px">受験履歴</h3>';
+  sorted.forEach(function(t){
+    var g = grade(t.totalPct);
+    html += '<div class="card" style="margin-bottom:10px;padding:14px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+      '<div><span style="font-size:12px;color:#888">'+fmtD(t.date)+'</span>'+(isAdmin?'　<span style="font-size:12px;font-weight:600">'+esc(t.userName)+'</span>':'')+'</div>' +
+      '<div style="display:flex;align-items:center;gap:8px">' +
+      '<span style="background:'+g.c+';color:#fff;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:bold">'+g.l+'</span>' +
+      '<span style="font-size:22px;font-weight:900;color:var(--primary)">'+t.totalPct+'%</span></div></div>' +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
+      CATS.map(function(c){var cs=t.catScores[c.id];
+        return '<div style="flex:1;min-width:70px"><div style="font-size:10px;color:#888;margin-bottom:2px">'+c.name.substring(0,4)+'</div>' +
+          '<div style="background:#f0e8e0;border-radius:6px;height:5px;overflow:hidden"><div style="width:'+cs.pct+'%;height:100%;background:'+c.color+'"></div></div>' +
+          '<div style="font-size:11px;color:'+c.color+';font-weight:bold;margin-top:2px">'+cs.pct+'%</div></div>';
+      }).join('')+'</div></div>';
+  });
+  el.innerHTML = html;
+}
 
 function renderHiring() {
   var el = document.getElementById('hiring-content');
