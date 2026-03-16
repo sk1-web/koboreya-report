@@ -2913,8 +2913,8 @@ function renderNews(cat) {
   }
 
   var html = '';
-  // Post creation (admin/manager/editor)
-  if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'manager' || currentUser.role === 'editor')) {
+  // Post creation (全ログインユーザー)
+  if (currentUser) {
     html += '<div class="card" style="margin-bottom:16px;"><div class="card-title">✏️ 新規投稿</div>'+
       '<div class="inp-group"><label class="inp-label">タイトル *</label><input class="inp" id="news-title-'+cat+'" placeholder="タイトルを入力"></div>'+
       '<div class="inp-group"><label class="inp-label">内容 *</label><textarea class="inp" id="news-body-'+cat+'" rows="4" placeholder="内容を入力..."></textarea></div>'+
