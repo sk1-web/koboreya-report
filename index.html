@@ -342,7 +342,7 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
     <div class="sb-item" data-page="reviews-ops"><span class="sb-icon">⭐</span>臨店・口コミ</div>
     <div class="sb-group">社内ニュース</div>
     <div class="sb-item" data-page="news-store"><span class="sb-icon">📰</span>店長会報告 <span class="sb-badge" id="badge-news-store">0</span></div>
-    <div class="sb-item" data-page="news-hq"><span class="sb-icon">🏢</span>本部報告 <span class="sb-badge" id="badge-news-hq">0</span></div>
+    
     <div class="sb-group">メンバー</div>
     <div class="sb-item active" data-page="accounts"><span class="sb-icon">👥</span>アカウント管理</div>
     <div class="sb-item" data-page="clubs"><span class="sb-icon">⚽</span>部活管理</div>
@@ -367,7 +367,7 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
         🔔 <span id="notif-badge" style="position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;border-radius:50%;width:16px;height:16px;font-size:10px;display:none;align-items:center;justify-content:center;font-weight:700;"></span>
       </button>
       <button class="topbar-btn" onclick="doLogout()">ログアウト</button>
-<button class="topbar-btn" id="lang-btn" onclick="toggleLang()" style="font-size:12px;">🌐 EN</button>
+
     </div>
   </div>
   <div id="birthday-banner" class="birthday-banner" style="display:none;">
@@ -496,11 +496,7 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
       <div id="news-store-content"></div>
     </div>
 
-    <!-- ── 社内ニュース: 本部報告 ── -->
-    <div id="page-news-hq" class="page">
-      <div class="page-header"><h2>🏢 本部報告</h2><p>本部からのお知らせ・指示・方針</p></div>
-      <div id="news-hq-content"></div>
-    </div>
+    
 
     <!-- ── アカウント管理 ── -->
     <div id="page-accounts" class="page">
@@ -600,7 +596,7 @@ var PAGE_TITLES = {
 'commit-staff':'社員コミットシート','commit-store':'店舗コミットシート',
 'hiring':'採用進捗',
   'reviews-ops':'臨店・口コミ',
-  'news-store':'店長会報告','news-hq':'本部報告',
+  'news-store':'店長会報告',
   'accounts':'アカウント管理','clubs':'部活管理'
 };
 
@@ -1030,7 +1026,7 @@ function renderPage(id) {
   else if (id === 'hiring') renderHiring();
   else if (id === 'reviews-ops') renderReviewsOps();
   else if (id === 'news-store') renderNews('store');
-  else if (id === 'news-hq') renderNews('hq');
+  
   else if (id === 'accounts') renderAccounts();
   else if (id === 'clubs') renderClubs();
   
@@ -1114,42 +1110,23 @@ function getUserAvatar(userId) {
   return {icon: ti.icon, bg: ti.bg, name: u.name, type: u.personalityType};
 }
 // ── LANGUAGE TOGGLE ──
-var currentLang = 'ja';
-var LANG = {
-  en: {
-    '店舗売上':'Sales Dashboard','業務一覧':'Task List','年間スケジュール':'Annual Schedule',
-    '会議体・研修':'Meetings & Training','店舗ルール':'Store Rules','連絡先一覧':'Contacts',
-    '業務進捗':'Work Progress','育成進捗管理':'Training Progress','各種マニュアル':'Manuals',
-    '目安箱':'Suggestion Box','面談申し込み':'Interview Request','臨店・口コミ':'Reviews & Ops',
-    '店長会報告':'Manager Reports','本部報告':'HQ Reports','アカウント管理':'Accounts',
-    '部活管理':'Club Mgmt','こぼれや番':'Koboreya Game','仕事掲示板':'Job Board',
-    '社員コミットシート':'Commit Sheet','店舗コミットシート':'Store Commit','採用進捗':'Hiring Progress',
-    'ログアウト':'Logout','編集モード':'Edit Mode','編集中':'Editing'
-  }
-};
-function toggleLang() {
-  currentLang = currentLang === 'ja' ? 'en' : 'ja';
-  document.getElementById('lang-btn').textContent = currentLang === 'ja' ? '🌐 EN' : '🌐 JP';
-  // Update sidebar labels
-  document.querySelectorAll('.sb-item, .sb-group, .topbar-btn').forEach(function(el) {
-    var orig = el.getAttribute('data-ja') || el.textContent.trim();
-    if (!el.getAttribute('data-ja')) el.setAttribute('data-ja', orig);
-    el.childNodes.forEach(function(node) {
-      if (node.nodeType === 3) {
-        var ja = node.textContent.trim();
-        if (currentLang === 'en' && LANG.en[ja]) node.textContent = ' ' + LANG.en[ja] + ' ';
-        else if (currentLang === 'ja' && el.getAttribute('data-ja')) node.textContent = ' ' + ja + ' ';
-      }
-    });
-  });
-  document.getElementById('lang-btn').textContent = currentLang === 'ja' ? '🌐 EN' : '🌐 JP';
-}
-
 function toggleEditMode() {
   editMode = !editMode;
   document.body.classList.toggle('edit-mode', editMode);
   document.getElementById('edit-toggle-btn').textContent = editMode ? '✅ 編集中' : '✏️ 編集モード';
-  if (!editMode) saveData();
+  if (!editMode) {
+    saveData();
+  } else {
+    markDirty();
+  }
+  // 現在のページを再レンダリングして編集UIを反映
+  var ap = document.querySelector('.page[style*="display: flex"], .page[style*="display:flex"]');
+  if (!ap) ap = document.querySelector('.page[style*="block"]');
+  if (ap) {
+    var pid = ap.id ? ap.id.replace('page-','') : '';
+    if (pid === 'rules') { filterRules(); }
+    else if (pid === 'tasks') { renderTasks(); }
+  }
 }
 function openImgViewer(src) {
   var v = document.getElementById('img-viewer');
@@ -1252,6 +1229,36 @@ function renderRules() {
   el.innerHTML = html;
   filterRules();
 }
+
+function editRule(idx) {
+  if (!confirm) return;
+  var item = prompt('項目名', D.rules[idx] && D.rules[idx].item || '');
+  if (item === null) return;
+  var content_val = prompt('内容', D.rules[idx] && D.rules[idx].content || '');
+  if (content_val === null) return;
+  var store = prompt('店舗（例: 全店 / 本店 / 結 など）', D.rules[idx] && D.rules[idx].store || '全店');
+  if (store === null) return;
+  if (!D.rules[idx]) D.rules[idx] = {};
+  D.rules[idx].item = item;
+  D.rules[idx].content = content_val;
+  D.rules[idx].store = store;
+  markDirty(); saveData(); filterRules();
+}
+function deleteRule(idx) {
+  if (!confirm('このルールを削除しますか？')) return;
+  D.rules.splice(idx, 1);
+  // renumber
+  D.rules.forEach(function(r, i) { r.num = i + 1; });
+  markDirty(); saveData(); filterRules();
+}
+function addNewRule() {
+  var item = prompt('項目名 *'); if (!item || !item.trim()) return;
+  var content_val = prompt('内容 *'); if (!content_val || !content_val.trim()) return;
+  var store = prompt('店舗（例: 全店 / 本店）', '全店') || '全店';
+  D.rules.push({ num: D.rules.length + 1, item: item.trim(), content: content_val.trim(), store: store, imageData: [] });
+  markDirty(); saveData(); filterRules();
+}
+
 function filterRules() {
   var q = (document.getElementById('rules-search') || {value:''}).value.toLowerCase();
   var store = (document.getElementById('rules-store') || {value:''}).value;
@@ -1267,11 +1274,17 @@ function filterRules() {
         return '<img src="'+src+'" style="max-height:80px;border-radius:6px;cursor:pointer;margin:2px;" onclick="openImgViewer(this.src)">';
       }).join('');
     }
+    var rIdx = D.rules.indexOf(r);
+    var editCell = editMode && currentUser && (currentUser.role==='admin'||currentUser.role==='manager') ?
+      '<td><button class="btn btn-secondary btn-sm" onclick="editRule('+rIdx+')" style="margin-right:4px;">✏️</button>'+
+      '<button class="btn btn-danger btn-sm" onclick="deleteRule('+rIdx+')">🗑️</button></td>' : '';
     html += '<tr><td>'+esc(r.num)+'</td><td><strong>'+esc(r.item)+'</strong></td><td>'+linkify(r.content || '')+
-      '</td><td>'+esc(r.store)+'</td><td>'+imgHtml+'</td></tr>';
+      '</td><td>'+esc(r.store)+'</td><td>'+imgHtml+'</td>'+editCell+'</tr>';
   });
   html += '</tbody></table></div>';
-  el.innerHTML = html;
+  var addBtnHtml = (editMode && currentUser && (currentUser.role==='admin'||currentUser.role==='manager'))
+    ? '<div style="margin-top:12px;"><button class="btn btn-primary btn-sm" onclick="addNewRule()">➕ ルールを追加</button></div>' : '';
+  el.innerHTML = html + addBtnHtml;
 }
 
 // ── RENDER CONTACTS ──
@@ -2892,9 +2905,15 @@ function renderNews(cat) {
   var posts = (newsData[cat] || []).slice().reverse();
   var badgeEl = document.getElementById('badge-news-'+cat);
   if (badgeEl) { badgeEl.textContent = posts.length; badgeEl.style.display = posts.length > 0 ? '' : 'none'; }
+  // currentUserを最新のaccountsから更新（権限変更を即時反映）
+  if (currentUser) {
+    var freshAccounts = getAccounts();
+    var freshUser = freshAccounts.find(function(a) { return a.id === currentUser.id; });
+    if (freshUser) currentUser = freshUser;
+  }
 
   var html = '';
-  // Post creation (admin/manager)
+  // Post creation (admin/manager/editor)
   if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'manager' || currentUser.role === 'editor')) {
     html += '<div class="card" style="margin-bottom:16px;"><div class="card-title">✏️ 新規投稿</div>'+
       '<div class="inp-group"><label class="inp-label">タイトル *</label><input class="inp" id="news-title-'+cat+'" placeholder="タイトルを入力"></div>'+
@@ -3198,7 +3217,17 @@ function renderAdminPanel() {
 function changeRole(id, role) {
   var accounts = getAccounts();
   var idx = accounts.findIndex(function(a) { return a.id === id; });
-  if (idx >= 0) { accounts[idx].role = role; saveAccounts(accounts); showToast('権限を変更しました'); }
+  if (idx >= 0) {
+    accounts[idx].role = role;
+    saveAccounts(accounts);
+    // 現在ログイン中のユーザーの権限が変わった場合はセッションも更新
+    if (currentUser && currentUser.id === id) {
+      currentUser.role = role;
+      updateSidebarUser();
+    }
+    showToast('権限を変更しました');
+    renderAdminPanel();
+  }
 }
 function deleteAccount(id) {
   if (!confirm('このアカウントを削除しますか？')) return;
