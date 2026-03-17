@@ -7,360 +7,433 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #0d1117;
-  --surface: #161b22;
-  --card: #21262d;
-  --border: #30363d;
-  --text: #e6edf3;
-  --muted: #8b949e;
-  --gold: #e3b341;
-  --red: #f85149;
-  --green: #3fb950;
-  --blue: #58a6ff;
-  --purple: #a371f7;
+  --bg: #f4f0e2;
+  --surface: #fff;
+  --card-bg: #fffdf5;
+  --border: #c9bfa3;
+  --border2: #b0a88a;
+  --text: #1c1a12;
+  --muted: #6b6048;
+  --hdr: #2c6b2f;
+  --hdr2: #388e3c;
+  --hdr-text: #fff;
+  --green: #2e7d32;
+  --green-bg: #e8f5e9;
+  --green-light: #a5d6a7;
+  --red: #c62828;
+  --red-bg: #ffebee;
+  --red-light: #ef9a9a;
+  --blue: #1565c0;
+  --blue-bg: #e3f2fd;
+  --blue-cell: #90caf9;
+  --gold: #b8860b;
+  --gold-bg: #fff8e1;
+  --teal: #00695c;
+  --teal-bg: #e0f2f1;
+  --orange: #e65100;
+  --orange-bg: #fff3e0;
 }
-body {
-  font-family: 'Hiragino Sans', 'Noto Sans JP', 'Meiryo', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-}
+body { font-family: 'Hiragino Sans','Noto Sans JP','Meiryo',sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 .screen { display: none; min-height: 100vh; }
 .screen.active { display: flex; flex-direction: column; }
 
-/* STATUS BAR */
-.status-bar {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 8px 16px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  font-size: 0.82em;
-  position: sticky; top: 0; z-index: 10;
-}
-.status-item { display: flex; align-items: center; gap: 5px; }
-.status-label { color: var(--muted); }
-.status-value { font-weight: bold; }
-.rank-badge { background: var(--gold); color: #000; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
-.month-badge { background: var(--blue); color: #000; padding: 2px 10px; border-radius: 4px; font-weight: bold; }
+/* ===== STATUS BAR ===== */
+.sbar { background: var(--hdr); color: #fff; padding: 7px 14px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 0.8em; position: sticky; top: 0; z-index: 20; box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
+.sbar-item { display: flex; align-items: center; gap: 4px; }
+.sbar-label { opacity: 0.75; font-size: 0.9em; }
+.sbar-val { font-weight: bold; }
+.sbadge-month { background: #fff; color: var(--hdr); padding: 2px 9px; border-radius: 4px; font-weight: bold; font-size: 0.9em; }
+.sbadge-rank { background: var(--gold); color: #fff; padding: 2px 9px; border-radius: 4px; font-weight: bold; font-size: 0.9em; }
+.sbar .pos { color: #a5d6a7; } .sbar .neg { color: #ef9a9a; }
 
-/* TITLE */
-#screen-title {
-  background: linear-gradient(160deg, #0d1117 0%, #161b22 40%, #0d1a2d 100%);
-  align-items: center; justify-content: center; text-align: center; padding: 40px 20px;
-}
-.title-logo { font-size: 4em; margin-bottom: 8px; }
-.title-main { font-size: 2.2em; font-weight: bold; color: var(--gold); margin-bottom: 4px; }
-.title-sub { font-size: 1.1em; color: var(--muted); margin-bottom: 30px; }
-.title-card {
-  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-  padding: 24px; max-width: 560px; width: 100%; text-align: left; margin-bottom: 16px;
-}
-.title-card h3 { color: var(--gold); margin-bottom: 12px; font-size: 1em; }
-.title-card ul { list-style: none; }
-.title-card li { padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.88em; }
-.title-card li:last-child { border: none; }
-.tag { display: inline-block; background: var(--blue); color: #000; padding: 1px 6px; border-radius: 3px; font-size: 0.78em; margin-right: 6px; font-weight: bold; }
-
-/* BUTTONS */
-.btn {
-  display: inline-block; padding: 11px 26px; border: none; border-radius: 8px;
-  font-size: 1em; font-family: inherit; cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s; font-weight: bold;
-}
-.btn:hover { opacity: 0.85; transform: translateY(-1px); }
+/* ===== BUTTONS ===== */
+.btn { display: inline-block; padding: 10px 24px; border: none; border-radius: 7px; font-size: 0.95em; font-family: inherit; cursor: pointer; transition: all 0.15s; font-weight: bold; }
+.btn:hover { opacity: 0.88; transform: translateY(-1px); }
 .btn:active { transform: translateY(0); }
-.btn-primary { background: var(--gold); color: #000; }
-.btn-success { background: var(--green); color: #000; }
-.btn-secondary { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+.btn-primary { background: var(--hdr2); color: #fff; box-shadow: 0 2px 6px rgba(46,107,47,0.35); }
+.btn-secondary { background: #fff; color: var(--text); border: 1px solid var(--border2); }
+.btn-blue { background: var(--blue); color: #fff; box-shadow: 0 2px 6px rgba(21,101,192,0.3); }
+.btn-red { background: var(--red); color: #fff; }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-/* MAIN CONTENT */
-.main-content { flex: 1; padding: 16px; max-width: 780px; width: 100%; margin: 0 auto; }
-.section-title {
-  font-size: 1.25em; font-weight: bold; margin-bottom: 14px;
-  color: var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 7px;
-}
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 14px; }
+/* ===== SECTION HEADERS ===== */
+.sec-hdr { background: var(--hdr); color: #fff; padding: 8px 14px; font-weight: bold; font-size: 1.05em; border-radius: 7px 7px 0 0; display: flex; align-items: center; gap: 8px; }
+.sec-hdr2 { background: var(--blue); color: #fff; padding: 7px 14px; font-weight: bold; font-size: 0.95em; border-radius: 7px 7px 0 0; display: flex; align-items: center; gap: 8px; }
+.sec-hdr3 { background: var(--teal); color: #fff; padding: 7px 14px; font-weight: bold; font-size: 0.95em; border-radius: 7px 7px 0 0; display: flex; align-items: center; gap: 8px; }
+.sec-hdr4 { background: var(--orange); color: #fff; padding: 7px 14px; font-weight: bold; font-size: 0.95em; border-radius: 7px 7px 0 0; display: flex; align-items: center; gap: 8px; }
 
-/* STAFF GRID */
-.staff-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 12px 0; }
-.staff-cell { text-align: center; padding: 10px 6px; border-radius: 8px; border: 1px solid var(--border); }
-.staff-cell.rank-s { background: linear-gradient(135deg,#2d1b69,#4a2c99); border-color: var(--purple); }
-.staff-cell.rank-a { background: linear-gradient(135deg,#1a3a1a,#2d5a2d); border-color: var(--green); }
-.staff-cell.rank-b { background: linear-gradient(135deg,#1a2d4a,#2d4a6d); border-color: var(--blue); }
-.staff-cell.rank-c { background: linear-gradient(135deg,#2d2d1a,#4a4a2d); border-color: var(--gold); }
-.staff-cell.rank-d { background: linear-gradient(135deg,#2d1a1a,#4a2d2d); border-color: var(--red); }
-.staff-rank { font-size: 1.4em; font-weight: bold; }
-.staff-count { font-size: 1.7em; font-weight: bold; margin: 4px 0; }
-.staff-power { font-size: 0.72em; color: var(--muted); }
+/* ===== CARDS ===== */
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 14px; overflow: hidden; }
+.panel-body { padding: 14px; }
+.inner-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 7px; padding: 12px; margin-bottom: 10px; }
 
-/* POWER BAR */
-.power-bar-bg {
-  background: var(--surface); border-radius: 10px; height: 22px;
-  position: relative; overflow: hidden; border: 1px solid var(--border); margin: 8px 0;
-}
-.power-bar-fill {
-  height: 100%; border-radius: 10px; transition: width 0.6s ease;
-  background: linear-gradient(90deg, var(--blue), var(--purple));
-}
-.power-bar-label {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-  font-size: 0.78em; font-weight: bold; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-}
-.power-thresholds { display: flex; justify-content: space-between; font-size: 0.72em; color: var(--muted); }
+/* ===== LAYOUT ===== */
+.main { flex: 1; padding: 14px; max-width: 820px; width: 100%; margin: 0 auto; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.flex-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.flex-center { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mb-10 { margin-bottom: 10px; }
 
-/* ACTION CARDS */
-.hours-bar {
-  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
-  padding: 10px 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;
-}
-.hours-remaining { font-size: 1.2em; font-weight: bold; }
-.hours-remaining.low { color: var(--red); }
-.hours-bar-inner { flex: 1; background: var(--card); border-radius: 6px; height: 14px; overflow: hidden; border: 1px solid var(--border); }
-.hours-bar-used { height: 100%; background: linear-gradient(90deg, var(--green), var(--blue)); transition: width 0.3s; }
-.hours-bar-used.full { background: linear-gradient(90deg, var(--gold), var(--red)); }
+/* ===== TITLE ===== */
+#screen-title { background: linear-gradient(160deg, #1b4d1e 0%, #2e6b30 50%, #1b3a1e 100%); align-items: center; justify-content: center; text-align: center; padding: 40px 16px; }
+.title-emblem { font-size: 3.5em; margin-bottom: 8px; }
+.title-main { font-size: 2em; font-weight: bold; color: #ffe082; letter-spacing: 2px; margin-bottom: 4px; }
+.title-sub { font-size: 1em; color: rgba(255,255,255,0.7); margin-bottom: 28px; }
+.title-rule-box { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25); border-radius: 10px; padding: 18px 22px; max-width: 540px; width: 100%; text-align: left; margin-bottom: 14px; color: #fff; }
+.title-rule-box h3 { color: #ffe082; margin-bottom: 10px; font-size: 0.95em; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 6px; }
+.title-rule-box ul { list-style: none; }
+.title-rule-box li { padding: 5px 0; font-size: 0.85em; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.title-rule-box li:last-child { border: none; }
+.tlabel { display: inline-block; background: var(--gold); color: #fff; padding: 1px 6px; border-radius: 3px; font-size: 0.78em; margin-right: 5px; font-weight: bold; }
 
-.action-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 9px; margin-bottom: 14px; }
-.action-card {
-  background: var(--card); border: 2px solid var(--border); border-radius: 10px;
-  padding: 12px; cursor: pointer; transition: all 0.2s; position: relative;
-}
-.action-card:hover:not(.disabled) { border-color: var(--blue); transform: translateY(-2px); box-shadow: 0 4px 14px rgba(88,166,255,0.3); }
-.action-card.selected { border-color: var(--green); background: #1a2d1a; box-shadow: 0 0 10px rgba(63,185,80,0.35); }
-.action-card.disabled { opacity: 0.38; cursor: not-allowed; }
-.action-card .card-icon { font-size: 1.7em; margin-bottom: 5px; }
-.action-card .card-name { font-weight: bold; font-size: 0.88em; margin-bottom: 3px; }
-.action-card .card-desc { font-size: 0.73em; color: var(--muted); margin-bottom: 7px; }
-.action-card .card-meta { display: flex; gap: 5px; flex-wrap: wrap; }
-.meta-badge { font-size: 0.68em; padding: 2px 5px; border-radius: 3px; font-weight: bold; }
-.meta-badge.hours { background: #1a2d4a; color: var(--blue); border: 1px solid var(--blue); }
-.meta-badge.cost { background: #2d1a1a; color: var(--red); border: 1px solid var(--red); }
-.selected-check { position: absolute; top: -6px; right: -6px; background: var(--green); color: #000; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.72em; font-weight: bold; }
+/* ===== STAFF TABLE ===== */
+.staff-ref-table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
+.staff-ref-table th, .staff-ref-table td { border: 1px solid var(--border); padding: 7px 10px; text-align: center; }
+.staff-ref-table thead th { background: var(--hdr); color: #fff; font-weight: bold; }
+.staff-ref-table .th-s { background: #6a1b9a; color: #fff; }
+.staff-ref-table .th-a { background: #1b5e20; color: #fff; }
+.staff-ref-table .th-b { background: #0d47a1; color: #fff; }
+.staff-ref-table .th-c { background: #e65100; color: #fff; }
+.staff-ref-table .th-d { background: #b71c1c; color: #fff; }
+.staff-ref-table .td-s { background: #f3e5f5; color: #6a1b9a; font-weight: bold; }
+.staff-ref-table .td-a { background: #e8f5e9; color: #1b5e20; font-weight: bold; }
+.staff-ref-table .td-b { background: #e3f2fd; color: #0d47a1; font-weight: bold; }
+.staff-ref-table .td-c { background: #fff3e0; color: #e65100; font-weight: bold; }
+.staff-ref-table .td-d { background: #ffebee; color: #b71c1c; font-weight: bold; }
+.staff-ref-table .row-label { background: #f5f0e2; color: var(--muted); font-size: 0.82em; text-align: left; padding-left: 10px; }
 
-/* RISK CARD */
-#screen-risk { align-items: center; justify-content: center; padding: 30px 20px; }
-.risk-container { text-align: center; max-width: 400px; width: 100%; }
-.risk-card-3d { width: 180px; height: 256px; margin: 20px auto; perspective: 1000px; cursor: pointer; }
-.risk-card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.8s; }
-.risk-card-3d.flipped .risk-card-inner { transform: rotateY(180deg); }
-.risk-card-face { position: absolute; width: 100%; height: 100%; border-radius: 14px; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; }
-.risk-card-back { background: linear-gradient(135deg, #8B0000, #CC2200); border: 3px solid #ff6666; box-shadow: 0 0 28px rgba(200,0,0,0.5); }
-.risk-card-back .cp { font-size: 2.8em; opacity: 0.4; }
-.risk-card-back .cl { font-size: 1.1em; font-weight: bold; color: rgba(255,255,255,0.75); margin-top: 8px; }
-.risk-card-front { transform: rotateY(180deg); }
-.risk-card-front.type-good { background: linear-gradient(135deg,#0d3d1a,#1a5c2d); border: 3px solid var(--green); box-shadow: 0 0 28px rgba(63,185,80,0.4); }
-.risk-card-front.type-bad { background: linear-gradient(135deg,#3d0d0d,#5c1a1a); border: 3px solid var(--red); box-shadow: 0 0 28px rgba(248,81,73,0.4); }
-.risk-card-front.type-critical { background: linear-gradient(135deg,#3d0030,#660000); border: 3px solid #ff44cc; box-shadow: 0 0 28px rgba(255,68,204,0.5); }
-.risk-card-front.type-neutral { background: linear-gradient(135deg,#1a1a3d,#2d2d5c); border: 3px solid var(--blue); box-shadow: 0 0 20px rgba(88,166,255,0.3); }
-.risk-icon-big { font-size: 2.8em; margin-bottom: 8px; }
-.risk-name-big { font-size: 1.1em; font-weight: bold; margin-bottom: 8px; }
-.risk-desc-sm { font-size: 0.78em; color: var(--muted); text-align: center; margin-bottom: 12px; }
-.risk-effect-big { font-size: 0.95em; font-weight: bold; }
-.risk-effect-big.neg { color: var(--red); }
-.risk-effect-big.pos { color: var(--green); }
-.risk-effect-big.neu { color: var(--muted); }
+/* Staff circles for resource board */
+.circles-row { display: flex; gap: 5px; justify-content: center; align-items: center; flex-wrap: wrap; padding: 4px 0; }
+.staff-circle { width: 20px; height: 20px; border-radius: 50%; border: 2px solid; display: inline-block; flex-shrink: 0; }
+.sc-s { background: #ce93d8; border-color: #6a1b9a; }
+.sc-a { background: #a5d6a7; border-color: #1b5e20; }
+.sc-b { background: #90caf9; border-color: #0d47a1; }
+.sc-c { background: #ffcc80; border-color: #e65100; }
+.sc-d { background: #ef9a9a; border-color: #b71c1c; }
+.sc-empty { background: #e0e0e0; border-color: #bdbdbd; }
 
-/* P&L TABLE */
+/* ===== POWER BAR ===== */
+.power-bar-wrap { margin: 10px 0; }
+.power-bar-bg { background: #e8e0d0; border-radius: 8px; height: 20px; position: relative; overflow: hidden; border: 1px solid var(--border); }
+.power-bar-fill { height: 100%; border-radius: 8px; transition: width 0.6s ease; background: linear-gradient(90deg, var(--hdr2), #1565c0); }
+.power-bar-lbl { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 0.78em; font-weight: bold; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.6); }
+.pthresh { display: flex; justify-content: space-between; font-size: 0.7em; color: var(--muted); margin-top: 3px; }
+
+/* ===== HOURS BAR ===== */
+.hours-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 9px 12px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+.hours-num { font-size: 1.15em; font-weight: bold; min-width: 80px; }
+.hours-num.low { color: var(--red); }
+.hours-bar-bg { flex: 1; background: #e8e0d0; border-radius: 5px; height: 13px; overflow: hidden; border: 1px solid var(--border); }
+.hours-bar-fill { height: 100%; background: linear-gradient(90deg, var(--hdr2), #42a5f5); transition: width 0.3s; }
+.hours-bar-fill.full { background: linear-gradient(90deg, var(--gold), var(--red)); }
+
+/* ===== MANAGEMENT TASK CARDS ===== */
+.mgmt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 9px; padding: 12px; }
+.mgmt-card { background: var(--card-bg); border: 2px solid var(--border); border-radius: 8px; padding: 11px; cursor: pointer; transition: all 0.18s; position: relative; }
+.mgmt-card:hover:not(.disabled) { border-color: var(--hdr2); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(46,107,47,0.25); }
+.mgmt-card.selected { border-color: var(--green); background: var(--green-bg); box-shadow: 0 0 0 2px rgba(46,107,47,0.2); }
+.mgmt-card.disabled { opacity: 0.4; cursor: not-allowed; }
+.mgmt-card .mc-icon { font-size: 1.6em; margin-bottom: 5px; }
+.mgmt-card .mc-name { font-weight: bold; font-size: 0.88em; color: var(--text); margin-bottom: 3px; }
+.mgmt-card .mc-desc { font-size: 0.72em; color: var(--muted); margin-bottom: 7px; }
+.mgmt-card .mc-meta { display: flex; gap: 5px; flex-wrap: wrap; }
+.mc-tag { font-size: 0.67em; padding: 2px 5px; border-radius: 3px; font-weight: bold; }
+.mc-tag.t-hours { background: var(--blue-bg); color: var(--blue); border: 1px solid #90caf9; }
+.mc-tag.t-cost { background: var(--red-bg); color: var(--red); border: 1px solid #ef9a9a; }
+.mc-tag.t-eff { background: var(--green-bg); color: var(--green); border: 1px solid #a5d6a7; }
+.mc-check { position: absolute; top: -6px; right: -6px; background: var(--green); color: #fff; border-radius: 50%; width: 19px; height: 19px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; font-weight: bold; }
+
+/* ===== ACTION CARDS ===== */
+.act-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 9px; padding: 12px; }
+.act-card { background: var(--card-bg); border: 2px solid var(--border); border-radius: 8px; padding: 11px; cursor: pointer; transition: all 0.18s; position: relative; }
+.act-card:hover:not(.disabled) { border-color: var(--blue); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(21,101,192,0.2); }
+.act-card.selected { border-color: var(--blue); background: var(--blue-bg); box-shadow: 0 0 0 2px rgba(21,101,192,0.18); }
+.act-card.disabled { opacity: 0.4; cursor: not-allowed; }
+.act-card .mc-icon { font-size: 1.5em; margin-bottom: 4px; }
+.act-card .mc-name { font-weight: bold; font-size: 0.86em; margin-bottom: 3px; }
+.act-card .mc-desc { font-size: 0.71em; color: var(--muted); margin-bottom: 7px; }
+.act-card .mc-meta { display: flex; gap: 5px; flex-wrap: wrap; }
+.act-check { position: absolute; top: -6px; right: -6px; background: var(--blue); color: #fff; border-radius: 50%; width: 19px; height: 19px; display: flex; align-items: center; justify-content: center; font-size: 0.7em; font-weight: bold; }
+
+/* ===== RISK CARD ===== */
+#screen-risk { align-items: center; justify-content: center; padding: 28px 16px; }
+.risk-wrap { text-align: center; max-width: 380px; width: 100%; }
+.risk-card-3d { width: 175px; height: 248px; margin: 18px auto; perspective: 1000px; cursor: pointer; }
+.rci { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.8s; }
+.risk-card-3d.flipped .rci { transform: rotateY(180deg); }
+.rcf { position: absolute; width: 100%; height: 100%; border-radius: 13px; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 14px; }
+.rcf-back { background: linear-gradient(135deg, #7b1010, #b71c1c); border: 3px solid #ef9a9a; box-shadow: 0 0 24px rgba(183,28,28,0.5); }
+.rcf-front { transform: rotateY(180deg); }
+.rcf-front.type-good { background: linear-gradient(135deg, #1b4a1e, #2e7d32); border: 3px solid #66bb6a; box-shadow: 0 0 22px rgba(46,125,50,0.4); }
+.rcf-front.type-bad { background: linear-gradient(135deg, #4a1515, #7b1010); border: 3px solid #ef9a9a; box-shadow: 0 0 22px rgba(183,28,28,0.4); }
+.rcf-front.type-critical { background: linear-gradient(135deg, #3a0a2e, #6a0f4a); border: 3px solid #ce93d8; box-shadow: 0 0 22px rgba(206,147,216,0.5); }
+.rcf-front.type-neutral { background: linear-gradient(135deg, #0d2a4a, #1565c0); border: 3px solid #90caf9; box-shadow: 0 0 18px rgba(144,202,249,0.35); }
+.rc-icon { font-size: 2.6em; margin-bottom: 7px; }
+.rc-name { font-size: 1em; font-weight: bold; color: #fff; margin-bottom: 7px; }
+.rc-desc { font-size: 0.75em; color: rgba(255,255,255,0.8); text-align: center; margin-bottom: 11px; }
+.rc-eff { font-size: 0.9em; font-weight: bold; color: #fff; }
+
+/* ===== P&L TABLE ===== */
 .pl-table { width: 100%; border-collapse: collapse; }
-.pl-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); font-size: 0.88em; }
+.pl-table td { padding: 6px 10px; border-bottom: 1px solid #e8e0d0; font-size: 0.88em; }
 .pl-table tr:last-child td { border: none; }
 .pl-label { color: var(--muted); }
-.pl-value { text-align: right; font-family: monospace; }
-.pl-total td { font-weight: bold; color: var(--gold); border-top: 2px solid var(--gold) !important; }
-.pl-section td { background: var(--surface); font-weight: bold; font-size: 0.82em; }
-.pl-indent td:first-child { padding-left: 26px; }
+.pl-val { text-align: right; font-family: monospace; }
+.pl-pos { color: var(--green); }
+.pl-neg { color: var(--red); }
+.pl-indent td:first-child { padding-left: 22px; font-size: 0.85em; }
+.pl-total td { font-weight: bold; border-top: 2px solid var(--hdr) !important; }
+.pl-total .pl-val { color: var(--hdr); }
+.pl-section td { background: #f0ede2; font-weight: bold; font-size: 0.82em; }
+.profit-box { text-align: center; padding: 16px; border-radius: 9px; margin: 10px 0; }
+.profit-box.pos { background: var(--green-bg); border: 2px solid var(--green); }
+.profit-box.neg { background: var(--red-bg); border: 2px solid var(--red); }
+.profit-num { font-size: 2.2em; font-weight: bold; }
+.profit-num.pos { color: var(--green); }
+.profit-num.neg { color: var(--red); }
+.profit-sub { font-size: 0.82em; color: var(--muted); margin-top: 3px; }
 
-.profit-box { text-align: center; padding: 18px; border-radius: 10px; margin: 12px 0; }
-.profit-box.pos { background: #1a2d1a; border: 2px solid var(--green); }
-.profit-box.neg { background: #2d1a1a; border: 2px solid var(--red); }
-.profit-amount { font-size: 2.4em; font-weight: bold; }
-.profit-amount.pos { color: var(--green); }
-.profit-amount.neg { color: var(--red); }
-.profit-sub { font-size: 0.85em; color: var(--muted); margin-top: 4px; }
+/* ===== ALERTS ===== */
+.alert { padding: 9px 12px; border-radius: 6px; font-size: 0.85em; margin-bottom: 8px; }
+.a-warn { background: var(--gold-bg); border: 1px solid var(--gold); color: #7a5500; }
+.a-danger { background: var(--red-bg); border: 1px solid var(--red); color: var(--red); }
+.a-success { background: var(--green-bg); border: 1px solid var(--green); color: var(--green); }
+.a-info { background: var(--blue-bg); border: 1px solid var(--blue); color: var(--blue); }
+.a-teal { background: var(--teal-bg); border: 1px solid var(--teal); color: var(--teal); }
 
-/* ENDING */
-#screen-ending { align-items: center; justify-content: center; padding: 36px 20px; }
-.grade-big { font-size: 7em; font-weight: bold; margin: 16px 0; text-shadow: 0 0 30px currentColor; }
-.grade-s { color: #ffd700; } .grade-a { color: var(--purple); }
-.grade-b { color: var(--blue); } .grade-c { color: var(--green); } .grade-f { color: var(--red); }
-.result-table { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; max-width: 480px; width: 100%; text-align: left; margin: 16px auto; }
-.result-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 0.88em; }
-.result-row:last-child { border: none; }
-.result-row .rl { color: var(--muted); }
-.result-row .rv { font-weight: bold; }
+/* ===== ENDING ===== */
+#screen-ending { align-items: center; justify-content: center; padding: 36px 16px; }
+.grade-big { font-size: 7em; font-weight: bold; margin: 14px 0; text-shadow: 0 2px 12px rgba(0,0,0,0.2); }
+.g-s { color: #f9a825; } .g-a { color: #6a1b9a; } .g-b { color: #1565c0; }
+.g-c { color: #2e7d32; } .g-f { color: #c62828; }
+.end-table { background: #fff; border: 1px solid var(--border); border-radius: 9px; padding: 16px; max-width: 480px; width: 100%; text-align: left; margin: 14px auto; }
+.end-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e8e0d0; font-size: 0.88em; }
+.end-row:last-child { border: none; }
+.end-row .el { color: var(--muted); }
+.end-row .ev { font-weight: bold; }
 
-/* MISC */
-.flex-center { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
-.mt-14 { margin-top: 14px; }
-.alert { padding: 10px 14px; border-radius: 7px; font-size: 0.87em; margin-bottom: 9px; }
-.alert-warn { background: #2d2d0d; border: 1px solid var(--gold); color: var(--gold); }
-.alert-danger { background: #2d0d0d; border: 1px solid var(--red); color: var(--red); }
-.alert-success { background: #0d2d0d; border: 1px solid var(--green); color: var(--green); }
-.alert-info { background: #0d1a2d; border: 1px solid var(--blue); color: var(--blue); }
-.text-green { color: var(--green); } .text-red { color: var(--red); } .text-gold { color: var(--gold); }
+/* ===== RESOURCE BOARD ===== */
+.res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.hours-ref-table { width: 100%; border-collapse: collapse; font-size: 0.8em; }
+.hours-ref-table th, .hours-ref-table td { border: 1px solid var(--border); padding: 5px 7px; text-align: center; }
+.hours-ref-table thead th { background: var(--hdr); color: #fff; font-size: 0.88em; }
+.hours-ref-table .h-pos { background: #c8e6c9; color: #1b5e20; font-weight: bold; }
+.hours-ref-table .h-neg { background: #ffcdd2; color: #b71c1c; font-weight: bold; }
+.hours-ref-table .h-zero { background: #fff9c4; color: #f57f17; font-weight: bold; }
+.hours-ref-table .h-cur { background: #90caf9; color: #0d47a1; font-weight: bold; border: 2px solid #0d47a1; }
 
-@media (max-width: 480px) {
-  .staff-grid { grid-template-columns: repeat(5, 1fr); gap: 4px; }
-  .staff-count { font-size: 1.4em; }
-  .action-grid { grid-template-columns: repeat(2, 1fr); }
+/* ===== SCORE BOX ===== */
+.score-box { text-align: center; padding: 12px; border-radius: 7px; }
+.score-box-val { font-size: 1.9em; font-weight: bold; }
+.score-box-label { font-size: 0.75em; color: var(--muted); }
+.score-box.green { background: var(--green-bg); border: 1px solid #a5d6a7; }
+.score-box.blue { background: var(--blue-bg); border: 1px solid #90caf9; }
+.score-box.red { background: var(--red-bg); border: 1px solid #ef9a9a; }
+.score-box.gold { background: var(--gold-bg); border: 1px solid #ffe082; }
+
+@media (max-width: 500px) {
+  .mgmt-grid, .act-grid { grid-template-columns: repeat(2, 1fr); }
+  .grid2, .grid3 { grid-template-columns: 1fr; }
+  .res-grid { grid-template-columns: 1fr; }
   .title-main { font-size: 1.7em; }
 }
 </style>
 </head>
 <body>
 
-<!-- TITLE -->
+<!-- ===== TITLE ===== -->
 <div id="screen-title" class="screen">
-  <div class="title-logo">🍽️</div>
+  <div class="title-emblem">🍽️</div>
   <div class="title-main">こぼれや</div>
   <div class="title-sub">レストラン マネジメントゲーム</div>
-  <div class="title-card">
+  <div class="title-rule-box">
     <h3>🎮 ゲーム概要</h3>
     <ul>
-      <li><span class="tag">期間</span>8月〜1月の6ヶ月間、店舗経営をシミュレート</li>
-      <li><span class="tag">目標</span>アクションカードで戦略を立て、リスクを乗り越えて利益を最大化</li>
-      <li><span class="tag">スタッフ</span>初期スタッフ20名（B×11・C×7・D×2）の育成・採用が鍵</li>
-      <li><span class="tag">評価</span>6ヶ月の累計利益でS〜Fのグレード判定</li>
+      <li><span class="tlabel">期間</span>8月〜1月の6ヶ月間、店舗経営をシミュレート</li>
+      <li><span class="tlabel">流れ</span>資源確認 → 計画立案 → リスク → 月次決算 の繰り返し</li>
+      <li><span class="tlabel">管理</span>原価・人件費・売上・リスクを適切にマネジメント</li>
+      <li><span class="tlabel">評価</span>6ヶ月の累計利益でS〜Fのグレード判定</li>
     </ul>
   </div>
-  <div class="title-card">
-    <h3>⚡ スタッフランクと営業力</h3>
+  <div class="title-rule-box">
+    <h3>👥 スタッフランクと営業力</h3>
     <ul>
-      <li>🌟 <b>S</b>: +6P / 時給1,400円×80h &nbsp;|&nbsp; ✨ <b>A</b>: +6P / 1,200円×80h</li>
-      <li>📘 <b>B</b>: +4P / 1,100円×70h &nbsp;|&nbsp; 📗 <b>C</b>: +2P / 1,000円×60h</li>
-      <li>📕 <b>D</b>: −4P / 1,000円×60h</li>
+      <li>🟣 <b>S スペシャリスト</b>: +6P / 1,400円×80h</li>
+      <li>🟢 <b>A 業務リーダー</b>: +6P / 1,200円×80h</li>
+      <li>🔵 <b>B 一般スタッフ</b>: +4P / 1,100円×70h</li>
+      <li>🟡 <b>C 学生バイト</b>: +2P / 1,000円×60h</li>
+      <li>🔴 <b>D 新人バイト</b>: −4P / 1,000円×60h</li>
     </ul>
   </div>
-  <div class="title-card">
-    <h3>🏆 営業力ランク</h3>
+  <div class="title-rule-box">
+    <h3>🏆 営業力ランク目安</h3>
     <ul>
-      <li>🏆 <b>1位</b>: 70P以上 &nbsp;⭐ <b>2位</b>: 60P以上 &nbsp;📊 <b>3位</b>: 45P以上</li>
-      <li>📈 <b>4位</b>: 30P以上 &nbsp;📉 <b>5位</b>: 30P未満</li>
+      <li>🏆 <b>1位</b>: 70P以上 ｜ ⭐ <b>2位</b>: 60P以上 ｜ 📊 <b>3位</b>: 45P以上</li>
+      <li>📈 <b>4位</b>: 30P以上 ｜ 📉 <b>5位</b>: 30P未満</li>
     </ul>
   </div>
-  <button class="btn btn-primary" onclick="startGame()" style="font-size:1.15em; padding:14px 48px; margin-top:6px;">🚀 ゲームスタート</button>
+  <button class="btn btn-primary" onclick="startGame()" style="font-size:1.1em; padding:13px 46px; margin-top:8px;">🚀 ゲームスタート</button>
 </div>
 
-<!-- MONTH INTRO -->
+<!-- ===== MONTH INTRO ===== -->
 <div id="screen-month-intro" class="screen">
-  <div id="intro-statusbar" class="status-bar"></div>
-  <div class="main-content">
+  <div id="sb-intro" class="sbar"></div>
+  <div class="main">
     <div id="intro-content"></div>
-    <div class="flex-center mt-14">
-      <button class="btn btn-primary" onclick="goToPlanning()">⚡ アクションカードを選ぶ</button>
+    <div class="flex-center mt-16">
+      <button class="btn btn-primary" onclick="showResources()">① 資源ボードを確認 →</button>
     </div>
   </div>
 </div>
 
-<!-- PLANNING -->
+<!-- ===== RESOURCES BOARD (資源ボード) ===== -->
+<div id="screen-resources" class="screen">
+  <div id="sb-res" class="sbar"></div>
+  <div class="main">
+    <div style="text-align:center; padding: 8px 0 14px;">
+      <span style="background:var(--hdr); color:#fff; padding:4px 14px; border-radius:20px; font-size:0.9em; font-weight:bold;">① 今月の資源確認ボード</span>
+    </div>
+    <div id="res-content"></div>
+    <div class="flex-center mt-16">
+      <button class="btn btn-secondary" onclick="showMonthIntro()">← 戻る</button>
+      <button class="btn btn-primary" onclick="goToPlanning()">② 計画ボードへ →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PLANNING BOARD (計画ボード) ===== -->
 <div id="screen-planning" class="screen">
-  <div id="plan-statusbar" class="status-bar"></div>
-  <div class="main-content">
-    <h2 class="section-title">🃏 アクションカードを選択</h2>
-    <div class="hours-bar">
+  <div id="sb-plan" class="sbar"></div>
+  <div class="main">
+    <div style="text-align:center; padding: 8px 0 12px;">
+      <span style="background:var(--blue); color:#fff; padding:4px 14px; border-radius:20px; font-size:0.9em; font-weight:bold;">② 今月の計画ボード</span>
+    </div>
+    <!-- Hours tracker -->
+    <div class="hours-wrap">
       <div>
-        <div style="font-size:0.78em; color:var(--muted);">マネージャー残り時間</div>
-        <div id="hrs-display" class="hours-remaining">180時間</div>
+        <div style="font-size:0.75em; color:var(--muted);">マネージャー残り時間</div>
+        <div id="hrs-disp" class="hours-num">180時間</div>
       </div>
-      <div class="hours-bar-inner" style="flex:1;">
-        <div id="hrs-bar" class="hours-bar-used" style="width:0%"></div>
+      <div class="hours-bar-bg">
+        <div id="hrs-fill" class="hours-bar-fill" style="width:0%"></div>
       </div>
-      <div style="font-size:0.8em; color:var(--muted);" id="hrs-total-label">/ 180h</div>
+      <div id="hrs-total" style="font-size:0.8em; color:var(--muted); white-space:nowrap;"> / 180h</div>
     </div>
-    <div id="action-grid" class="action-grid"></div>
-    <div id="sel-summary" class="card" style="display:none;">
-      <div style="font-size:0.85em; color:var(--muted); margin-bottom:8px;">📋 選択中のアクション</div>
-      <div id="sel-list"></div>
+
+    <!-- Management Tasks -->
+    <div class="panel">
+      <div class="sec-hdr">🏢 マネジメントタスク（管理業務）</div>
+      <div style="padding:8px 12px; font-size:0.8em; color:var(--muted); background:#f9f6ee; border-bottom:1px solid var(--border);">
+        適切に管理することでコスト削減・売上向上・リスク軽減の効果が得られます
+      </div>
+      <div id="mgmt-grid" class="mgmt-grid"></div>
     </div>
-    <div class="flex-center mt-14">
-      <button class="btn btn-secondary" onclick="goToMonthIntro()">← 戻る</button>
-      <button class="btn btn-primary" onclick="confirmActions()">🎴 リスクカードを引く</button>
+
+    <!-- Action Cards -->
+    <div class="panel">
+      <div class="sec-hdr2">🃏 アクションカード（任意）</div>
+      <div style="padding:8px 12px; font-size:0.8em; color:var(--muted); background:#f5f8ff; border-bottom:1px solid var(--border);">
+        採用・教育・販促など追加の施策を実施できます（残り時間内で選択可能）
+      </div>
+      <div id="act-grid" class="act-grid"></div>
+    </div>
+
+    <!-- Selected summary -->
+    <div id="sel-box" class="panel" style="display:none;">
+      <div class="sec-hdr3">📋 選択中のアクション</div>
+      <div class="panel-body" id="sel-body"></div>
+    </div>
+
+    <div class="flex-center mt-16">
+      <button class="btn btn-secondary" onclick="showResources()">← 資源ボードへ</button>
+      <button class="btn btn-primary" onclick="confirmActions()">🎴 リスクカードを引く →</button>
     </div>
   </div>
 </div>
 
-<!-- RISK -->
+<!-- ===== RISK CARD ===== -->
 <div id="screen-risk" class="screen">
-  <div id="risk-statusbar" class="status-bar"></div>
-  <div class="risk-container">
-    <h2 style="font-size:1.4em; color:var(--gold); margin-bottom:4px;">🎴 リスクカード</h2>
-    <p style="color:var(--muted); font-size:0.88em; margin-bottom:18px;">カードをタップして今月のリスクを確認！</p>
+  <div id="sb-risk" class="sbar"></div>
+  <div class="risk-wrap">
+    <h2 style="font-size:1.4em; color:var(--hdr); margin-bottom:4px;">🎴 リスクカード</h2>
+    <p style="color:var(--muted); font-size:0.85em; margin-bottom:16px;">カードをタップして今月のリスクを確認！</p>
     <div id="risk-card-el" class="risk-card-3d" onclick="flipRiskCard()">
-      <div class="risk-card-inner">
-        <div class="risk-card-face risk-card-back">
-          <div class="cp">🃏</div>
-          <div class="cl">RISK CARD</div>
-          <div class="cl" style="font-size:0.78em; margin-top:6px;">タップして開く</div>
+      <div class="rci">
+        <div class="rcf rcf-back">
+          <div style="font-size:2.6em; opacity:0.4;">🃏</div>
+          <div style="font-size:1.1em; font-weight:bold; color:rgba(255,255,255,0.8); margin-top:8px;">RISK CARD</div>
+          <div style="font-size:0.75em; color:rgba(255,255,255,0.6); margin-top:6px;">タップして開く</div>
         </div>
-        <div id="risk-front" class="risk-card-face risk-card-front type-bad">
-          <div id="ri-icon" class="risk-icon-big">❓</div>
-          <div id="ri-name" class="risk-name-big">-</div>
-          <div id="ri-desc" class="risk-desc-sm">-</div>
-          <div id="ri-effect" class="risk-effect-big neu">-</div>
+        <div id="rc-front" class="rcf rcf-front type-bad">
+          <div id="rc-icon" class="rc-icon">❓</div>
+          <div id="rc-name" class="rc-name">-</div>
+          <div id="rc-desc" class="rc-desc">-</div>
+          <div id="rc-eff" class="rc-eff"></div>
         </div>
       </div>
     </div>
-    <div id="risk-next-btn" style="display:none; margin-top:16px;">
-      <button class="btn btn-primary" onclick="goToResults()">📊 月次決算を見る</button>
+    <div id="risk-go-btn" style="display:none; margin-top:14px;">
+      <button class="btn btn-primary" onclick="goToResults()">📊 月次決算へ →</button>
     </div>
   </div>
 </div>
 
-<!-- RESULTS -->
+<!-- ===== RESULTS ===== -->
 <div id="screen-results" class="screen">
-  <div id="res-statusbar" class="status-bar"></div>
-  <div class="main-content">
-    <h2 class="section-title" id="res-month-title">📊 8月 月次決算</h2>
+  <div id="sb-res2" class="sbar"></div>
+  <div class="main">
+    <h2 id="res-title" style="font-size:1.2em; font-weight:bold; color:var(--hdr); border-bottom:2px solid var(--hdr); padding-bottom:8px; margin-bottom:12px;">📊 8月 月次決算</h2>
     <div id="profit-box" class="profit-box pos">
-      <div style="font-size:0.85em; color:var(--muted);">今月の営業利益</div>
-      <div id="profit-num" class="profit-amount pos">+¥0</div>
+      <div style="font-size:0.82em; color:var(--muted);">今月の営業利益</div>
+      <div id="profit-num" class="profit-num pos">+¥0</div>
       <div id="profit-sub" class="profit-sub"></div>
     </div>
-    <div class="card">
-      <table class="pl-table" id="pl-body"></table>
+    <div class="panel">
+      <div class="sec-hdr">📋 損益計算書（P&L）</div>
+      <div class="panel-body" style="padding:10px;">
+        <table class="pl-table" id="pl-body"></table>
+      </div>
     </div>
-    <div id="action-eff-card" class="card" style="display:none;">
-      <div style="font-size:0.85em; color:var(--muted); margin-bottom:8px;">🎯 今月のアクション効果</div>
-      <div id="action-eff-list"></div>
+    <div id="eff-panel" class="panel" style="display:none;">
+      <div class="sec-hdr3">🎯 今月のアクション効果</div>
+      <div class="panel-body" id="eff-body"></div>
     </div>
-    <div class="flex-center mt-14">
+    <div class="flex-center mt-16">
       <button class="btn btn-primary" id="next-btn" onclick="nextMonth()">➡️ 次の月へ</button>
     </div>
   </div>
 </div>
 
-<!-- GAME OVER -->
+<!-- ===== GAME OVER ===== -->
 <div id="screen-gameover" class="screen">
-  <div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:40px 20px;text-align:center;">
-    <div style="font-size:4.5em;">💸</div>
-    <h1 style="font-size:2.3em; color:var(--red); margin:16px 0;">ゲームオーバー</h1>
-    <p style="color:var(--muted); max-width:380px; margin-bottom:24px;">累計損失が−500万円を超え、店舗の継続が困難になりました。</p>
-    <div class="result-table">
-      <div class="result-row"><span class="rl">最終月</span><span class="rv" id="go-month">-</span></div>
-      <div class="result-row"><span class="rl">累計利益</span><span class="rv text-red" id="go-profit">-</span></div>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:40px 16px;text-align:center; background:var(--bg);">
+    <div style="font-size:4em;">💸</div>
+    <h1 style="font-size:2em; color:var(--red); margin:14px 0;">ゲームオーバー</h1>
+    <p style="color:var(--muted); max-width:360px; margin-bottom:22px; font-size:0.9em;">累計損失が−500万円を超え、店舗の継続が困難になりました。</p>
+    <div class="end-table">
+      <div class="end-row"><span class="el">最終月</span><span class="ev" id="go-month">-</span></div>
+      <div class="end-row"><span class="el">累計利益</span><span class="ev" style="color:var(--red)" id="go-profit">-</span></div>
     </div>
-    <button class="btn btn-primary mt-14" onclick="restartGame()">🔄 もう一度プレイ</button>
+    <button class="btn btn-primary mt-12" onclick="restartGame()">🔄 もう一度プレイ</button>
   </div>
 </div>
 
-<!-- ENDING -->
+<!-- ===== ENDING ===== -->
 <div id="screen-ending" class="screen">
-  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;text-align:center;">
-    <div style="font-size:1.8em; margin-bottom:6px;">🎊 6ヶ月間お疲れさまでした！</div>
-    <div style="font-size:1.5em; color:var(--gold); margin-bottom:4px;">最終評価</div>
-    <div id="final-grade" class="grade-big grade-b">B</div>
-    <div id="grade-comment" style="font-size:1.05em; color:var(--muted); margin-bottom:16px;"></div>
-    <div class="result-table">
-      <div id="final-stats"></div>
-    </div>
-    <div class="result-table" style="margin-top:12px;">
-      <h3 style="color:var(--gold); margin-bottom:10px; font-size:0.95em;">📅 月次サマリー</h3>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 16px;text-align:center; background:var(--bg);">
+    <div style="font-size:1.7em; margin-bottom:5px;">🎊 6ヶ月間お疲れさまでした！</div>
+    <div style="font-size:1.3em; color:var(--hdr); margin-bottom:4px; font-weight:bold;">最終評価</div>
+    <div id="final-grade" class="grade-big g-b">B</div>
+    <div id="grade-comment" style="font-size:1em; color:var(--muted); margin-bottom:16px;"></div>
+    <div class="end-table"><div id="final-stats"></div></div>
+    <div class="end-table" style="margin-top:10px;">
+      <h3 style="color:var(--hdr); margin-bottom:9px; font-size:0.9em;">📅 月次サマリー</h3>
       <div id="monthly-rows"></div>
     </div>
-    <div class="flex-center mt-14">
+    <div class="flex-center mt-16">
       <button class="btn btn-primary" onclick="restartGame()">🔄 もう一度プレイ</button>
       <button class="btn btn-secondary" onclick="window.location.href='index.html'">← ポータルへ戻る</button>
     </div>
@@ -368,475 +441,601 @@ body {
 </div>
 
 <script>
-// ==================== GAME DATA ====================
+// ==================== DATA ====================
 const MONTHS = ['8月','9月','10月','11月','12月','1月'];
-
-// Base revenue table (万円) indexed by [month][rank-1 (0=1位)]
 const BASE_REV = [
-  [584,578,567,556,528], // 8月
-  [591,585,574,556,534], // 9月
-  [576,570,559,542,520], // 10月
-  [716,709,695,674,647], // 11月
-  [763,756,740,718,690], // 12月
-  [608,602,590,572,549], // 1月
+  [584,578,567,556,528],[591,585,574,556,534],[576,570,559,542,520],
+  [716,709,695,674,647],[763,756,740,718,690],[608,602,590,572,549],
 ];
-
 const STAFF_INFO = {
-  S:{power:6, rate:1400, hours:80, color:'#a371f7'},
-  A:{power:6, rate:1200, hours:80, color:'#3fb950'},
-  B:{power:4, rate:1100, hours:70, color:'#58a6ff'},
-  C:{power:2, rate:1000, hours:60, color:'#e3b341'},
-  D:{power:-4, rate:1000, hours:60, color:'#f85149'},
+  S:{power:6, rate:1400, hours:80, color:'#6a1b9a', bg:'#f3e5f5', label:'S スペシャリスト'},
+  A:{power:6, rate:1200, hours:80, color:'#1b5e20', bg:'#e8f5e9', label:'A 業務リーダー'},
+  B:{power:4, rate:1100, hours:70, color:'#0d47a1', bg:'#e3f2fd', label:'B 一般スタッフ'},
+  C:{power:2, rate:1000, hours:60, color:'#e65100', bg:'#fff3e0', label:'C 学生バイト'},
+  D:{power:-4, rate:1000, hours:60, color:'#b71c1c', bg:'#ffebee', label:'D 新人バイト'},
 };
 
-const ACTION_CARDS = [
-  {id:'hire_c', name:'採用（C）', icon:'👤', cost:30000, hours:30,
-   desc:'Cランクスタッフを1名採用', typeLabel:'採用',
-   canUse:(s)=>true,
-   effect:(s,r)=>{ s.staff.C++; r.actionDesc.push('Cスタッフ1名を採用'); }},
-  {id:'hire_b', name:'採用（B）', icon:'👥', cost:50000, hours:40,
-   desc:'Bランクスタッフを1名採用', typeLabel:'採用',
-   canUse:(s)=>true,
-   effect:(s,r)=>{ s.staff.B++; r.actionDesc.push('Bスタッフ1名を採用'); }},
-  {id:'train_dc', name:'教育 D→C', icon:'📚', cost:20000, hours:20,
-   desc:'DランクをCランクにアップ', typeLabel:'教育',
-   canUse:(s)=>s.staff.D>0,
-   effect:(s,r)=>{ if(s.staff.D>0){s.staff.D--;s.staff.C++;r.actionDesc.push('DをCにランクアップ');} }},
-  {id:'train_cb', name:'教育 C→B', icon:'📖', cost:30000, hours:30,
-   desc:'CランクをBランクにアップ', typeLabel:'教育',
-   canUse:(s)=>s.staff.C>0,
-   effect:(s,r)=>{ if(s.staff.C>0){s.staff.C--;s.staff.B++;r.actionDesc.push('CをBにランクアップ');} }},
-  {id:'train_ba', name:'教育 B→A', icon:'🎓', cost:50000, hours:40,
-   desc:'BランクをAランクにアップ', typeLabel:'教育',
-   canUse:(s)=>s.staff.B>0,
-   effect:(s,r)=>{ if(s.staff.B>0){s.staff.B--;s.staff.A++;r.actionDesc.push('BをAにランクアップ');} }},
-  {id:'train_as', name:'教育 A→S', icon:'⭐', cost:80000, hours:50,
-   desc:'AランクをSランクにアップ', typeLabel:'教育',
-   canUse:(s)=>s.staff.A>0,
-   effect:(s,r)=>{ if(s.staff.A>0){s.staff.A--;s.staff.S++;r.actionDesc.push('AをSにランクアップ');} }},
-  {id:'leader_mtg', name:'リーダーMTG', icon:'💬', cost:10000, hours:10,
-   desc:'チームの士気UP +15万売上', typeLabel:'運営',
-   canUse:(s)=>true,
-   effect:(s,r)=>{ r.bonusSales+=150000; r.actionDesc.push('リーダーMTGで+15万売上'); }},
-  {id:'web_promo', name:'WEB販促', icon:'🌐', cost:50000, hours:20,
-   desc:'WEB広告で集客 +25万売上', typeLabel:'販促',
-   canUse:(s)=>true,
-   effect:(s,r)=>{ r.bonusSales+=250000; r.actionDesc.push('WEB販促で+25万売上'); }},
-  {id:'campaign', name:'キャンペーン', icon:'🎉', cost:100000, hours:30,
-   desc:'集客キャンペーン +35万売上', typeLabel:'販促',
-   canUse:(s)=>true,
-   effect:(s,r)=>{ r.bonusSales+=350000; r.actionDesc.push('キャンペーンで+35万売上'); }},
-  {id:'timesale', name:'タイムセール', icon:'⏰', cost:20000, hours:15,
-   desc:'時間限定割引 +20万売上', typeLabel:'販促',
-   canUse:(s)=>true,
-   effect:(s,r)=>{ r.bonusSales+=200000; r.actionDesc.push('タイムセールで+20万売上'); }},
-  {id:'dm', name:'DM送付', icon:'📮', cost:15000, hours:10,
-   desc:'既存顧客へDM +10万売上', typeLabel:'販促',
-   canUse:(s)=>true,
-   effect:(s,r)=>{ r.bonusSales+=100000; r.actionDesc.push('DM送付で+10万売上'); }},
-  {id:'receipt', name:'レシート分析', icon:'🧾', cost:0, hours:20,
-   desc:'今月の原価率を3%削減', typeLabel:'運営',
-   canUse:(s)=>true,
-   effect:(s,r)=>{ r.cogsReduction=0.03; r.actionDesc.push('レシート分析で原価3%削減'); }},
-  {id:'ms_survey', name:'MSアンケート', icon:'📊', cost:30000, hours:25,
-   desc:'サービス改善 翌月+20万売上', typeLabel:'運営',
-   canUse:(s)=>true,
-   effect:(s,r)=>{ r.nextMonthBonus=200000; r.actionDesc.push('MSアンケートで翌月+20万売上'); }},
-  {id:'hotone', name:'ほっとーん対策', icon:'🛡️', cost:20000, hours:15,
-   desc:'今月リスク効果を50%軽減', typeLabel:'運営',
-   canUse:(s)=>true,
-   effect:(s,r)=>{ r.riskReduction=0.5; r.actionDesc.push('ほっとーん対策でリスク50%軽減'); }},
+// Management Tasks (マネジメントタスク)
+const MANAGER_TASKS = [
+  {id:'cost_mgmt', name:'原価管理', icon:'📦', cost:0, hours:4,
+   desc:'食材コストを適切に管理・発注調整', eff:'原価率 −3%',
+   canUse:()=>true,
+   effect:(s,r)=>{ r.cogsReduction+=0.03; r.actionDesc.push('原価管理: 原価率-3%'); }},
+  {id:'labor_mgmt', name:'人件費管理', icon:'👔', cost:0, hours:4,
+   desc:'PA勤務シフトを最適化・効率化', eff:'PA費 −5%',
+   canUse:()=>true,
+   effect:(s,r)=>{ r.laborReduction+=0.05; r.actionDesc.push('人件費管理: PA費-5%'); }},
+  {id:'sales_mgmt', name:'売上管理', icon:'💹', cost:0, hours:4,
+   desc:'日々の売上データを分析・改善提案', eff:'売上 +10万',
+   canUse:()=>true,
+   effect:(s,r)=>{ r.bonusSales+=100000; r.actionDesc.push('売上管理: +10万円'); }},
+  {id:'risk_mgmt', name:'リスク管理', icon:'🛡️', cost:20000, hours:4,
+   desc:'ヒヤリ・ハットを事前対策', eff:'リスク 50%軽減',
+   canUse:()=>true,
+   effect:(s,r)=>{ r.riskReduction+=0.5; r.actionDesc.push('リスク管理: リスク50%軽減'); }},
+  {id:'pa_labor2', name:'P/A最適化', icon:'⚙️', cost:0, hours:8,
+   desc:'シフトとグレード配置を高度最適化', eff:'PA費 −8%',
+   canUse:()=>true,
+   effect:(s,r)=>{ r.laborReduction+=0.08; r.actionDesc.push('P/A最適化: PA費-8%'); }},
+  {id:'final_ops', name:'最終業務管理', icon:'✅', cost:0, hours:4,
+   desc:'月末精算・棚卸し・報告書作成', eff:'売上 +10万',
+   canUse:()=>true,
+   effect:(s,r)=>{ r.bonusSales+=100000; r.actionDesc.push('最終業務管理: +10万円'); }},
+  {id:'pa_comm', name:'P/Aコミュニケーション', icon:'💬', cost:10000, hours:8,
+   desc:'スタッフとのMTGで連携強化', eff:'売上 +15万',
+   canUse:()=>true,
+   effect:(s,r)=>{ r.bonusSales+=150000; r.actionDesc.push('P/Aコミュニケーション: +15万円'); }},
+  {id:'cost2', name:'受発注管理', icon:'📋', cost:0, hours:4,
+   desc:'在庫と発注サイクルを精密管理', eff:'原価率 −2%',
+   canUse:()=>true,
+   effect:(s,r)=>{ r.cogsReduction+=0.02; r.actionDesc.push('受発注管理: 原価率-2%'); }},
 ];
 
+// Action Cards (アクションカード)
+const ACTION_CARDS = [
+  {id:'hire_c', name:'採用（C）', icon:'👤', cost:30000, hours:30,
+   desc:'Cランクスタッフを1名採用', eff:'+1名（C）',
+   canUse:()=>true,
+   effect:(s,r)=>{ s.staff.C++; r.actionDesc.push('Cスタッフ1名採用'); }},
+  {id:'hire_b', name:'採用（B）', icon:'👥', cost:50000, hours:40,
+   desc:'Bランクスタッフを1名採用', eff:'+1名（B）',
+   canUse:()=>true,
+   effect:(s,r)=>{ s.staff.B++; r.actionDesc.push('Bスタッフ1名採用'); }},
+  {id:'train_dc', name:'教育 D→C', icon:'📚', cost:20000, hours:20,
+   desc:'DランクをCランクにアップ', eff:'D→C ランクアップ',
+   canUse:(s)=>s.staff.D>0,
+   effect:(s,r)=>{ if(s.staff.D>0){s.staff.D--;s.staff.C++;r.actionDesc.push('D→Cランクアップ');} }},
+  {id:'train_cb', name:'教育 C→B', icon:'📖', cost:30000, hours:30,
+   desc:'CランクをBランクにアップ', eff:'C→B ランクアップ',
+   canUse:(s)=>s.staff.C>0,
+   effect:(s,r)=>{ if(s.staff.C>0){s.staff.C--;s.staff.B++;r.actionDesc.push('C→Bランクアップ');} }},
+  {id:'train_ba', name:'教育 B→A', icon:'🎓', cost:50000, hours:40,
+   desc:'BランクをAランクにアップ', eff:'B→A ランクアップ',
+   canUse:(s)=>s.staff.B>0,
+   effect:(s,r)=>{ if(s.staff.B>0){s.staff.B--;s.staff.A++;r.actionDesc.push('B→Aランクアップ');} }},
+  {id:'train_as', name:'教育 A→S', icon:'⭐', cost:80000, hours:50,
+   desc:'AランクをSランクにアップ', eff:'A→S ランクアップ',
+   canUse:(s)=>s.staff.A>0,
+   effect:(s,r)=>{ if(s.staff.A>0){s.staff.A--;s.staff.S++;r.actionDesc.push('A→Sランクアップ');} }},
+  {id:'web_promo', name:'WEB販促', icon:'🌐', cost:50000, hours:20,
+   desc:'WEB広告で集客強化', eff:'売上 +25万',
+   canUse:()=>true,
+   effect:(s,r)=>{ r.bonusSales+=250000; r.actionDesc.push('WEB販促: +25万円'); }},
+  {id:'campaign', name:'キャンペーン', icon:'🎉', cost:100000, hours:30,
+   desc:'集客イベント・キャンペーン実施', eff:'売上 +35万',
+   canUse:()=>true,
+   effect:(s,r)=>{ r.bonusSales+=350000; r.actionDesc.push('キャンペーン: +35万円'); }},
+  {id:'timesale', name:'タイムセール', icon:'⏰', cost:20000, hours:15,
+   desc:'時間限定割引で来店促進', eff:'売上 +20万',
+   canUse:()=>true,
+   effect:(s,r)=>{ r.bonusSales+=200000; r.actionDesc.push('タイムセール: +20万円'); }},
+  {id:'dm', name:'DM送付', icon:'📮', cost:15000, hours:10,
+   desc:'既存顧客へのDM送付', eff:'売上 +10万',
+   canUse:()=>true,
+   effect:(s,r)=>{ r.bonusSales+=100000; r.actionDesc.push('DM送付: +10万円'); }},
+  {id:'ms_survey', name:'MSアンケート', icon:'📊', cost:30000, hours:25,
+   desc:'サービス改善アンケート実施', eff:'翌月 +20万',
+   canUse:()=>true,
+   effect:(s,r)=>{ r.nextMonthBonus=200000; r.actionDesc.push('MSアンケート: 翌月+20万円'); }},
+  {id:'leader_mtg', name:'リーダーMTG', icon:'🗣️', cost:10000, hours:10,
+   desc:'現場リーダーとの定例会議', eff:'売上 +15万',
+   canUse:()=>true,
+   effect:(s,r)=>{ r.bonusSales+=150000; r.actionDesc.push('リーダーMTG: +15万円'); }},
+];
+
+// Risk Cards
 const RISK_CARDS = [
-  {id:'eq_big', name:'設備故障（大）', icon:'🔧', salesPenalty:500000, type:'bad',
-   desc:'大型設備が突然故障！修理費と機会損失が発生'},
-  {id:'eq_small', name:'設備故障（小）', icon:'🔩', salesPenalty:200000, type:'bad',
-   desc:'小型設備が故障。対応に時間がかかった'},
-  {id:'injury', name:'従業員ケガ', icon:'🤕', salesPenalty:300000, type:'bad',
-   desc:'スタッフが業務中に負傷。補償費と一時的な戦力ダウン',
-   onApply:(s)=>{ loseRandomStaff(s); }},
-  {id:'food_poison', name:'食中毒発生', icon:'🤢', salesPenalty:1000000, type:'critical',
-   desc:'食中毒が発生！行政対応と売上激減で大打撃'},
-  {id:'fire', name:'火災ヒヤリ', icon:'🔥', salesPenalty:800000, type:'critical',
-   desc:'厨房でヒヤリ事故発生。消防対応と設備復旧費用が発生'},
-  {id:'theft', name:'盗難', icon:'💰', salesPenalty:200000, type:'bad',
-   desc:'現金・備品が盗まれた。防犯対策費も計上'},
-  {id:'claim_big', name:'重大クレーム', icon:'😡', salesPenalty:400000, type:'bad',
-   desc:'重大なクレームが発生。対応コストと信頼損失'},
-  {id:'claim_sm', name:'クレーム', icon:'😤', salesPenalty:150000, type:'bad',
-   desc:'お客様からクレームあり。対応に時間を費やした'},
-  {id:'sns', name:'SNS炎上', icon:'📱', salesPenalty:600000, type:'critical',
-   desc:'悪評がSNSで拡散！客足が大幅に減少'},
-  {id:'resign', name:'従業員退職', icon:'👋', salesPenalty:100000, type:'bad',
-   desc:'スタッフが急に退職。引き継ぎコストが発生',
-   onApply:(s)=>{ loseRandomStaff(s); }},
-  {id:'food_inf', name:'食材高騰', icon:'📈', salesPenalty:0, cogsUp:0.05, type:'bad',
-   desc:'原材料費が高騰（原価率+5%）。仕入れコスト増加'},
-  {id:'rain', name:'雨天続き', icon:'🌧️', salesPenalty:200000, type:'bad',
-   desc:'悪天候が続き、客足が遠のいた'},
-  {id:'norisk', name:'ノーリスク！', icon:'✨', salesPenalty:0, type:'good',
-   desc:'今月は特に問題なし！順調な営業ができました'},
-  {id:'lucky1', name:'食評サイト掲載！', icon:'🎊', salesPenalty:-300000, type:'good',
-   desc:'有名グルメサイトで紹介され集客増！+30万売上'},
-  {id:'lucky2', name:'グループ予約獲得', icon:'💎', salesPenalty:-200000, type:'good',
-   desc:'大型グループ予約が入った！+20万の臨時収入'},
-  {id:'inspect', name:'衛生検査', icon:'📋', salesPenalty:100000, type:'neutral',
-   desc:'保健所の抜き打ち検査。対応コストと時間が発生'},
+  {id:'eq_big', name:'設備故障（大）', icon:'🔧', salesPenalty:500000, type:'bad', desc:'大型設備が突然故障！修理費と機会損失が発生'},
+  {id:'eq_small', name:'設備故障（小）', icon:'🔩', salesPenalty:200000, type:'bad', desc:'小型設備が故障。対応に時間がかかった'},
+  {id:'injury', name:'従業員ケガ', icon:'🤕', salesPenalty:300000, type:'bad', desc:'スタッフが業務中に負傷。補償費と戦力ダウン', onApply:(s)=>loseRandomStaff(s)},
+  {id:'food_poison', name:'食中毒発生', icon:'🤢', salesPenalty:1000000, type:'critical', desc:'食中毒が発生！行政対応と売上激減で大打撃'},
+  {id:'fire', name:'火災ヒヤリ', icon:'🔥', salesPenalty:800000, type:'critical', desc:'厨房でヒヤリ事故発生。消防対応と設備復旧費'},
+  {id:'theft', name:'盗難', icon:'💰', salesPenalty:200000, type:'bad', desc:'現金・備品が盗まれた'},
+  {id:'claim_big', name:'重大クレーム', icon:'😡', salesPenalty:400000, type:'bad', desc:'重大なクレームが発生。対応コストと信頼損失'},
+  {id:'claim_sm', name:'クレーム', icon:'😤', salesPenalty:150000, type:'bad', desc:'お客様からクレームあり'},
+  {id:'sns', name:'SNS炎上', icon:'📱', salesPenalty:600000, type:'critical', desc:'悪評がSNSで拡散！客足が大幅に減少'},
+  {id:'resign', name:'従業員退職', icon:'👋', salesPenalty:100000, type:'bad', desc:'スタッフが急に退職', onApply:(s)=>loseRandomStaff(s)},
+  {id:'food_inf', name:'食材高騰', icon:'📈', salesPenalty:0, cogsUp:0.05, type:'bad', desc:'原材料費が高騰（原価率+5%）'},
+  {id:'rain', name:'雨天続き', icon:'🌧️', salesPenalty:200000, type:'bad', desc:'悪天候が続き、客足が遠のいた'},
+  {id:'norisk', name:'ノーリスク！', icon:'✨', salesPenalty:0, type:'good', desc:'今月は特に問題なし！順調な営業ができました'},
+  {id:'lucky1', name:'食評サイト掲載！', icon:'🎊', salesPenalty:-300000, type:'good', desc:'有名グルメサイトで紹介！集客増、+30万売上'},
+  {id:'lucky2', name:'グループ予約獲得', icon:'💎', salesPenalty:-200000, type:'good', desc:'大型グループ予約が入った！+20万の臨時収入'},
+  {id:'inspect', name:'衛生検査', icon:'📋', salesPenalty:100000, type:'neutral', desc:'保健所の抜き打ち検査。対応コストが発生'},
 ];
 
 // ==================== STATE ====================
 let G = {};
-
 function initGame() {
   G = {
-    month: 0,
-    staff: {S:0, A:0, B:11, C:7, D:2},
-    totalProfit: 0,
-    monthlyResults: [],
-    actions: [],
-    risk: null,
-    riskFlipped: false,
-    pendingBonus: 0,
+    month:0, staff:{S:0,A:0,B:11,C:7,D:2}, totalProfit:0,
+    monthlyResults:[], actions:[], risk:null, riskFlipped:false, pendingBonus:0,
   };
 }
 
 // ==================== HELPERS ====================
-function totalStaff(s) { return Object.values(s.staff).reduce((a,b)=>a+b,0); }
-function calcPower(s) {
-  return Object.entries(STAFF_INFO).reduce((sum,[rank,info])=>sum+s.staff[rank]*info.power, 0);
-}
-function calcRank(power) {
-  if(power>=70) return 1; if(power>=60) return 2;
-  if(power>=45) return 3; if(power>=30) return 4; return 5;
-}
-function rankLabel(rank) { return ['🏆 1位','⭐ 2位','📊 3位','📈 4位','📉 5位'][rank-1]; }
-function mgrHours(mi) { return mi===5?140:180; }
-function loseRandomStaff(s) {
-  const lvls = Object.keys(STAFF_INFO).filter(l=>s.staff[l]>0);
-  if(!lvls.length) return;
+const RANKS = ['S','A','B','C','D'];
+function totalStaff(s){ return RANKS.reduce((n,r)=>n+s.staff[r],0); }
+function calcPower(s){ return RANKS.reduce((n,r)=>n+s.staff[r]*STAFF_INFO[r].power,0); }
+function calcRank(p){ if(p>=70)return 1; if(p>=60)return 2; if(p>=45)return 3; if(p>=30)return 4; return 5; }
+function rankLabel(rank){ return ['🏆 1位','⭐ 2位','📊 3位','📈 4位','📉 5位'][rank-1]; }
+function mgrHours(mi){ return mi===5?140:180; }
+function loseRandomStaff(s){
+  const lvls=RANKS.filter(r=>s.staff[r]>0);
+  if(!lvls.length)return;
   s.staff[lvls[Math.floor(Math.random()*lvls.length)]]--;
 }
-function yen(n) {
-  const abs=Math.abs(n), sign=n<0?'-':'+';
-  if(abs>=10000000) return sign+'¥'+(abs/10000).toFixed(0)+'万';
-  if(abs>=1000000) return sign+'¥'+(abs/10000).toFixed(1)+'万';
-  return sign+'¥'+abs.toLocaleString();
+function calcPACost(s,reduction=0){
+  const raw=RANKS.reduce((n,r)=>n+s.staff[r]*STAFF_INFO[r].rate*STAFF_INFO[r].hours,0);
+  return Math.round(raw*(1-Math.min(0.3,reduction)));
 }
-function yenFmt(n) { return (n<0?'-':'')+' ¥'+Math.abs(n).toLocaleString(); }
-function showScreen(id) {
+function yen(n){ const a=Math.abs(n),sg=n<0?'−':'+'; if(a>=10000000)return sg+'¥'+(a/10000).toFixed(0)+'万'; if(a>=1000000)return sg+'¥'+(a/10000).toFixed(1)+'万'; return sg+'¥'+a.toLocaleString(); }
+function yenFmt(n){ return (n<0?'−':'') +' ¥'+Math.abs(n).toLocaleString(); }
+function showScreen(id){
   document.querySelectorAll('.screen').forEach(el=>{ el.style.display='none'; el.classList.remove('active'); });
-  const el = document.getElementById('screen-'+id);
-  el.style.display = 'flex';
-  el.classList.add('active');
-  window.scrollTo(0,0);
+  const el=document.getElementById('screen-'+id);
+  el.style.display='flex'; el.classList.add('active'); window.scrollTo(0,0);
 }
-function buildStatus(barId) {
-  const power=calcPower(G), rank=calcRank(power);
-  document.getElementById(barId).innerHTML = `
-    <div class="status-item"><span class="month-badge">${MONTHS[G.month]}</span></div>
-    <div class="status-item"><span class="status-label">営業力</span><span class="status-value">${power}P</span></div>
-    <div class="status-item"><span class="status-label">ランク</span><span class="rank-badge">${rankLabel(rank)}</span></div>
-    <div class="status-item"><span class="status-label">スタッフ</span><span class="status-value">${totalStaff(G)}名</span></div>
-    <div class="status-item"><span class="status-label">累計利益</span>
-      <span class="status-value ${G.totalProfit>=0?'text-green':'text-red'}">${yen(G.totalProfit)}</span>
-    </div>`;
+function buildSbar(id){
+  const p=calcPower(G),rank=calcRank(p);
+  const tot=G.totalProfit;
+  document.getElementById(id).innerHTML=`
+    <div class="sbar-item"><span class="sbadge-month">${MONTHS[G.month]}</span></div>
+    <div class="sbar-item"><span class="sbar-label">営業力</span><span class="sbar-val">${p}P</span></div>
+    <div class="sbar-item"><span class="sbar-label">ランク</span><span class="sbadge-rank">${rankLabel(rank)}</span></div>
+    <div class="sbar-item"><span class="sbar-label">スタッフ</span><span class="sbar-val">${totalStaff(G)}名</span></div>
+    <div class="sbar-item"><span class="sbar-label">累計利益</span><span class="sbar-val ${tot>=0?'pos':'neg'}">${yen(tot)}</span></div>`;
 }
-function getUsedHours() {
-  return G.actions.reduce((sum,id)=>{ const c=ACTION_CARDS.find(x=>x.id===id); return sum+(c?c.hours:0); },0);
-}
+function getUsedHours(){ return G.actions.reduce((n,id)=>{ const c=[...MANAGER_TASKS,...ACTION_CARDS].find(x=>x.id===id); return n+(c?c.hours:0); },0); }
 
 // ==================== SCREENS ====================
-function startGame() { initGame(); showMonthIntro(); }
-function restartGame() { showScreen('title'); }
-function goToMonthIntro() { showMonthIntro(); }
+function startGame(){ initGame(); showMonthIntro(); }
+function restartGame(){ showScreen('title'); }
+function goToMonthIntro(){ showMonthIntro(); }
 
-function showMonthIntro() {
-  buildStatus('intro-statusbar');
-  const mi=G.month, power=calcPower(G), rank=calcRank(power);
+function showMonthIntro(){
+  buildSbar('sb-intro');
+  const mi=G.month, p=calcPower(G), rank=calcRank(p);
   const baseRev=BASE_REV[mi][rank-1];
-  const predRev=baseRev+power*2;
-  const staffRows = Object.entries(STAFF_INFO).map(([r,info])=>`
-    <div class="staff-cell rank-${r.toLowerCase()}">
-      <div class="staff-rank" style="color:${info.color}">${r}</div>
-      <div class="staff-count">${G.staff[r]}</div>
-      <div class="staff-power">${info.power>=0?'+':''}${info.power}P</div>
-    </div>`).join('');
-  const powerPct=Math.min(100,(power/100)*100);
   const bonusNote = G.pendingBonus>0 ?
-    `<div class="alert alert-success">📊 前月のMSアンケート効果: +${(G.pendingBonus/10000).toFixed(0)}万円の売上ボーナスあり</div>` : '';
-  document.getElementById('intro-content').innerHTML = `
-    <h2 class="section-title">📅 ${MONTHS[mi]}の営業開始</h2>
+    `<div class="alert a-success">📊 前月のMSアンケート効果: +${(G.pendingBonus/10000).toFixed(0)}万円の売上ボーナスが今月適用されます</div>` : '';
+  document.getElementById('intro-content').innerHTML=`
+    <div style="text-align:center; font-size:1.5em; font-weight:bold; color:var(--hdr); padding:10px 0 16px;">${MONTHS[mi]}の営業開始</div>
     ${bonusNote}
-    <div class="card">
-      <h3 style="font-size:0.9em;color:var(--muted);margin-bottom:10px;">👥 現在のスタッフ構成</h3>
-      <div class="staff-grid">${staffRows}</div>
-      <div style="display:flex;justify-content:space-between;margin-top:10px;margin-bottom:4px;">
-        <span style="font-size:0.83em;color:var(--muted);">総営業力</span>
-        <span style="font-weight:bold;">${power}P → ${rankLabel(rank)}</span>
-      </div>
-      <div class="power-bar-bg">
-        <div class="power-bar-fill" style="width:${powerPct}%"></div>
-        <div class="power-bar-label">${power}P</div>
-      </div>
-      <div class="power-thresholds"><span>0</span><span>30P</span><span>45P</span><span>60P</span><span>70P+</span></div>
-    </div>
-    <div class="card">
-      <h3 style="font-size:0.9em;color:var(--muted);margin-bottom:10px;">📊 ${MONTHS[mi]}の予測売上</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div style="text-align:center;padding:12px;background:var(--surface);border-radius:8px;">
-          <div style="font-size:0.78em;color:var(--muted);">ベース売上（${rankLabel(rank)}）</div>
-          <div style="font-size:1.4em;font-weight:bold;color:var(--blue);">${baseRev}万円</div>
+    <div class="panel">
+      <div class="sec-hdr">📅 ${MONTHS[mi]}の目標・概要</div>
+      <div class="panel-body">
+        <div class="grid2">
+          <div class="score-box green"><div class="score-box-val">${baseRev+p*2}万円</div><div class="score-box-label">予測売上（${rankLabel(rank)}+営業力ボーナス）</div></div>
+          <div class="score-box blue"><div class="score-box-val">${mgrHours(mi)}時間</div><div class="score-box-label">マネージャー利用可能時間</div></div>
         </div>
-        <div style="text-align:center;padding:12px;background:var(--surface);border-radius:8px;">
-          <div style="font-size:0.78em;color:var(--muted);">営業力ボーナス</div>
-          <div style="font-size:1.4em;font-weight:bold;color:var(--green);">+${power*2}万円</div>
+        ${mi===5?'<div class="alert a-warn" style="margin-top:10px;">⚠️ 1月はマネージャー時間が140時間に削減されます</div>':''}
+        <div style="margin-top:12px; font-size:0.85em; color:var(--muted);">
+          今月のゲームの流れ：<br>
+          <b style="color:var(--hdr);">①資源確認</b>（スタッフ・営業力を確認）→ 
+          <b style="color:var(--blue);">②計画立案</b>（管理タスク＋アクションを選択）→ 
+          <b style="color:var(--red);">③リスク</b>（リスクカードを引く）→ 
+          <b style="color:var(--teal);">④月次決算</b>
         </div>
       </div>
-      <div style="text-align:center;padding:14px;margin-top:10px;background:#1a2233;border-radius:8px;border:1px solid var(--blue);">
-        <div style="font-size:0.78em;color:var(--muted);">予測売上（アクション・リスク前）</div>
-        <div style="font-size:1.9em;font-weight:bold;color:var(--gold);">${predRev}万円</div>
-      </div>
-    </div>
-    <div class="card">
-      <h3 style="font-size:0.9em;color:var(--muted);margin-bottom:6px;">⏱️ マネージャー利用可能時間</h3>
-      <div style="font-size:1.4em;font-weight:bold;">${mgrHours(mi)}時間</div>
-      <div style="font-size:0.78em;color:var(--muted);margin-top:3px;">この時間内でアクションカードを選びます</div>
-      ${mi===5?'<div class="alert alert-warn" style="margin-top:10px;">⚠️ 1月はマネージャー時間が140時間に削減されます</div>':''}
     </div>`;
   showScreen('month-intro');
 }
 
-function goToPlanning() {
-  G.actions = [];
-  buildStatus('plan-statusbar');
-  renderActionGrid();
+function showResources(){
+  buildSbar('sb-res');
+  const s=G, p=calcPower(s), rank=calcRank(p), mi=s.month;
+  const paCost=calcPACost(s);
+
+  // Build staff circles grid
+  const circleRows = [
+    {label:'1〜4名', range:[1,4]},{label:'5〜8名',range:[5,8]},{label:'9〜12名',range:[9,12]},
+    {label:'13〜16名',range:[13,16]},{label:'17〜20名',range:[17,20]},
+  ];
+  const staffCols=['S','A','B','C','D'];
+  let cumulative=0;
+  const staffCounts=[];
+  RANKS.forEach(r=>{ for(let i=0;i<s.staff[r];i++) staffCounts.push(r); });
+
+  // Circles for each staff level
+  const makeCircles=(rank)=>{
+    const count=s.staff[rank];
+    let html='<div class="circles-row">';
+    for(let i=0;i<Math.min(count,4);i++) html+=`<div class="staff-circle sc-${rank.toLowerCase()}"></div>`;
+    if(count>4) html+=`<span style="font-size:0.75em;color:var(--muted);">+${count-4}</span>`;
+    if(count===0) html+=`<div class="staff-circle sc-empty"></div>`;
+    html+='</div>'; return html;
+  };
+
+  const powerPct=Math.min(100,(p/100)*100);
+
+  // Hours reference table (from planning board image right side)
+  const hoursRef=[
+    {h:20,n:5,p:-40,val:-807},{h:40,n:10,p:-30,val:-607},{h:60,n:15,p:-20,val:-407},
+    {h:80,n:20,p:-10,val:-207},{h:100,n:25,p:0,val:0},{h:120,n:30,p:10,val:207},
+    {h:140,n:35,p:20,val:407},{h:160,n:40,p:30,val:607},{h:180,n:45,p:40,val:807},
+    {h:200,n:50,p:50,val:1007},
+  ];
+  const curHours=RANKS.reduce((n,r)=>n+s.staff[r]*STAFF_INFO[r].hours,0);
+  const curStaff=totalStaff(s);
+  const hoursRefRows=hoursRef.map(row=>{
+    const isCur=Math.abs(row.n-curStaff)<=2;
+    const cls=isCur?'h-cur':row.p>0?'h-pos':row.p<0?'h-neg':'h-zero';
+    return `<tr>
+      <td class="${cls}">${row.h}h</td>
+      <td class="${cls}">${row.n}名</td>
+      <td class="${cls}">${row.p>0?'+':''}${row.p}P</td>
+      <td class="${cls}">${row.val>0?'+':''}${row.val}万</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('res-content').innerHTML=`
+    <!-- Staff Level Reference Table -->
+    <div class="panel">
+      <div class="sec-hdr">👥 スタッフレベル一覧</div>
+      <div class="panel-body" style="padding:10px; overflow-x:auto;">
+        <table class="staff-ref-table">
+          <thead>
+            <tr>
+              <th>項目</th>
+              <th class="th-s">S<br><small>スペシャリスト</small></th>
+              <th class="th-a">A<br><small>業務リーダー</small></th>
+              <th class="th-b">B<br><small>一般スタッフ</small></th>
+              <th class="th-c">C<br><small>学生バイト</small></th>
+              <th class="th-d">D<br><small>新人バイト</small></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="row-label">営業力P</td>
+              <td class="td-s">+6P</td><td class="td-a">+6P</td><td class="td-b">+4P</td>
+              <td class="td-c">+2P</td><td class="td-d">−4P</td>
+            </tr>
+            <tr>
+              <td class="row-label">時給×月間</td>
+              <td class="td-s">1,400円<br>×80h</td><td class="td-a">1,200円<br>×80h</td>
+              <td class="td-b">1,100円<br>×70h</td><td class="td-c">1,000円<br>×60h</td>
+              <td class="td-d">1,000円<br>×60h</td>
+            </tr>
+            <tr>
+              <td class="row-label">月間人件費</td>
+              <td class="td-s">¥112,000</td><td class="td-a">¥96,000</td>
+              <td class="td-b">¥77,000</td><td class="td-c">¥60,000</td><td class="td-d">¥60,000</td>
+            </tr>
+            <tr>
+              <td class="row-label">現在の人数</td>
+              ${RANKS.map(r=>`<td class="td-${r.toLowerCase()}" style="font-size:1.3em; font-weight:bold;">${s.staff[r]}名</td>`).join('')}
+            </tr>
+            <tr>
+              <td class="row-label">スタッフ分布</td>
+              ${RANKS.map(r=>`<td>${makeCircles(r)}</td>`).join('')}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Power & Revenue Preview -->
+    <div class="panel">
+      <div class="sec-hdr2">⚡ 今月の営業力・売上予測</div>
+      <div class="panel-body">
+        <div class="grid3" style="margin-bottom:12px;">
+          <div class="score-box green">
+            <div class="score-box-val">${p}P</div>
+            <div class="score-box-label">総営業力</div>
+          </div>
+          <div class="score-box blue">
+            <div class="score-box-val">${rankLabel(rank)}</div>
+            <div class="score-box-label">現在のランク</div>
+          </div>
+          <div class="score-box gold">
+            <div class="score-box-val">${BASE_REV[mi][rank-1]+p*2}万</div>
+            <div class="score-box-label">予測売上（ベース）</div>
+          </div>
+        </div>
+        <div class="power-bar-wrap">
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;font-size:0.82em;">
+            <span style="color:var(--muted);">総営業力</span>
+            <span style="font-weight:bold;">${p}P → ${rankLabel(rank)}</span>
+          </div>
+          <div class="power-bar-bg">
+            <div class="power-bar-fill" style="width:${powerPct}%"></div>
+            <div class="power-bar-lbl">${p}P</div>
+          </div>
+          <div class="pthresh"><span>0</span><span>30P(4位)</span><span>45P(3位)</span><span>60P(2位)</span><span>70P(1位)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PA Cost & Hours Reference -->
+    <div class="grid2">
+      <div class="panel" style="margin-bottom:0;">
+        <div class="sec-hdr3">💴 人件費・PA費見込み</div>
+        <div class="panel-body">
+          <table style="width:100%;font-size:0.85em;border-collapse:collapse;">
+            ${RANKS.filter(r=>s.staff[r]>0).map(r=>{
+              const info=STAFF_INFO[r];
+              const cost=s.staff[r]*info.rate*info.hours;
+              return `<tr style="border-bottom:1px solid #e8e0d0;">
+                <td style="padding:5px 0;"><span style="color:${info.color};font-weight:bold;">${r}</span> ${info.label.split(' ').slice(1).join(' ')}</td>
+                <td style="text-align:right;padding:5px 0;font-family:monospace;">${s.staff[r]}名 × ¥${(info.rate*info.hours).toLocaleString()}</td>
+              </tr>`;
+            }).join('')}
+            <tr style="border-top:2px solid var(--hdr);">
+              <td style="padding:7px 0;font-weight:bold;color:var(--hdr);">PA費合計</td>
+              <td style="text-align:right;font-weight:bold;font-family:monospace;color:var(--hdr);">¥${paCost.toLocaleString()}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div class="panel" style="margin-bottom:0; overflow-x:auto;">
+        <div class="sec-hdr4">📊 稼働規模の目安</div>
+        <div class="panel-body" style="padding:8px;">
+          <table class="hours-ref-table">
+            <thead><tr><th>時間</th><th>人数</th><th>P変化</th><th>売上影響</th></tr></thead>
+            <tbody>${hoursRefRows}</tbody>
+          </table>
+          <div style="font-size:0.7em;color:var(--muted);margin-top:5px;">🔵 現在の規模に近い行</div>
+        </div>
+      </div>
+    </div>`;
+  showScreen('resources');
+}
+
+function goToPlanning(){
+  buildSbar('sb-plan');
+  renderPlanningBoard();
   showScreen('planning');
 }
 
-function renderActionGrid() {
-  const maxH=mgrHours(G.month), usedH=getUsedHours(), rem=maxH-usedH, pct=(usedH/maxH)*100;
-  document.getElementById('hrs-display').textContent = `残り${rem}時間`;
-  document.getElementById('hrs-display').className = `hours-remaining${rem<30?' low':''}`;
-  document.getElementById('hrs-total-label').textContent = `/ ${maxH}h`;
-  const bar=document.getElementById('hrs-bar');
-  bar.style.width=pct+'%';
-  bar.className=`hours-bar-used${pct>=80?' full':''}`;
+function renderPlanningBoard(){
+  const maxH=mgrHours(G.month), usedH=getUsedHours(), rem=maxH-usedH;
+  const pct=(usedH/maxH)*100;
+  document.getElementById('hrs-disp').textContent=`残り${rem}時間`;
+  document.getElementById('hrs-disp').className=`hours-num${rem<30?' low':''}`;
+  document.getElementById('hrs-total').textContent=` / ${maxH}h`;
+  const fill=document.getElementById('hrs-fill');
+  fill.style.width=pct+'%';
+  fill.className=`hours-bar-fill${pct>=80?' full':''}`;
 
-  document.getElementById('action-grid').innerHTML = ACTION_CARDS.map(card=>{
-    const isSel=G.actions.includes(card.id);
-    const canUse=card.canUse(G);
-    const canHours=rem>=card.hours||isSel;
-    const dis=(!canUse||!canHours)&&!isSel;
-    return `
-      <div class="action-card${isSel?' selected':''}${dis?' disabled':''}" onclick="toggleAction('${card.id}')">
-        ${isSel?'<div class="selected-check">✓</div>':''}
-        <div class="card-icon">${card.icon}</div>
-        <div class="card-name">${card.name}</div>
-        <div class="card-desc">${card.desc}</div>
-        <div class="card-meta">
-          <span class="meta-badge hours">⏱ ${card.hours}h</span>
-          ${card.cost>0?`<span class="meta-badge cost">💴 ${(card.cost/10000).toFixed(0)}万</span>`:''}
-        </div>
-      </div>`;
+  // Render management tasks
+  document.getElementById('mgmt-grid').innerHTML=MANAGER_TASKS.map(card=>{
+    const sel=G.actions.includes(card.id);
+    const canH=rem>=card.hours||sel;
+    const canU=card.canUse(G);
+    const dis=(!canU||!canH)&&!sel;
+    return `<div class="mgmt-card${sel?' selected':''}${dis?' disabled':''}" onclick="toggleAction('${card.id}')">
+      ${sel?'<div class="mc-check">✓</div>':''}
+      <div class="mc-icon">${card.icon}</div>
+      <div class="mc-name">${card.name}</div>
+      <div class="mc-desc">${card.desc}</div>
+      <div class="mc-meta">
+        <span class="mc-tag t-hours">⏱ ${card.hours}h</span>
+        ${card.cost>0?`<span class="mc-tag t-cost">¥${(card.cost/10000).toFixed(0)}万</span>`:''}
+        <span class="mc-tag t-eff">✦ ${card.eff}</span>
+      </div>
+    </div>`;
   }).join('');
 
-  const selCards=ACTION_CARDS.filter(c=>G.actions.includes(c.id));
-  const sumEl=document.getElementById('sel-summary');
-  if(selCards.length>0) {
-    sumEl.style.display='block';
-    const totalC=selCards.reduce((s,c)=>s+c.cost,0);
-    const totalH=selCards.reduce((s,c)=>s+c.hours,0);
-    document.getElementById('sel-list').innerHTML =
-      selCards.map(c=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:0.87em;"><span>${c.icon} ${c.name}</span><span style="color:var(--muted);">${c.hours}h${c.cost>0?' / ¥'+(c.cost/10000).toFixed(0)+'万':''}</span></div>`).join('')+
-      `<div style="display:flex;justify-content:space-between;padding:7px 0;font-weight:bold;font-size:0.87em;"><span>合計</span><span>${totalH}h / ¥${(totalC/10000).toFixed(1)}万</span></div>`;
-  } else {
-    sumEl.style.display='none';
-  }
+  // Render action cards
+  document.getElementById('act-grid').innerHTML=ACTION_CARDS.map(card=>{
+    const sel=G.actions.includes(card.id);
+    const canH=rem>=card.hours||sel;
+    const canU=card.canUse(G);
+    const dis=(!canU||!canH)&&!sel;
+    return `<div class="act-card${sel?' selected':''}${dis?' disabled':''}" onclick="toggleAction('${card.id}')">
+      ${sel?'<div class="act-check">✓</div>':''}
+      <div class="mc-icon">${card.icon}</div>
+      <div class="mc-name">${card.name}</div>
+      <div class="mc-desc">${card.desc}</div>
+      <div class="mc-meta">
+        <span class="mc-tag t-hours">⏱ ${card.hours}h</span>
+        ${card.cost>0?`<span class="mc-tag t-cost">¥${(card.cost/10000).toFixed(0)}万</span>`:''}
+        <span class="mc-tag t-eff">✦ ${card.eff}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Selected summary
+  const allCards=[...MANAGER_TASKS,...ACTION_CARDS];
+  const selCards=allCards.filter(c=>G.actions.includes(c.id));
+  const selBox=document.getElementById('sel-box');
+  if(selCards.length>0){
+    selBox.style.display='block';
+    const totC=selCards.reduce((n,c)=>n+c.cost,0), totH=selCards.reduce((n,c)=>n+c.hours,0);
+    document.getElementById('sel-body').innerHTML=
+      selCards.map(c=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e8e0d0;font-size:0.87em;"><span>${c.icon} ${c.name}</span><span style="color:var(--muted);">${c.hours}h${c.cost>0?' / ¥'+(c.cost/10000).toFixed(0)+'万':''}</span></div>`).join('')+
+      `<div style="display:flex;justify-content:space-between;padding:8px 0;font-weight:bold;font-size:0.87em;border-top:1px solid var(--hdr);margin-top:4px;"><span>合計</span><span>${totH}h / ¥${(totC/10000).toFixed(1)}万</span></div>`;
+  } else { selBox.style.display='none'; }
 }
 
-function toggleAction(id) {
-  const card=ACTION_CARDS.find(c=>c.id===id);
+function toggleAction(id){
+  const allCards=[...MANAGER_TASKS,...ACTION_CARDS];
+  const card=allCards.find(c=>c.id===id);
   if(!card) return;
   const idx=G.actions.indexOf(id);
-  if(idx>=0) { G.actions.splice(idx,1); }
+  if(idx>=0){ G.actions.splice(idx,1); }
   else {
     if(!card.canUse(G)) return;
     if(getUsedHours()+card.hours>mgrHours(G.month)) return;
     G.actions.push(id);
   }
-  renderActionGrid();
+  renderPlanningBoard();
 }
 
-function confirmActions() {
-  G.risk = RISK_CARDS[Math.floor(Math.random()*RISK_CARDS.length)];
-  G.riskFlipped = false;
-  buildStatus('risk-statusbar');
+function confirmActions(){
+  G.risk=RISK_CARDS[Math.floor(Math.random()*RISK_CARDS.length)];
+  G.riskFlipped=false;
+  buildSbar('sb-risk');
   document.getElementById('risk-card-el').classList.remove('flipped');
-  document.getElementById('risk-next-btn').style.display='none';
+  document.getElementById('risk-go-btn').style.display='none';
   showScreen('risk');
 }
 
-function flipRiskCard() {
+function flipRiskCard(){
   if(G.riskFlipped) return;
   G.riskFlipped=true;
   const risk=G.risk;
-  const front=document.getElementById('risk-front');
-  front.className=`risk-card-face risk-card-front type-${risk.type}`;
-  document.getElementById('ri-icon').textContent=risk.icon;
-  document.getElementById('ri-name').textContent=risk.name;
-  document.getElementById('ri-desc').textContent=risk.desc;
-  let effTxt='', effCls='neu';
-  if(risk.salesPenalty>0){ effTxt=`売上損失: −¥${(risk.salesPenalty/10000).toFixed(0)}万`; effCls='neg'; }
-  else if(risk.salesPenalty<0){ effTxt=`売上ボーナス: +¥${(-risk.salesPenalty/10000).toFixed(0)}万`; effCls='pos'; }
-  else if(risk.cogsUp){ effTxt=`原価率 +${(risk.cogsUp*100).toFixed(0)}%`; effCls='neg'; }
-  else { effTxt='影響なし'; effCls='neu'; }
-  const effEl=document.getElementById('ri-effect');
-  effEl.textContent=effTxt; effEl.className=`risk-effect-big ${effCls}`;
+  const front=document.getElementById('rc-front');
+  front.className=`rcf rcf-front type-${risk.type}`;
+  document.getElementById('rc-icon').textContent=risk.icon;
+  document.getElementById('rc-name').textContent=risk.name;
+  document.getElementById('rc-desc').textContent=risk.desc;
+  let effTxt='', effCls='#fff';
+  if(risk.salesPenalty>0){ effTxt=`損失: −¥${(risk.salesPenalty/10000).toFixed(0)}万`; effCls='#ffcdd2'; }
+  else if(risk.salesPenalty<0){ effTxt=`ボーナス: +¥${(-risk.salesPenalty/10000).toFixed(0)}万`; effCls='#c8e6c9'; }
+  else if(risk.cogsUp){ effTxt=`原価率 +${(risk.cogsUp*100).toFixed(0)}%`; effCls='#ffcdd2'; }
+  else { effTxt='影響なし'; effCls='rgba(255,255,255,0.7)'; }
+  const effEl=document.getElementById('rc-eff');
+  effEl.textContent=effTxt; effEl.style.color=effCls;
   document.getElementById('risk-card-el').classList.add('flipped');
-  setTimeout(()=>{ document.getElementById('risk-next-btn').style.display='block'; }, 900);
+  setTimeout(()=>{ document.getElementById('risk-go-btn').style.display='block'; },900);
 }
 
-function goToResults() {
+function goToResults(){
   const s=G, mi=s.month, risk=s.risk;
-  const savedPendingBonus=s.pendingBonus;
+  const savedPending=s.pendingBonus;
+  const allCards=[...MANAGER_TASKS,...ACTION_CARDS];
 
-  // Build round result accumulator
-  const rr={bonusSales:0, cogsReduction:0, nextMonthBonus:0, riskReduction:0, actionCosts:0, actionDesc:[], cogsUp:risk.cogsUp||0};
+  // Round result accumulator
+  const rr={bonusSales:0,cogsReduction:0,laborReduction:0,nextMonthBonus:0,riskReduction:0,actionCosts:0,actionDesc:[],cogsUp:risk.cogsUp||0};
 
-  // Apply action effects (staff changes, bonuses)
-  ACTION_CARDS.filter(c=>s.actions.includes(c.id)).forEach(c=>{ c.effect(s,rr); rr.actionCosts+=c.cost; });
+  // Apply actions
+  allCards.filter(c=>s.actions.includes(c.id)).forEach(c=>{ c.effect(s,rr); rr.actionCosts+=c.cost; });
 
-  // Apply risk on-apply effects (staff loss etc.)
+  // Apply risk on-apply
   if(risk.onApply) risk.onApply(s);
 
-  // Calculate revenue
-  const power=calcPower(s), rank=calcRank(power);
+  // Revenue
+  const p=calcPower(s), rank=calcRank(p);
   const baseRev=BASE_REV[mi][rank-1]*10000;
-  const powerBonus=power*20000;
+  const powerBonus=p*20000;
   let riskPen=risk.salesPenalty||0;
-  if(riskPen>0 && rr.riskReduction) riskPen=Math.floor(riskPen*(1-rr.riskReduction));
+  if(riskPen>0&&rr.riskReduction) riskPen=Math.floor(riskPen*(1-rr.riskReduction));
+  const revenue=baseRev+powerBonus+rr.bonusSales+savedPending-riskPen;
 
-  const revenue=baseRev+powerBonus+rr.bonusSales+savedPendingBonus-riskPen;
-
-  // Calculate costs
+  // Costs
   const cogsRate=Math.max(0.15, 0.30-rr.cogsReduction+rr.cogsUp);
   const cogs=Math.round(revenue*cogsRate);
   const grossProfit=revenue-cogs;
-  const paCost=Object.entries(STAFF_INFO).reduce((sum,[r,info])=>sum+s.staff[r]*info.rate*info.hours,0);
-  const mgrCost=300000, utilityCost=Math.round(revenue*0.05), promoCost=Math.round(revenue*0.02);
+  const paCost=calcPACost(s,rr.laborReduction);
+  const mgrCost=300000, utilityCost=Math.round(revenue*0.05);
+  const promoCost=Math.round(revenue*0.02);
   const otherMgmt=100000, sysCost=100000, eqCost=100000;
   const totalCost=paCost+mgrCost+utilityCost+promoCost+otherMgmt+sysCost+eqCost+rr.actionCosts;
   const opProfit=grossProfit-totalCost;
 
-  // Store and update state
-  const result={month:MONTHS[mi],rank,revenue,cogs,grossProfit,paCost,mgrCost,utilityCost,promoCost,otherMgmt,sysCost,eqCost,actionCosts:rr.actionCosts,totalCost,opProfit,riskCard:risk,riskPen,staff:{...s.staff},power,cogsRate};
-  s.monthlyResults.push(result);
+  s.monthlyResults.push({month:MONTHS[mi],rank,revenue,cogs,grossProfit,paCost,mgrCost,utilityCost,promoCost,otherMgmt,sysCost,eqCost,actionCosts:rr.actionCosts,totalCost,opProfit,riskCard:risk,riskPen,staff:{...s.staff},power:p,cogsRate,laborReduction:rr.laborReduction});
   s.totalProfit+=opProfit;
   s.pendingBonus=rr.nextMonthBonus;
 
-  // Render
-  buildStatus('res-statusbar');
-  document.getElementById('res-month-title').textContent=`📊 ${MONTHS[mi]} 月次決算`;
-  const pb=document.getElementById('profit-box');
-  const pn=document.getElementById('profit-num');
-  pb.className=`profit-box ${opProfit>=0?'pos':'neg'}`;
-  pn.textContent=yenFmt(opProfit);
-  pn.className=`profit-amount ${opProfit>=0?'pos':'neg'}`;
-  document.getElementById('profit-sub').textContent=`累計利益: ${yenFmt(s.totalProfit)}`;
+  buildSbar('sb-res2');
+  document.getElementById('res-title').textContent=`📊 ${MONTHS[mi]} 月次決算`;
 
-  // P&L table
-  const pRow=(label,val,indent,bold,sec)=>`
-    <tr class="${indent?'pl-indent':''} ${bold?'pl-total':''} ${sec?'pl-section':''}">
-      <td class="pl-label">${label}</td>
-      <td class="pl-value" style="color:${val<0?'var(--red)':val===0?'var(--muted)':'var(--text)'}">${yenFmt(val)}</td>
-    </tr>`;
-  let tableHTML=pRow('■ 売上高',revenue,false,false,true);
-  tableHTML+=pRow('　ベース売上（'+rankLabel(rank)+'）',baseRev,true);
-  tableHTML+=pRow('　営業力ボーナス（'+power+'P×2万）',powerBonus,true);
-  if(rr.bonusSales>0) tableHTML+=pRow('　アクション販促ボーナス',rr.bonusSales,true);
-  if(savedPendingBonus>0) tableHTML+=pRow('　前月MSボーナス',savedPendingBonus,true);
-  if(riskPen>0) tableHTML+=pRow('　リスク損失（'+risk.name+'）',-riskPen,true);
-  if(riskPen<0) tableHTML+=pRow('　ラッキーボーナス（'+risk.name+'）',-riskPen,true);
-  tableHTML+=pRow('■ 売上原価（'+(cogsRate*100).toFixed(0)+'%）',-cogs,false,false,true);
-  tableHTML+=pRow('◆ 売上総利益',grossProfit,false,true,false);
-  tableHTML+=pRow('■ 販売管理費',-totalCost,false,false,true);
-  tableHTML+=pRow('　PA人件費',-paCost,true);
-  tableHTML+=pRow('　マネージャー人件費',-mgrCost,true);
-  tableHTML+=pRow('　水道光熱費（5%）',-utilityCost,true);
-  tableHTML+=pRow('　販促費（2%）',-promoCost,true);
-  tableHTML+=pRow('　その他管理費',-otherMgmt,true);
-  tableHTML+=pRow('　システム費',-sysCost,true);
-  tableHTML+=pRow('　設備費',-eqCost,true);
-  if(rr.actionCosts>0) tableHTML+=pRow('　アクションコスト',-rr.actionCosts,true);
-  tableHTML+=pRow('◆ 営業利益',opProfit,false,true,false);
-  document.getElementById('pl-body').innerHTML=tableHTML;
+  const pb=document.getElementById('profit-box'), pn=document.getElementById('profit-num');
+  pb.className=`profit-box ${opProfit>=0?'pos':'neg'}`;
+  pn.textContent=yenFmt(opProfit); pn.className=`profit-num ${opProfit>=0?'pos':'neg'}`;
+  document.getElementById('profit-sub').textContent=`6ヶ月累計利益: ${yenFmt(s.totalProfit)}`;
+
+  // P&L
+  const pRow=(lbl,val,indent,bold,sec)=>`<tr class="${indent?'pl-indent':''} ${bold?'pl-total':''} ${sec?'pl-section':''}">
+    <td class="pl-label">${lbl}</td>
+    <td class="pl-val ${val<0?'pl-neg':val>0?'pl-pos':''}">${yenFmt(val)}</td></tr>`;
+  let tHTML=pRow('■ 売上高',revenue,false,false,true);
+  tHTML+=pRow(`　ベース売上（${rankLabel(rank)}）`,baseRev,true);
+  tHTML+=pRow(`　営業力ボーナス（${p}P×2万）`,powerBonus,true);
+  if(rr.bonusSales>0) tHTML+=pRow('　アクション・管理ボーナス',rr.bonusSales,true);
+  if(savedPending>0) tHTML+=pRow('　前月MSアンケートボーナス',savedPending,true);
+  if(riskPen>0) tHTML+=pRow(`　リスク損失（${risk.name}）`,-riskPen,true);
+  if(riskPen<0) tHTML+=pRow(`　ラッキーボーナス（${risk.name}）`,-riskPen,true);
+  tHTML+=pRow(`■ 売上原価（${(cogsRate*100).toFixed(0)}%）`,-cogs,false,false,true);
+  tHTML+=pRow('◆ 売上総利益',grossProfit,false,true);
+  tHTML+=pRow('■ 販売管理費',-totalCost,false,false,true);
+  tHTML+=pRow('　PA人件費（'+( rr.laborReduction>0?`${(rr.laborReduction*100).toFixed(0)}%削減後`:'管理なし')+'）',-paCost,true);
+  tHTML+=pRow('　マネージャー人件費',-mgrCost,true);
+  tHTML+=pRow('　水道光熱費（5%）',-utilityCost,true);
+  tHTML+=pRow('　販促費（2%）',-promoCost,true);
+  tHTML+=pRow('　その他管理費',-otherMgmt,true);
+  tHTML+=pRow('　システム費',-sysCost,true);
+  tHTML+=pRow('　設備費',-eqCost,true);
+  if(rr.actionCosts>0) tHTML+=pRow('　アクションコスト',-rr.actionCosts,true);
+  tHTML+=pRow('◆ 営業利益',opProfit,false,true);
+  document.getElementById('pl-body').innerHTML=tHTML;
 
   // Action effects
-  if(rr.actionDesc.length>0) {
-    document.getElementById('action-eff-card').style.display='block';
-    document.getElementById('action-eff-list').innerHTML=rr.actionDesc.map(d=>`<div style="padding:3px 0;font-size:0.85em;">✓ ${d}</div>`).join('')+
-      (rr.nextMonthBonus>0?`<div class="alert alert-info" style="margin-top:8px;">📊 来月 +¥${(rr.nextMonthBonus/10000).toFixed(0)}万のボーナスが適用されます</div>`:'');
-  } else {
-    document.getElementById('action-eff-card').style.display='none';
-  }
+  const ep=document.getElementById('eff-panel'), eb=document.getElementById('eff-body');
+  if(rr.actionDesc.length>0){
+    ep.style.display='block';
+    eb.innerHTML=rr.actionDesc.map(d=>`<div style="padding:3px 0;font-size:0.85em;">✓ ${d}</div>`).join('')+
+      (rr.nextMonthBonus>0?`<div class="alert a-info" style="margin-top:8px;">📊 来月 +¥${(rr.nextMonthBonus/10000).toFixed(0)}万のMSボーナスが適用されます</div>`:'');
+  } else { ep.style.display='none'; }
 
   // Next button
   const nb=document.getElementById('next-btn');
-  if(s.totalProfit<-5000000) {
-    nb.textContent='💸 ゲームオーバー...'; nb.onclick=showGameOver;
-  } else if(mi>=5) {
-    nb.textContent='🏁 最終結果を見る'; nb.onclick=showEnding;
-  } else {
-    nb.textContent='➡️ '+MONTHS[mi+1]+'へ進む'; nb.onclick=nextMonth;
-  }
+  if(s.totalProfit<-5000000){ nb.textContent='💸 ゲームオーバー...'; nb.onclick=showGameOver; }
+  else if(mi>=5){ nb.textContent='🏁 最終結果を見る'; nb.onclick=showEnding; }
+  else { nb.textContent='➡️ '+MONTHS[mi+1]+'へ進む'; nb.onclick=nextMonth; }
   showScreen('results');
 }
 
-function nextMonth() {
-  if(G.totalProfit<-5000000){ showGameOver(); return; }
-  if(G.month>=5){ showEnding(); return; }
-  G.month++; G.actions=[];
-  showMonthIntro();
+function nextMonth(){
+  if(G.totalProfit<-5000000){showGameOver();return;}
+  if(G.month>=5){showEnding();return;}
+  G.month++; G.actions=[]; showMonthIntro();
 }
-
-function showGameOver() {
+function showGameOver(){
   document.getElementById('go-month').textContent=MONTHS[G.month];
   document.getElementById('go-profit').textContent=yenFmt(G.totalProfit);
   showScreen('gameover');
 }
-
-function showEnding() {
+function showEnding(){
   const tot=G.totalProfit;
   let grade,gc,comment;
-  if(tot>=15000000){grade='S';gc='grade-s';comment='伝説のマネージャー！完璧な経営で最高の結果を達成！';}
-  else if(tot>=10000000){grade='A';gc='grade-a';comment='優秀なマネージャー！高い利益を維持し続けました！';}
-  else if(tot>=5000000){grade='B';gc='grade-b';comment='安定した経営ができました。さらなる改善の余地あり！';}
-  else if(tot>=0){grade='C';gc='grade-c';comment='黒字経営を維持。次はもっと高い利益を目指そう！';}
-  else{grade='F';gc='grade-f';comment='赤字経営でした。次回は戦略を練り直してみましょう。';}
+  if(tot>=15000000){grade='S';gc='g-s';comment='伝説のマネージャー！完璧な経営で最高の結果を達成！';}
+  else if(tot>=10000000){grade='A';gc='g-a';comment='優秀なマネージャー！高い利益を維持し続けました！';}
+  else if(tot>=5000000){grade='B';gc='g-b';comment='安定した経営ができました。さらなる改善の余地あり！';}
+  else if(tot>=0){grade='C';gc='g-c';comment='黒字経営を維持。次はもっと高い利益を目指そう！';}
+  else{grade='F';gc='g-f';comment='赤字経営でした。次回は戦略を練り直しましょう。';}
   document.getElementById('final-grade').textContent=grade;
   document.getElementById('final-grade').className=`grade-big ${gc}`;
   document.getElementById('grade-comment').textContent=comment;
   const fs=G.staff, fp=calcPower(G), fr=calcRank(fp);
   const best=G.monthlyResults.reduce((a,b)=>a.opProfit>b.opProfit?a:b);
   document.getElementById('final-stats').innerHTML=`
-    <div class="result-row"><span class="rl">6ヶ月累計利益</span><span class="rv ${tot>=0?'text-green':'text-red'}">${yenFmt(tot)}</span></div>
-    <div class="result-row"><span class="rl">最終スタッフ</span><span class="rv">S:${fs.S} A:${fs.A} B:${fs.B} C:${fs.C} D:${fs.D}（${totalStaff(G)}名）</span></div>
-    <div class="result-row"><span class="rl">最終営業力</span><span class="rv">${fp}P（${rankLabel(fr)}）</span></div>
-    <div class="result-row"><span class="rl">最高利益月</span><span class="rv text-green">${best.month}: ${yenFmt(best.opProfit)}</span></div>`;
+    <div class="end-row"><span class="el">6ヶ月累計利益</span><span class="ev" style="color:${tot>=0?'var(--green)':'var(--red)'}">${yenFmt(tot)}</span></div>
+    <div class="end-row"><span class="el">最終スタッフ</span><span class="ev">S:${fs.S} A:${fs.A} B:${fs.B} C:${fs.C} D:${fs.D}（${totalStaff(G)}名）</span></div>
+    <div class="end-row"><span class="el">最終営業力</span><span class="ev">${fp}P（${rankLabel(fr)}）</span></div>
+    <div class="end-row"><span class="el">最高利益月</span><span class="ev" style="color:var(--green)">${best.month}: ${yenFmt(best.opProfit)}</span></div>`;
   document.getElementById('monthly-rows').innerHTML=G.monthlyResults.map(r=>`
-    <div class="result-row">
-      <span class="rl">${r.month}（${rankLabel(r.rank)}）</span>
-      <span class="rv ${r.opProfit>=0?'text-green':'text-red'}">${yenFmt(r.opProfit)}</span>
+    <div class="end-row">
+      <span class="el">${r.month}（${rankLabel(r.rank)}）</span>
+      <span class="ev" style="color:${r.opProfit>=0?'var(--green)':'var(--red)'}">${yenFmt(r.opProfit)}</span>
     </div>`).join('');
   showScreen('ending');
 }
 
-// Init
 window.onload=()=>{
   document.querySelectorAll('.screen').forEach(el=>{ el.style.display='none'; el.classList.remove('active'); });
-  const ts=document.getElementById('screen-title');
-  ts.style.display='flex'; ts.classList.add('active');
+  const ts=document.getElementById('screen-title'); ts.style.display='flex'; ts.classList.add('active');
 };
 </script>
 </body>
