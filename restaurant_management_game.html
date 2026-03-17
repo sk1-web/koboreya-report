@@ -1081,12 +1081,12 @@ function flipRiskCard(idx){
 }
 
 function goToResults(){
-  const s=G, mi=s.month, risk=s.risk;
+  const s=G, mi=s.month;
   const savedPending=s.pendingBonus;
   const allCards=[...MANAGER_TASKS,...ACTION_CARDS];
 
   // Round result accumulator
-  const rr={bonusSales:0,cogsReduction:0,laborReduction:0,nextMonthBonus:0,riskReduction:0,actionCosts:0,actionDesc:[],cogsUp:risk.cogsUp||0};
+  const rr={bonusSales:0,cogsReduction:0,laborReduction:0,nextMonthBonus:0,riskReduction:0,actionCosts:0,actionDesc:[],cogsUp:0};
 
   // Apply actions
   allCards.filter(c=>s.actions.includes(c.id)).forEach(c=>{ c.effect(s,rr); rr.actionCosts+=c.cost; });
