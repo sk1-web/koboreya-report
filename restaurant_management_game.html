@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍽️ こぼれや マネジメントゲーム</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --card: #21262d;
+  --border: #30363d;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --gold: #e3b341;
+  --red: #f85149;
+  --green: #3fb950;
+  --blue: #58a6ff;
+  --purple: #a371f7;
+}
+body {
+  font-family: 'Hiragino Sans', 'Noto Sans JP', 'Meiryo', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* STATUS BAR */
+.status-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 0.82em;
+  position: sticky; top: 0; z-index: 10;
+}
+.status-item { display: flex; align-items: center; gap: 5px; }
+.status-label { color: var(--muted); }
+.status-value { font-weight: bold; }
+.rank-badge { background: var(--gold); color: #000; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+.month-badge { background: var(--blue); color: #000; padding: 2px 10px; border-radius: 4px; font-weight: bold; }
+
+/* TITLE */
+#screen-title {
+  background: linear-gradient(160deg, #0d1117 0%, #161b22 40%, #0d1a2d 100%);
+  align-items: center; justify-content: center; text-align: center; padding: 40px 20px;
+}
+.title-logo { font-size: 4em; margin-bottom: 8px; }
+.title-main { font-size: 2.2em; font-weight: bold; color: var(--gold); margin-bottom: 4px; }
+.title-sub { font-size: 1.1em; color: var(--muted); margin-bottom: 30px; }
+.title-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 24px; max-width: 560px; width: 100%; text-align: left; margin-bottom: 16px;
+}
+.title-card h3 { color: var(--gold); margin-bottom: 12px; font-size: 1em; }
+.title-card ul { list-style: none; }
+.title-card li { padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.88em; }
+.title-card li:last-child { border: none; }
+.tag { display: inline-block; background: var(--blue); color: #000; padding: 1px 6px; border-radius: 3px; font-size: 0.78em; margin-right: 6px; font-weight: bold; }
+
+/* BUTTONS */
+.btn {
+  display: inline-block; padding: 11px 26px; border: none; border-radius: 8px;
+  font-size: 1em; font-family: inherit; cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s; font-weight: bold;
+}
+.btn:hover { opacity: 0.85; transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn-primary { background: var(--gold); color: #000; }
+.btn-success { background: var(--green); color: #000; }
+.btn-secondary { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+/* MAIN CONTENT */
+.main-content { flex: 1; padding: 16px; max-width: 780px; width: 100%; margin: 0 auto; }
+.section-title {
+  font-size: 1.25em; font-weight: bold; margin-bottom: 14px;
+  color: var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 7px;
+}
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 14px; }
+
+/* STAFF GRID */
+.staff-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 12px 0; }
+.staff-cell { text-align: center; padding: 10px 6px; border-radius: 8px; border: 1px solid var(--border); }
+.staff-cell.rank-s { background: linear-gradient(135deg,#2d1b69,#4a2c99); border-color: var(--purple); }
+.staff-cell.rank-a { background: linear-gradient(135deg,#1a3a1a,#2d5a2d); border-color: var(--green); }
+.staff-cell.rank-b { background: linear-gradient(135deg,#1a2d4a,#2d4a6d); border-color: var(--blue); }
+.staff-cell.rank-c { background: linear-gradient(135deg,#2d2d1a,#4a4a2d); border-color: var(--gold); }
+.staff-cell.rank-d { background: linear-gradient(135deg,#2d1a1a,#4a2d2d); border-color: var(--red); }
+.staff-rank { font-size: 1.4em; font-weight: bold; }
+.staff-count { font-size: 1.7em; font-weight: bold; margin: 4px 0; }
+.staff-power { font-size: 0.72em; color: var(--muted); }
+
+/* POWER BAR */
+.power-bar-bg {
+  background: var(--surface); border-radius: 10px; height: 22px;
+  position: relative; overflow: hidden; border: 1px solid var(--border); margin: 8px 0;
+}
+.power-bar-fill {
+  height: 100%; border-radius: 10px; transition: width 0.6s ease;
+  background: linear-gradient(90deg, var(--blue), var(--purple));
+}
+.power-bar-label {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  font-size: 0.78em; font-weight: bold; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+.power-thresholds { display: flex; justify-content: space-between; font-size: 0.72em; color: var(--muted); }
+
+/* ACTION CARDS */
+.hours-bar {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px;
+}
+.hours-remaining { font-size: 1.2em; font-weight: bold; }
+.hours-remaining.low { color: var(--red); }
+.hours-bar-inner { flex: 1; background: var(--card); border-radius: 6px; height: 14px; overflow: hidden; border: 1px solid var(--border); }
+.hours-bar-used { height: 100%; background: linear-gradient(90deg, var(--green), var(--blue)); transition: width 0.3s; }
+.hours-bar-used.full { background: linear-gradient(90deg, var(--gold), var(--red)); }
+
+.action-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 9px; margin-bottom: 14px; }
+.action-card {
+  background: var(--card); border: 2px solid var(--border); border-radius: 10px;
+  padding: 12px; cursor: pointer; transition: all 0.2s; position: relative;
+}
+.action-card:hover:not(.disabled) { border-color: var(--blue); transform: translateY(-2px); box-shadow: 0 4px 14px rgba(88,166,255,0.3); }
+.action-card.selected { border-color: var(--green); background: #1a2d1a; box-shadow: 0 0 10px rgba(63,185,80,0.35); }
+.action-card.disabled { opacity: 0.38; cursor: not-allowed; }
+.action-card .card-icon { font-size: 1.7em; margin-bottom: 5px; }
+.action-card .card-name { font-weight: bold; font-size: 0.88em; margin-bottom: 3px; }
+.action-card .card-desc { font-size: 0.73em; color: var(--muted); margin-bottom: 7px; }
+.action-card .card-meta { display: flex; gap: 5px; flex-wrap: wrap; }
+.meta-badge { font-size: 0.68em; padding: 2px 5px; border-radius: 3px; font-weight: bold; }
+.meta-badge.hours { background: #1a2d4a; color: var(--blue); border: 1px solid var(--blue); }
+.meta-badge.cost { background: #2d1a1a; color: var(--red); border: 1px solid var(--red); }
+.selected-check { position: absolute; top: -6px; right: -6px; background: var(--green); color: #000; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.72em; font-weight: bold; }
+
+/* RISK CARD */
+#screen-risk { align-items: center; justify-content: center; padding: 30px 20px; }
+.risk-container { text-align: center; max-width: 400px; width: 100%; }
+.risk-card-3d { width: 180px; height: 256px; margin: 20px auto; perspective: 1000px; cursor: pointer; }
+.risk-card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.8s; }
+.risk-card-3d.flipped .risk-card-inner { transform: rotateY(180deg); }
+.risk-card-face { position: absolute; width: 100%; height: 100%; border-radius: 14px; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; }
+.risk-card-back { background: linear-gradient(135deg, #8B0000, #CC2200); border: 3px solid #ff6666; box-shadow: 0 0 28px rgba(200,0,0,0.5); }
+.risk-card-back .cp { font-size: 2.8em; opacity: 0.4; }
+.risk-card-back .cl { font-size: 1.1em; font-weight: bold; color: rgba(255,255,255,0.75); margin-top: 8px; }
+.risk-card-front { transform: rotateY(180deg); }
+.risk-card-front.type-good { background: linear-gradient(135deg,#0d3d1a,#1a5c2d); border: 3px solid var(--green); box-shadow: 0 0 28px rgba(63,185,80,0.4); }
+.risk-card-front.type-bad { background: linear-gradient(135deg,#3d0d0d,#5c1a1a); border: 3px solid var(--red); box-shadow: 0 0 28px rgba(248,81,73,0.4); }
+.risk-card-front.type-critical { background: linear-gradient(135deg,#3d0030,#660000); border: 3px solid #ff44cc; box-shadow: 0 0 28px rgba(255,68,204,0.5); }
+.risk-card-front.type-neutral { background: linear-gradient(135deg,#1a1a3d,#2d2d5c); border: 3px solid var(--blue); box-shadow: 0 0 20px rgba(88,166,255,0.3); }
+.risk-icon-big { font-size: 2.8em; margin-bottom: 8px; }
+.risk-name-big { font-size: 1.1em; font-weight: bold; margin-bottom: 8px; }
+.risk-desc-sm { font-size: 0.78em; color: var(--muted); text-align: center; margin-bottom: 12px; }
+.risk-effect-big { font-size: 0.95em; font-weight: bold; }
+.risk-effect-big.neg { color: var(--red); }
+.risk-effect-big.pos { color: var(--green); }
+.risk-effect-big.neu { color: var(--muted); }
+
+/* P&L TABLE */
+.pl-table { width: 100%; border-collapse: collapse; }
+.pl-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); font-size: 0.88em; }
+.pl-table tr:last-child td { border: none; }
+.pl-label { color: var(--muted); }
+.pl-value { text-align: right; font-family: monospace; }
+.pl-total td { font-weight: bold; color: var(--gold); border-top: 2px solid var(--gold) !important; }
+.pl-section td { background: var(--surface); font-weight: bold; font-size: 0.82em; }
+.pl-indent td:first-child { padding-left: 26px; }
+
+.profit-box { text-align: center; padding: 18px; border-radius: 10px; margin: 12px 0; }
+.profit-box.pos { background: #1a2d1a; border: 2px solid var(--green); }
+.profit-box.neg { background: #2d1a1a; border: 2px solid var(--red); }
+.profit-amount { font-size: 2.4em; font-weight: bold; }
+.profit-amount.pos { color: var(--green); }
+.profit-amount.neg { color: var(--red); }
+.profit-sub { font-size: 0.85em; color: var(--muted); margin-top: 4px; }
+
+/* ENDING */
+#screen-ending { align-items: center; justify-content: center; padding: 36px 20px; }
+.grade-big { font-size: 7em; font-weight: bold; margin: 16px 0; text-shadow: 0 0 30px currentColor; }
+.grade-s { color: #ffd700; } .grade-a { color: var(--purple); }
+.grade-b { color: var(--blue); } .grade-c { color: var(--green); } .grade-f { color: var(--red); }
+.result-table { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; max-width: 480px; width: 100%; text-align: left; margin: 16px auto; }
+.result-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 0.88em; }
+.result-row:last-child { border: none; }
+.result-row .rl { color: var(--muted); }
+.result-row .rv { font-weight: bold; }
+
+/* MISC */
+.flex-center { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.mt-14 { margin-top: 14px; }
+.alert { padding: 10px 14px; border-radius: 7px; font-size: 0.87em; margin-bottom: 9px; }
+.alert-warn { background: #2d2d0d; border: 1px solid var(--gold); color: var(--gold); }
+.alert-danger { background: #2d0d0d; border: 1px solid var(--red); color: var(--red); }
+.alert-success { background: #0d2d0d; border: 1px solid var(--green); color: var(--green); }
+.alert-info { background: #0d1a2d; border: 1px solid var(--blue); color: var(--blue); }
+.text-green { color: var(--green); } .text-red { color: var(--red); } .text-gold { color: var(--gold); }
+
+@media (max-width: 480px) {
+  .staff-grid { grid-template-columns: repeat(5, 1fr); gap: 4px; }
+  .staff-count { font-size: 1.4em; }
+  .action-grid { grid-template-columns: repeat(2, 1fr); }
+  .title-main { font-size: 1.7em; }
+}
+</style>
+</head>
+<body>
+
+<!-- TITLE -->
+<div id="screen-title" class="screen">
+  <div class="title-logo">🍽️</div>
+  <div class="title-main">こぼれや</div>
+  <div class="title-sub">レストラン マネジメントゲーム</div>
+  <div class="title-card">
+    <h3>🎮 ゲーム概要</h3>
+    <ul>
+      <li><span class="tag">期間</span>8月〜1月の6ヶ月間、店舗経営をシミュレート</li>
+      <li><span class="tag">目標</span>アクションカードで戦略を立て、リスクを乗り越えて利益を最大化</li>
+      <li><span class="tag">スタッフ</span>初期スタッフ20名（B×11・C×7・D×2）の育成・採用が鍵</li>
+      <li><span class="tag">評価</span>6ヶ月の累計利益でS〜Fのグレード判定</li>
+    </ul>
+  </div>
+  <div class="title-card">
+    <h3>⚡ スタッフランクと営業力</h3>
+    <ul>
+      <li>🌟 <b>S</b>: +6P / 時給1,400円×80h &nbsp;|&nbsp; ✨ <b>A</b>: +6P / 1,200円×80h</li>
+      <li>📘 <b>B</b>: +4P / 1,100円×70h &nbsp;|&nbsp; 📗 <b>C</b>: +2P / 1,000円×60h</li>
+      <li>📕 <b>D</b>: −4P / 1,000円×60h</li>
+    </ul>
+  </div>
+  <div class="title-card">
+    <h3>🏆 営業力ランク</h3>
+    <ul>
+      <li>🏆 <b>1位</b>: 70P以上 &nbsp;⭐ <b>2位</b>: 60P以上 &nbsp;📊 <b>3位</b>: 45P以上</li>
+      <li>📈 <b>4位</b>: 30P以上 &nbsp;📉 <b>5位</b>: 30P未満</li>
+    </ul>
+  </div>
+  <button class="btn btn-primary" onclick="startGame()" style="font-size:1.15em; padding:14px 48px; margin-top:6px;">🚀 ゲームスタート</button>
+</div>
+
+<!-- MONTH INTRO -->
+<div id="screen-month-intro" class="screen">
+  <div id="intro-statusbar" class="status-bar"></div>
+  <div class="main-content">
+    <div id="intro-content"></div>
+    <div class="flex-center mt-14">
+      <button class="btn btn-primary" onclick="goToPlanning()">⚡ アクションカードを選ぶ</button>
+    </div>
+  </div>
+</div>
+
+<!-- PLANNING -->
+<div id="screen-planning" class="screen">
+  <div id="plan-statusbar" class="status-bar"></div>
+  <div class="main-content">
+    <h2 class="section-title">🃏 アクションカードを選択</h2>
+    <div class="hours-bar">
+      <div>
+        <div style="font-size:0.78em; color:var(--muted);">マネージャー残り時間</div>
+        <div id="hrs-display" class="hours-remaining">180時間</div>
+      </div>
+      <div class="hours-bar-inner" style="flex:1;">
+        <div id="hrs-bar" class="hours-bar-used" style="width:0%"></div>
+      </div>
+      <div style="font-size:0.8em; color:var(--muted);" id="hrs-total-label">/ 180h</div>
+    </div>
+    <div id="action-grid" class="action-grid"></div>
+    <div id="sel-summary" class="card" style="display:none;">
+      <div style="font-size:0.85em; color:var(--muted); margin-bottom:8px;">📋 選択中のアクション</div>
+      <div id="sel-list"></div>
+    </div>
+    <div class="flex-center mt-14">
+      <button class="btn btn-secondary" onclick="goToMonthIntro()">← 戻る</button>
+      <button class="btn btn-primary" onclick="confirmActions()">🎴 リスクカードを引く</button>
+    </div>
+  </div>
+</div>
+
+<!-- RISK -->
+<div id="screen-risk" class="screen">
+  <div id="risk-statusbar" class="status-bar"></div>
+  <div class="risk-container">
+    <h2 style="font-size:1.4em; color:var(--gold); margin-bottom:4px;">🎴 リスクカード</h2>
+    <p style="color:var(--muted); font-size:0.88em; margin-bottom:18px;">カードをタップして今月のリスクを確認！</p>
+    <div id="risk-card-el" class="risk-card-3d" onclick="flipRiskCard()">
+      <div class="risk-card-inner">
+        <div class="risk-card-face risk-card-back">
+          <div class="cp">🃏</div>
+          <div class="cl">RISK CARD</div>
+          <div class="cl" style="font-size:0.78em; margin-top:6px;">タップして開く</div>
+        </div>
+        <div id="risk-front" class="risk-card-face risk-card-front type-bad">
+          <div id="ri-icon" class="risk-icon-big">❓</div>
+          <div id="ri-name" class="risk-name-big">-</div>
+          <div id="ri-desc" class="risk-desc-sm">-</div>
+          <div id="ri-effect" class="risk-effect-big neu">-</div>
+        </div>
+      </div>
+    </div>
+    <div id="risk-next-btn" style="display:none; margin-top:16px;">
+      <button class="btn btn-primary" onclick="goToResults()">📊 月次決算を見る</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="screen-results" class="screen">
+  <div id="res-statusbar" class="status-bar"></div>
+  <div class="main-content">
+    <h2 class="section-title" id="res-month-title">📊 8月 月次決算</h2>
+    <div id="profit-box" class="profit-box pos">
+      <div style="font-size:0.85em; color:var(--muted);">今月の営業利益</div>
+      <div id="profit-num" class="profit-amount pos">+¥0</div>
+      <div id="profit-sub" class="profit-sub"></div>
+    </div>
+    <div class="card">
+      <table class="pl-table" id="pl-body"></table>
+    </div>
+    <div id="action-eff-card" class="card" style="display:none;">
+      <div style="font-size:0.85em; color:var(--muted); margin-bottom:8px;">🎯 今月のアクション効果</div>
+      <div id="action-eff-list"></div>
+    </div>
+    <div class="flex-center mt-14">
+      <button class="btn btn-primary" id="next-btn" onclick="nextMonth()">➡️ 次の月へ</button>
+    </div>
+  </div>
+</div>
+
+<!-- GAME OVER -->
+<div id="screen-gameover" class="screen">
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:40px 20px;text-align:center;">
+    <div style="font-size:4.5em;">💸</div>
+    <h1 style="font-size:2.3em; color:var(--red); margin:16px 0;">ゲームオーバー</h1>
+    <p style="color:var(--muted); max-width:380px; margin-bottom:24px;">累計損失が−500万円を超え、店舗の継続が困難になりました。</p>
+    <div class="result-table">
+      <div class="result-row"><span class="rl">最終月</span><span class="rv" id="go-month">-</span></div>
+      <div class="result-row"><span class="rl">累計利益</span><span class="rv text-red" id="go-profit">-</span></div>
+    </div>
+    <button class="btn btn-primary mt-14" onclick="restartGame()">🔄 もう一度プレイ</button>
+  </div>
+</div>
+
+<!-- ENDING -->
+<div id="screen-ending" class="screen">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;text-align:center;">
+    <div style="font-size:1.8em; margin-bottom:6px;">🎊 6ヶ月間お疲れさまでした！</div>
+    <div style="font-size:1.5em; color:var(--gold); margin-bottom:4px;">最終評価</div>
+    <div id="final-grade" class="grade-big grade-b">B</div>
+    <div id="grade-comment" style="font-size:1.05em; color:var(--muted); margin-bottom:16px;"></div>
+    <div class="result-table">
+      <div id="final-stats"></div>
+    </div>
+    <div class="result-table" style="margin-top:12px;">
+      <h3 style="color:var(--gold); margin-bottom:10px; font-size:0.95em;">📅 月次サマリー</h3>
+      <div id="monthly-rows"></div>
+    </div>
+    <div class="flex-center mt-14">
+      <button class="btn btn-primary" onclick="restartGame()">🔄 もう一度プレイ</button>
+      <button class="btn btn-secondary" onclick="window.location.href='index.html'">← ポータルへ戻る</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== GAME DATA ====================
+const MONTHS = ['8月','9月','10月','11月','12月','1月'];
+
+// Base revenue table (万円) indexed by [month][rank-1 (0=1位)]
+const BASE_REV = [
+  [584,578,567,556,528], // 8月
+  [591,585,574,556,534], // 9月
+  [576,570,559,542,520], // 10月
+  [716,709,695,674,647], // 11月
+  [763,756,740,718,690], // 12月
+  [608,602,590,572,549], // 1月
+];
+
+const STAFF_INFO = {
+  S:{power:6, rate:1400, hours:80, color:'#a371f7'},
+  A:{power:6, rate:1200, hours:80, color:'#3fb950'},
+  B:{power:4, rate:1100, hours:70, color:'#58a6ff'},
+  C:{power:2, rate:1000, hours:60, color:'#e3b341'},
+  D:{power:-4, rate:1000, hours:60, color:'#f85149'},
+};
+
+const ACTION_CARDS = [
+  {id:'hire_c', name:'採用（C）', icon:'👤', cost:30000, hours:30,
+   desc:'Cランクスタッフを1名採用', typeLabel:'採用',
+   canUse:(s)=>true,
+   effect:(s,r)=>{ s.staff.C++; r.actionDesc.push('Cスタッフ1名を採用'); }},
+  {id:'hire_b', name:'採用（B）', icon:'👥', cost:50000, hours:40,
+   desc:'Bランクスタッフを1名採用', typeLabel:'採用',
+   canUse:(s)=>true,
+   effect:(s,r)=>{ s.staff.B++; r.actionDesc.push('Bスタッフ1名を採用'); }},
+  {id:'train_dc', name:'教育 D→C', icon:'📚', cost:20000, hours:20,
+   desc:'DランクをCランクにアップ', typeLabel:'教育',
+   canUse:(s)=>s.staff.D>0,
+   effect:(s,r)=>{ if(s.staff.D>0){s.staff.D--;s.staff.C++;r.actionDesc.push('DをCにランクアップ');} }},
+  {id:'train_cb', name:'教育 C→B', icon:'📖', cost:30000, hours:30,
+   desc:'CランクをBランクにアップ', typeLabel:'教育',
+   canUse:(s)=>s.staff.C>0,
+   effect:(s,r)=>{ if(s.staff.C>0){s.staff.C--;s.staff.B++;r.actionDesc.push('CをBにランクアップ');} }},
+  {id:'train_ba', name:'教育 B→A', icon:'🎓', cost:50000, hours:40,
+   desc:'BランクをAランクにアップ', typeLabel:'教育',
+   canUse:(s)=>s.staff.B>0,
+   effect:(s,r)=>{ if(s.staff.B>0){s.staff.B--;s.staff.A++;r.actionDesc.push('BをAにランクアップ');} }},
+  {id:'train_as', name:'教育 A→S', icon:'⭐', cost:80000, hours:50,
+   desc:'AランクをSランクにアップ', typeLabel:'教育',
+   canUse:(s)=>s.staff.A>0,
+   effect:(s,r)=>{ if(s.staff.A>0){s.staff.A--;s.staff.S++;r.actionDesc.push('AをSにランクアップ');} }},
+  {id:'leader_mtg', name:'リーダーMTG', icon:'💬', cost:10000, hours:10,
+   desc:'チームの士気UP +15万売上', typeLabel:'運営',
+   canUse:(s)=>true,
+   effect:(s,r)=>{ r.bonusSales+=150000; r.actionDesc.push('リーダーMTGで+15万売上'); }},
+  {id:'web_promo', name:'WEB販促', icon:'🌐', cost:50000, hours:20,
+   desc:'WEB広告で集客 +25万売上', typeLabel:'販促',
+   canUse:(s)=>true,
+   effect:(s,r)=>{ r.bonusSales+=250000; r.actionDesc.push('WEB販促で+25万売上'); }},
+  {id:'campaign', name:'キャンペーン', icon:'🎉', cost:100000, hours:30,
+   desc:'集客キャンペーン +35万売上', typeLabel:'販促',
+   canUse:(s)=>true,
+   effect:(s,r)=>{ r.bonusSales+=350000; r.actionDesc.push('キャンペーンで+35万売上'); }},
+  {id:'timesale', name:'タイムセール', icon:'⏰', cost:20000, hours:15,
+   desc:'時間限定割引 +20万売上', typeLabel:'販促',
+   canUse:(s)=>true,
+   effect:(s,r)=>{ r.bonusSales+=200000; r.actionDesc.push('タイムセールで+20万売上'); }},
+  {id:'dm', name:'DM送付', icon:'📮', cost:15000, hours:10,
+   desc:'既存顧客へDM +10万売上', typeLabel:'販促',
+   canUse:(s)=>true,
+   effect:(s,r)=>{ r.bonusSales+=100000; r.actionDesc.push('DM送付で+10万売上'); }},
+  {id:'receipt', name:'レシート分析', icon:'🧾', cost:0, hours:20,
+   desc:'今月の原価率を3%削減', typeLabel:'運営',
+   canUse:(s)=>true,
+   effect:(s,r)=>{ r.cogsReduction=0.03; r.actionDesc.push('レシート分析で原価3%削減'); }},
+  {id:'ms_survey', name:'MSアンケート', icon:'📊', cost:30000, hours:25,
+   desc:'サービス改善 翌月+20万売上', typeLabel:'運営',
+   canUse:(s)=>true,
+   effect:(s,r)=>{ r.nextMonthBonus=200000; r.actionDesc.push('MSアンケートで翌月+20万売上'); }},
+  {id:'hotone', name:'ほっとーん対策', icon:'🛡️', cost:20000, hours:15,
+   desc:'今月リスク効果を50%軽減', typeLabel:'運営',
+   canUse:(s)=>true,
+   effect:(s,r)=>{ r.riskReduction=0.5; r.actionDesc.push('ほっとーん対策でリスク50%軽減'); }},
+];
+
+const RISK_CARDS = [
+  {id:'eq_big', name:'設備故障（大）', icon:'🔧', salesPenalty:500000, type:'bad',
+   desc:'大型設備が突然故障！修理費と機会損失が発生'},
+  {id:'eq_small', name:'設備故障（小）', icon:'🔩', salesPenalty:200000, type:'bad',
+   desc:'小型設備が故障。対応に時間がかかった'},
+  {id:'injury', name:'従業員ケガ', icon:'🤕', salesPenalty:300000, type:'bad',
+   desc:'スタッフが業務中に負傷。補償費と一時的な戦力ダウン',
+   onApply:(s)=>{ loseRandomStaff(s); }},
+  {id:'food_poison', name:'食中毒発生', icon:'🤢', salesPenalty:1000000, type:'critical',
+   desc:'食中毒が発生！行政対応と売上激減で大打撃'},
+  {id:'fire', name:'火災ヒヤリ', icon:'🔥', salesPenalty:800000, type:'critical',
+   desc:'厨房でヒヤリ事故発生。消防対応と設備復旧費用が発生'},
+  {id:'theft', name:'盗難', icon:'💰', salesPenalty:200000, type:'bad',
+   desc:'現金・備品が盗まれた。防犯対策費も計上'},
+  {id:'claim_big', name:'重大クレーム', icon:'😡', salesPenalty:400000, type:'bad',
+   desc:'重大なクレームが発生。対応コストと信頼損失'},
+  {id:'claim_sm', name:'クレーム', icon:'😤', salesPenalty:150000, type:'bad',
+   desc:'お客様からクレームあり。対応に時間を費やした'},
+  {id:'sns', name:'SNS炎上', icon:'📱', salesPenalty:600000, type:'critical',
+   desc:'悪評がSNSで拡散！客足が大幅に減少'},
+  {id:'resign', name:'従業員退職', icon:'👋', salesPenalty:100000, type:'bad',
+   desc:'スタッフが急に退職。引き継ぎコストが発生',
+   onApply:(s)=>{ loseRandomStaff(s); }},
+  {id:'food_inf', name:'食材高騰', icon:'📈', salesPenalty:0, cogsUp:0.05, type:'bad',
+   desc:'原材料費が高騰（原価率+5%）。仕入れコスト増加'},
+  {id:'rain', name:'雨天続き', icon:'🌧️', salesPenalty:200000, type:'bad',
+   desc:'悪天候が続き、客足が遠のいた'},
+  {id:'norisk', name:'ノーリスク！', icon:'✨', salesPenalty:0, type:'good',
+   desc:'今月は特に問題なし！順調な営業ができました'},
+  {id:'lucky1', name:'食評サイト掲載！', icon:'🎊', salesPenalty:-300000, type:'good',
+   desc:'有名グルメサイトで紹介され集客増！+30万売上'},
+  {id:'lucky2', name:'グループ予約獲得', icon:'💎', salesPenalty:-200000, type:'good',
+   desc:'大型グループ予約が入った！+20万の臨時収入'},
+  {id:'inspect', name:'衛生検査', icon:'📋', salesPenalty:100000, type:'neutral',
+   desc:'保健所の抜き打ち検査。対応コストと時間が発生'},
+];
+
+// ==================== STATE ====================
+let G = {};
+
+function initGame() {
+  G = {
+    month: 0,
+    staff: {S:0, A:0, B:11, C:7, D:2},
+    totalProfit: 0,
+    monthlyResults: [],
+    actions: [],
+    risk: null,
+    riskFlipped: false,
+    pendingBonus: 0,
+  };
+}
+
+// ==================== HELPERS ====================
+function totalStaff(s) { return Object.values(s.staff).reduce((a,b)=>a+b,0); }
+function calcPower(s) {
+  return Object.entries(STAFF_INFO).reduce((sum,[rank,info])=>sum+s.staff[rank]*info.power, 0);
+}
+function calcRank(power) {
+  if(power>=70) return 1; if(power>=60) return 2;
+  if(power>=45) return 3; if(power>=30) return 4; return 5;
+}
+function rankLabel(rank) { return ['🏆 1位','⭐ 2位','📊 3位','📈 4位','📉 5位'][rank-1]; }
+function mgrHours(mi) { return mi===5?140:180; }
+function loseRandomStaff(s) {
+  const lvls = Object.keys(STAFF_INFO).filter(l=>s.staff[l]>0);
+  if(!lvls.length) return;
+  s.staff[lvls[Math.floor(Math.random()*lvls.length)]]--;
+}
+function yen(n) {
+  const abs=Math.abs(n), sign=n<0?'-':'+';
+  if(abs>=10000000) return sign+'¥'+(abs/10000).toFixed(0)+'万';
+  if(abs>=1000000) return sign+'¥'+(abs/10000).toFixed(1)+'万';
+  return sign+'¥'+abs.toLocaleString();
+}
+function yenFmt(n) { return (n<0?'-':'')+' ¥'+Math.abs(n).toLocaleString(); }
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(el=>{ el.style.display='none'; el.classList.remove('active'); });
+  const el = document.getElementById('screen-'+id);
+  el.style.display = 'flex';
+  el.classList.add('active');
+  window.scrollTo(0,0);
+}
+function buildStatus(barId) {
+  const power=calcPower(G), rank=calcRank(power);
+  document.getElementById(barId).innerHTML = `
+    <div class="status-item"><span class="month-badge">${MONTHS[G.month]}</span></div>
+    <div class="status-item"><span class="status-label">営業力</span><span class="status-value">${power}P</span></div>
+    <div class="status-item"><span class="status-label">ランク</span><span class="rank-badge">${rankLabel(rank)}</span></div>
+    <div class="status-item"><span class="status-label">スタッフ</span><span class="status-value">${totalStaff(G)}名</span></div>
+    <div class="status-item"><span class="status-label">累計利益</span>
+      <span class="status-value ${G.totalProfit>=0?'text-green':'text-red'}">${yen(G.totalProfit)}</span>
+    </div>`;
+}
+function getUsedHours() {
+  return G.actions.reduce((sum,id)=>{ const c=ACTION_CARDS.find(x=>x.id===id); return sum+(c?c.hours:0); },0);
+}
+
+// ==================== SCREENS ====================
+function startGame() { initGame(); showMonthIntro(); }
+function restartGame() { showScreen('title'); }
+function goToMonthIntro() { showMonthIntro(); }
+
+function showMonthIntro() {
+  buildStatus('intro-statusbar');
+  const mi=G.month, power=calcPower(G), rank=calcRank(power);
+  const baseRev=BASE_REV[mi][rank-1];
+  const predRev=baseRev+power*2;
+  const staffRows = Object.entries(STAFF_INFO).map(([r,info])=>`
+    <div class="staff-cell rank-${r.toLowerCase()}">
+      <div class="staff-rank" style="color:${info.color}">${r}</div>
+      <div class="staff-count">${G.staff[r]}</div>
+      <div class="staff-power">${info.power>=0?'+':''}${info.power}P</div>
+    </div>`).join('');
+  const powerPct=Math.min(100,(power/100)*100);
+  const bonusNote = G.pendingBonus>0 ?
+    `<div class="alert alert-success">📊 前月のMSアンケート効果: +${(G.pendingBonus/10000).toFixed(0)}万円の売上ボーナスあり</div>` : '';
+  document.getElementById('intro-content').innerHTML = `
+    <h2 class="section-title">📅 ${MONTHS[mi]}の営業開始</h2>
+    ${bonusNote}
+    <div class="card">
+      <h3 style="font-size:0.9em;color:var(--muted);margin-bottom:10px;">👥 現在のスタッフ構成</h3>
+      <div class="staff-grid">${staffRows}</div>
+      <div style="display:flex;justify-content:space-between;margin-top:10px;margin-bottom:4px;">
+        <span style="font-size:0.83em;color:var(--muted);">総営業力</span>
+        <span style="font-weight:bold;">${power}P → ${rankLabel(rank)}</span>
+      </div>
+      <div class="power-bar-bg">
+        <div class="power-bar-fill" style="width:${powerPct}%"></div>
+        <div class="power-bar-label">${power}P</div>
+      </div>
+      <div class="power-thresholds"><span>0</span><span>30P</span><span>45P</span><span>60P</span><span>70P+</span></div>
+    </div>
+    <div class="card">
+      <h3 style="font-size:0.9em;color:var(--muted);margin-bottom:10px;">📊 ${MONTHS[mi]}の予測売上</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="text-align:center;padding:12px;background:var(--surface);border-radius:8px;">
+          <div style="font-size:0.78em;color:var(--muted);">ベース売上（${rankLabel(rank)}）</div>
+          <div style="font-size:1.4em;font-weight:bold;color:var(--blue);">${baseRev}万円</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:var(--surface);border-radius:8px;">
+          <div style="font-size:0.78em;color:var(--muted);">営業力ボーナス</div>
+          <div style="font-size:1.4em;font-weight:bold;color:var(--green);">+${power*2}万円</div>
+        </div>
+      </div>
+      <div style="text-align:center;padding:14px;margin-top:10px;background:#1a2233;border-radius:8px;border:1px solid var(--blue);">
+        <div style="font-size:0.78em;color:var(--muted);">予測売上（アクション・リスク前）</div>
+        <div style="font-size:1.9em;font-weight:bold;color:var(--gold);">${predRev}万円</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="font-size:0.9em;color:var(--muted);margin-bottom:6px;">⏱️ マネージャー利用可能時間</h3>
+      <div style="font-size:1.4em;font-weight:bold;">${mgrHours(mi)}時間</div>
+      <div style="font-size:0.78em;color:var(--muted);margin-top:3px;">この時間内でアクションカードを選びます</div>
+      ${mi===5?'<div class="alert alert-warn" style="margin-top:10px;">⚠️ 1月はマネージャー時間が140時間に削減されます</div>':''}
+    </div>`;
+  showScreen('month-intro');
+}
+
+function goToPlanning() {
+  G.actions = [];
+  buildStatus('plan-statusbar');
+  renderActionGrid();
+  showScreen('planning');
+}
+
+function renderActionGrid() {
+  const maxH=mgrHours(G.month), usedH=getUsedHours(), rem=maxH-usedH, pct=(usedH/maxH)*100;
+  document.getElementById('hrs-display').textContent = `残り${rem}時間`;
+  document.getElementById('hrs-display').className = `hours-remaining${rem<30?' low':''}`;
+  document.getElementById('hrs-total-label').textContent = `/ ${maxH}h`;
+  const bar=document.getElementById('hrs-bar');
+  bar.style.width=pct+'%';
+  bar.className=`hours-bar-used${pct>=80?' full':''}`;
+
+  document.getElementById('action-grid').innerHTML = ACTION_CARDS.map(card=>{
+    const isSel=G.actions.includes(card.id);
+    const canUse=card.canUse(G);
+    const canHours=rem>=card.hours||isSel;
+    const dis=(!canUse||!canHours)&&!isSel;
+    return `
+      <div class="action-card${isSel?' selected':''}${dis?' disabled':''}" onclick="toggleAction('${card.id}')">
+        ${isSel?'<div class="selected-check">✓</div>':''}
+        <div class="card-icon">${card.icon}</div>
+        <div class="card-name">${card.name}</div>
+        <div class="card-desc">${card.desc}</div>
+        <div class="card-meta">
+          <span class="meta-badge hours">⏱ ${card.hours}h</span>
+          ${card.cost>0?`<span class="meta-badge cost">💴 ${(card.cost/10000).toFixed(0)}万</span>`:''}
+        </div>
+      </div>`;
+  }).join('');
+
+  const selCards=ACTION_CARDS.filter(c=>G.actions.includes(c.id));
+  const sumEl=document.getElementById('sel-summary');
+  if(selCards.length>0) {
+    sumEl.style.display='block';
+    const totalC=selCards.reduce((s,c)=>s+c.cost,0);
+    const totalH=selCards.reduce((s,c)=>s+c.hours,0);
+    document.getElementById('sel-list').innerHTML =
+      selCards.map(c=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:0.87em;"><span>${c.icon} ${c.name}</span><span style="color:var(--muted);">${c.hours}h${c.cost>0?' / ¥'+(c.cost/10000).toFixed(0)+'万':''}</span></div>`).join('')+
+      `<div style="display:flex;justify-content:space-between;padding:7px 0;font-weight:bold;font-size:0.87em;"><span>合計</span><span>${totalH}h / ¥${(totalC/10000).toFixed(1)}万</span></div>`;
+  } else {
+    sumEl.style.display='none';
+  }
+}
+
+function toggleAction(id) {
+  const card=ACTION_CARDS.find(c=>c.id===id);
+  if(!card) return;
+  const idx=G.actions.indexOf(id);
+  if(idx>=0) { G.actions.splice(idx,1); }
+  else {
+    if(!card.canUse(G)) return;
+    if(getUsedHours()+card.hours>mgrHours(G.month)) return;
+    G.actions.push(id);
+  }
+  renderActionGrid();
+}
+
+function confirmActions() {
+  G.risk = RISK_CARDS[Math.floor(Math.random()*RISK_CARDS.length)];
+  G.riskFlipped = false;
+  buildStatus('risk-statusbar');
+  document.getElementById('risk-card-el').classList.remove('flipped');
+  document.getElementById('risk-next-btn').style.display='none';
+  showScreen('risk');
+}
+
+function flipRiskCard() {
+  if(G.riskFlipped) return;
+  G.riskFlipped=true;
+  const risk=G.risk;
+  const front=document.getElementById('risk-front');
+  front.className=`risk-card-face risk-card-front type-${risk.type}`;
+  document.getElementById('ri-icon').textContent=risk.icon;
+  document.getElementById('ri-name').textContent=risk.name;
+  document.getElementById('ri-desc').textContent=risk.desc;
+  let effTxt='', effCls='neu';
+  if(risk.salesPenalty>0){ effTxt=`売上損失: −¥${(risk.salesPenalty/10000).toFixed(0)}万`; effCls='neg'; }
+  else if(risk.salesPenalty<0){ effTxt=`売上ボーナス: +¥${(-risk.salesPenalty/10000).toFixed(0)}万`; effCls='pos'; }
+  else if(risk.cogsUp){ effTxt=`原価率 +${(risk.cogsUp*100).toFixed(0)}%`; effCls='neg'; }
+  else { effTxt='影響なし'; effCls='neu'; }
+  const effEl=document.getElementById('ri-effect');
+  effEl.textContent=effTxt; effEl.className=`risk-effect-big ${effCls}`;
+  document.getElementById('risk-card-el').classList.add('flipped');
+  setTimeout(()=>{ document.getElementById('risk-next-btn').style.display='block'; }, 900);
+}
+
+function goToResults() {
+  const s=G, mi=s.month, risk=s.risk;
+  const savedPendingBonus=s.pendingBonus;
+
+  // Build round result accumulator
+  const rr={bonusSales:0, cogsReduction:0, nextMonthBonus:0, riskReduction:0, actionCosts:0, actionDesc:[], cogsUp:risk.cogsUp||0};
+
+  // Apply action effects (staff changes, bonuses)
+  ACTION_CARDS.filter(c=>s.actions.includes(c.id)).forEach(c=>{ c.effect(s,rr); rr.actionCosts+=c.cost; });
+
+  // Apply risk on-apply effects (staff loss etc.)
+  if(risk.onApply) risk.onApply(s);
+
+  // Calculate revenue
+  const power=calcPower(s), rank=calcRank(power);
+  const baseRev=BASE_REV[mi][rank-1]*10000;
+  const powerBonus=power*20000;
+  let riskPen=risk.salesPenalty||0;
+  if(riskPen>0 && rr.riskReduction) riskPen=Math.floor(riskPen*(1-rr.riskReduction));
+
+  const revenue=baseRev+powerBonus+rr.bonusSales+savedPendingBonus-riskPen;
+
+  // Calculate costs
+  const cogsRate=Math.max(0.15, 0.30-rr.cogsReduction+rr.cogsUp);
+  const cogs=Math.round(revenue*cogsRate);
+  const grossProfit=revenue-cogs;
+  const paCost=Object.entries(STAFF_INFO).reduce((sum,[r,info])=>sum+s.staff[r]*info.rate*info.hours,0);
+  const mgrCost=300000, utilityCost=Math.round(revenue*0.05), promoCost=Math.round(revenue*0.02);
+  const otherMgmt=100000, sysCost=100000, eqCost=100000;
+  const totalCost=paCost+mgrCost+utilityCost+promoCost+otherMgmt+sysCost+eqCost+rr.actionCosts;
+  const opProfit=grossProfit-totalCost;
+
+  // Store and update state
+  const result={month:MONTHS[mi],rank,revenue,cogs,grossProfit,paCost,mgrCost,utilityCost,promoCost,otherMgmt,sysCost,eqCost,actionCosts:rr.actionCosts,totalCost,opProfit,riskCard:risk,riskPen,staff:{...s.staff},power,cogsRate};
+  s.monthlyResults.push(result);
+  s.totalProfit+=opProfit;
+  s.pendingBonus=rr.nextMonthBonus;
+
+  // Render
+  buildStatus('res-statusbar');
+  document.getElementById('res-month-title').textContent=`📊 ${MONTHS[mi]} 月次決算`;
+  const pb=document.getElementById('profit-box');
+  const pn=document.getElementById('profit-num');
+  pb.className=`profit-box ${opProfit>=0?'pos':'neg'}`;
+  pn.textContent=yenFmt(opProfit);
+  pn.className=`profit-amount ${opProfit>=0?'pos':'neg'}`;
+  document.getElementById('profit-sub').textContent=`累計利益: ${yenFmt(s.totalProfit)}`;
+
+  // P&L table
+  const pRow=(label,val,indent,bold,sec)=>`
+    <tr class="${indent?'pl-indent':''} ${bold?'pl-total':''} ${sec?'pl-section':''}">
+      <td class="pl-label">${label}</td>
+      <td class="pl-value" style="color:${val<0?'var(--red)':val===0?'var(--muted)':'var(--text)'}">${yenFmt(val)}</td>
+    </tr>`;
+  let tableHTML=pRow('■ 売上高',revenue,false,false,true);
+  tableHTML+=pRow('　ベース売上（'+rankLabel(rank)+'）',baseRev,true);
+  tableHTML+=pRow('　営業力ボーナス（'+power+'P×2万）',powerBonus,true);
+  if(rr.bonusSales>0) tableHTML+=pRow('　アクション販促ボーナス',rr.bonusSales,true);
+  if(savedPendingBonus>0) tableHTML+=pRow('　前月MSボーナス',savedPendingBonus,true);
+  if(riskPen>0) tableHTML+=pRow('　リスク損失（'+risk.name+'）',-riskPen,true);
+  if(riskPen<0) tableHTML+=pRow('　ラッキーボーナス（'+risk.name+'）',-riskPen,true);
+  tableHTML+=pRow('■ 売上原価（'+(cogsRate*100).toFixed(0)+'%）',-cogs,false,false,true);
+  tableHTML+=pRow('◆ 売上総利益',grossProfit,false,true,false);
+  tableHTML+=pRow('■ 販売管理費',-totalCost,false,false,true);
+  tableHTML+=pRow('　PA人件費',-paCost,true);
+  tableHTML+=pRow('　マネージャー人件費',-mgrCost,true);
+  tableHTML+=pRow('　水道光熱費（5%）',-utilityCost,true);
+  tableHTML+=pRow('　販促費（2%）',-promoCost,true);
+  tableHTML+=pRow('　その他管理費',-otherMgmt,true);
+  tableHTML+=pRow('　システム費',-sysCost,true);
+  tableHTML+=pRow('　設備費',-eqCost,true);
+  if(rr.actionCosts>0) tableHTML+=pRow('　アクションコスト',-rr.actionCosts,true);
+  tableHTML+=pRow('◆ 営業利益',opProfit,false,true,false);
+  document.getElementById('pl-body').innerHTML=tableHTML;
+
+  // Action effects
+  if(rr.actionDesc.length>0) {
+    document.getElementById('action-eff-card').style.display='block';
+    document.getElementById('action-eff-list').innerHTML=rr.actionDesc.map(d=>`<div style="padding:3px 0;font-size:0.85em;">✓ ${d}</div>`).join('')+
+      (rr.nextMonthBonus>0?`<div class="alert alert-info" style="margin-top:8px;">📊 来月 +¥${(rr.nextMonthBonus/10000).toFixed(0)}万のボーナスが適用されます</div>`:'');
+  } else {
+    document.getElementById('action-eff-card').style.display='none';
+  }
+
+  // Next button
+  const nb=document.getElementById('next-btn');
+  if(s.totalProfit<-5000000) {
+    nb.textContent='💸 ゲームオーバー...'; nb.onclick=showGameOver;
+  } else if(mi>=5) {
+    nb.textContent='🏁 最終結果を見る'; nb.onclick=showEnding;
+  } else {
+    nb.textContent='➡️ '+MONTHS[mi+1]+'へ進む'; nb.onclick=nextMonth;
+  }
+  showScreen('results');
+}
+
+function nextMonth() {
+  if(G.totalProfit<-5000000){ showGameOver(); return; }
+  if(G.month>=5){ showEnding(); return; }
+  G.month++; G.actions=[];
+  showMonthIntro();
+}
+
+function showGameOver() {
+  document.getElementById('go-month').textContent=MONTHS[G.month];
+  document.getElementById('go-profit').textContent=yenFmt(G.totalProfit);
+  showScreen('gameover');
+}
+
+function showEnding() {
+  const tot=G.totalProfit;
+  let grade,gc,comment;
+  if(tot>=15000000){grade='S';gc='grade-s';comment='伝説のマネージャー！完璧な経営で最高の結果を達成！';}
+  else if(tot>=10000000){grade='A';gc='grade-a';comment='優秀なマネージャー！高い利益を維持し続けました！';}
+  else if(tot>=5000000){grade='B';gc='grade-b';comment='安定した経営ができました。さらなる改善の余地あり！';}
+  else if(tot>=0){grade='C';gc='grade-c';comment='黒字経営を維持。次はもっと高い利益を目指そう！';}
+  else{grade='F';gc='grade-f';comment='赤字経営でした。次回は戦略を練り直してみましょう。';}
+  document.getElementById('final-grade').textContent=grade;
+  document.getElementById('final-grade').className=`grade-big ${gc}`;
+  document.getElementById('grade-comment').textContent=comment;
+  const fs=G.staff, fp=calcPower(G), fr=calcRank(fp);
+  const best=G.monthlyResults.reduce((a,b)=>a.opProfit>b.opProfit?a:b);
+  document.getElementById('final-stats').innerHTML=`
+    <div class="result-row"><span class="rl">6ヶ月累計利益</span><span class="rv ${tot>=0?'text-green':'text-red'}">${yenFmt(tot)}</span></div>
+    <div class="result-row"><span class="rl">最終スタッフ</span><span class="rv">S:${fs.S} A:${fs.A} B:${fs.B} C:${fs.C} D:${fs.D}（${totalStaff(G)}名）</span></div>
+    <div class="result-row"><span class="rl">最終営業力</span><span class="rv">${fp}P（${rankLabel(fr)}）</span></div>
+    <div class="result-row"><span class="rl">最高利益月</span><span class="rv text-green">${best.month}: ${yenFmt(best.opProfit)}</span></div>`;
+  document.getElementById('monthly-rows').innerHTML=G.monthlyResults.map(r=>`
+    <div class="result-row">
+      <span class="rl">${r.month}（${rankLabel(r.rank)}）</span>
+      <span class="rv ${r.opProfit>=0?'text-green':'text-red'}">${yenFmt(r.opProfit)}</span>
+    </div>`).join('');
+  showScreen('ending');
+}
+
+// Init
+window.onload=()=>{
+  document.querySelectorAll('.screen').forEach(el=>{ el.style.display='none'; el.classList.remove('active'); });
+  const ts=document.getElementById('screen-title');
+  ts.style.display='flex'; ts.classList.add('active');
+};
+</script>
+</body>
+</html>
