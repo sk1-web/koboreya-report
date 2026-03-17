@@ -220,6 +220,12 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
 .rank-3{background:#cd7f32;color:#fff;}
 .rank-other{background:var(--bg);color:var(--light);}
 </style>
+
+<style>
+.step-list { display:flex;flex-direction:column;gap:10px; }
+.step-item { display:flex;align-items:flex-start;gap:12px; }
+.step-num { min-width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+</style>
 </head>
 <body>
 
@@ -654,11 +660,12 @@ var QUIZ = [
 var MANUAL_ITEMS = [
   {icon:'🍽️',title:'接客マニュアル',desc:'ホール接客の基本・お客様対応フロー',cat:'接客',file:'sekkaku_manual.pdf'},
   {icon:'🫕',title:'キッチンマニュアル',desc:'仕込み・調理・衛生管理の手順',cat:'キッチン',file:''},
-  {icon:'🔥',title:'火災・避難訓練研修',desc:'火災発生時の対応・避難手順',cat:'安全',file:''},
-  {icon:'🧼',title:'衛生管理研修',desc:'食品衛生・手洗い・アレルギー対応',cat:'衛生',file:''},
+  {icon:'🔥',title:'火災・避難訓練研修',desc:'火災発生時の対応・避難手順',cat:'安全',file:'training-fire'},
+  {icon:'🧼',title:'衛生管理研修',desc:'食品衛生・手洗い・アレルギー対応（HACCP準拠）',cat:'衛生',file:'training-hygiene'},
   {icon:'📝',title:'接客テスト',desc:'接客知識の確認テスト',cat:'テスト',file:'quiz'},
   {icon:'📝',title:'キッチンテスト',desc:'調理・食品衛生の確認テスト',cat:'テスト',file:''},
-  {icon:'📝',title:'衛生管理テスト',desc:'衛生知識の確認テスト',cat:'テスト',file:''},
+  {icon:'📝',title:'衛生管理テスト',desc:'衛生・HACCPの確認テスト（10問）',cat:'テスト',file:'quiz-hygiene'},
+  {icon:'📝',title:'火災・避難訓練テスト',desc:'火災対応・避難手順の確認テスト（10問）',cat:'テスト',file:'quiz-fire'},
 ];
 
 var TRAINING_ITEMS = [
@@ -1567,6 +1574,325 @@ function renderManuals() {
 
 
 // ── 接客マニュアル 小テスト ──
+
+// ── 火災・避難訓練 研修コンテンツ ────────────────────────────────────────
+var TRAINING_CONTENT = {
+  'training-fire': {
+    title: '🔥 飲食店での火の取り扱い研修',
+    sections: [
+      { heading: '🎯 研修の目的',
+        body: 'こぼれやは鉄板・ガスコンロを使用するもんじゃ焼き専門店です。火を日常的に扱う職場だからこそ、正しい知識と取り扱い方を徹底し、火災事故ゼロを目指します。この研修では飲食店特有の火災リスクと予防・対処方法を習得します。' },
+      { heading: '🍳 鉄板・コンロの正しい取り扱い',
+        body:
+          '<div class="step-list">' +
+          '<div class="step-item"><span class="step-num">1</span><div><strong>点火前の確認</strong><br>ガスの元栓が閉まっていることを確認してから点火操作を行う。周囲に可燃物（紙・布・油脂類）がないか確認する。</div></div>' +
+          '<div class="step-item"><span class="step-num">2</span><div><strong>点火の手順</strong><br>必ず「点火ボタンを押しながら」ガスを出す。ガスを先に出してから点火するのは絶対にNG（爆発的着火の危険）。</div></div>' +
+          '<div class="step-item"><span class="step-num">3</span><div><strong>火力の管理</strong><br>必要以上に火力を上げない。鉄板加熱中はその場を離れない。異常な煙・異臭がしたら即座に火を止める。</div></div>' +
+          '<div class="step-item"><span class="step-num">4</span><div><strong>消火の手順</strong><br>使用後は必ずガスコックを閉める→元栓を閉める。鉄板が冷えるまでその場を離れない。</div></div>' +
+          '</div>' +
+          '<div style="margin-top:10px;padding:10px;background:#fee2e2;border-radius:8px;font-size:13px;">⚠️ 閉店時は必ず「ガスの元栓を閉めたか」を責任者がダブルチェックすること。</div>' },
+      { heading: '🛢️ 油火災の危険性と対処法（最重要）',
+        body:
+          '<div style="padding:12px;background:#fee2e2;border-radius:8px;margin-bottom:12px;font-size:13px;line-height:1.8;">' +
+          '<strong>⚠️ 油火災は水をかけると爆発的に拡大します！絶対に水をかけないこと。</strong>' +
+          '</div>' +
+          '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px;">' +
+          '<tr style="background:#fee2e2;"><th style="padding:8px;border:1px solid #fca5a5;">状況</th><th style="padding:8px;border:1px solid #fca5a5;">正しい対処法</th><th style="padding:8px;border:1px solid #fca5a5;">NG行動</th></tr>' +
+          '<tr><td style="padding:8px;border:1px solid #ddd;">揚げ油・天ぷら油から出火</td><td style="padding:8px;border:1px solid #ddd;">①ガスを止める②濡れタオル・蓋で酸素を遮断③消火器（ABC粉末または強化液）</td><td style="padding:8px;border:1px solid #ddd;color:#dc2626;font-weight:700;">水をかける</td></tr>' +
+          '<tr><td style="padding:8px;border:1px solid #ddd;">鉄板に油が燃え移った</td><td style="padding:8px;border:1px solid #ddd;">①ガスを止める②燃焼範囲が広がる前に消火器を使用③お客様を遠ざける</td><td style="padding:8px;border:1px solid #ddd;color:#dc2626;font-weight:700;">うちわ・タオルで扇ぐ</td></tr>' +
+          '<tr><td style="padding:8px;border:1px solid #ddd;">換気扇・ダクトに油煙着火</td><td style="padding:8px;border:1px solid #ddd;">ガスを全て止め、すぐ119番通報。換気扇を止める。</td><td style="padding:8px;border:1px solid #ddd;color:#dc2626;font-weight:700;">換気扇を回し続ける</td></tr>' +
+          '</table>' +
+          '<p style="font-size:13px;"><strong>油の発火点：約360℃。</strong>揚げ物油は加熱しすぎると自然発火します。揚げ物中は必ず温度管理を行い、その場を離れないこと。</p>' },
+      { heading: '🔧 ガス設備の安全管理',
+        body:
+          '<ul style="padding-left:18px;line-height:2.2;font-size:13px;">' +
+          '<li><strong>ガス臭がしたら</strong>：火気を使わず窓を開け換気し、元栓を閉めてすぐに責任者へ報告。絶対に電灯スイッチを触らない（スパークで引火の危険）。</li>' +
+          '<li><strong>元栓の位置を全員が把握する</strong>：入店初日に必ず元栓の場所を確認すること。</li>' +
+          '<li><strong>ガスホースの定期点検</strong>：ひび割れ・折れ曲がり・接続部の緩みがないか月1回確認する。</li>' +
+          '<li><strong>閉店時の確認</strong>：全てのガスコック→元栓の順に閉まっているか責任者が確認・記録する。</li>' +
+          '<li><strong>ガス警報器の確認</strong>：警報器が正常に作動しているか定期的に確認する。</li>' +
+          '</ul>' },
+      { heading: '🧯 消火器の種類と選び方',
+        body:
+          '<table style="width:100%;border-collapse:collapse;font-size:13px;">' +
+          '<tr style="background:#fef3c7;"><th style="padding:8px;border:1px solid #fcd34d;">種類</th><th style="padding:8px;border:1px solid #fcd34d;">適応火災</th><th style="padding:8px;border:1px solid #fcd34d;">飲食店での推奨</th></tr>' +
+          '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:700;">ABC粉末消火器</td><td style="padding:8px;border:1px solid #ddd;">普通火災・油火災・電気火災</td><td style="padding:8px;border:1px solid #ddd;color:#16a34a;font-weight:700;">◎ 最も汎用的</td></tr>' +
+          '<tr><td style="padding:8px;border:1px solid #ddd;font-weight:700;">強化液消火器</td><td style="padding:8px;border:1px solid #ddd;">普通火災・油火災</td><td style="padding:8px;border:1px solid #ddd;color:#16a34a;">○ 油火災に有効</td></tr>' +
+          '<tr><td style="padding:8px;border:1px solid #ddd;">二酸化炭素消火器</td><td style="padding:8px;border:1px solid #ddd;">油火災・電気火災</td><td style="padding:8px;border:1px solid #ddd;">△ 精密機器向き</td></tr>' +
+          '<tr><td style="padding:8px;border:1px solid #ddd;color:#dc2626;font-weight:700;">水消火器</td><td style="padding:8px;border:1px solid #ddd;">普通火災のみ</td><td style="padding:8px;border:1px solid #ddd;color:#dc2626;font-weight:700;">✕ 油火災に使用禁止</td></tr>' +
+          '</table>' +
+          '<p style="margin-top:10px;font-size:13px;">消火器の使い方（PASS）: <strong>P</strong>in（ピンを抜く）→ <strong>A</strong>im（根元に向ける）→ <strong>S</strong>queeze（レバーを握る）→ <strong>S</strong>weep（左右に掃く）</p>' },
+      { heading: '📋 開店・閉店時の火災予防チェックリスト',
+        body:
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;">' +
+          '<div style="padding:12px;background:#d1fae5;border-radius:8px;">' +
+          '<div style="font-weight:700;margin-bottom:8px;">🌅 開店前チェック</div>' +
+          '<ul style="padding-left:16px;line-height:2;">' +
+          '<li>ガスホースの状態確認</li>' +
+          '<li>換気扇・ダクトの清掃状態</li>' +
+          '<li>消火器の設置場所・残量確認</li>' +
+          '<li>可燃物が火元周辺にないか</li>' +
+          '<li>ガス警報器の作動確認</li>' +
+          '</ul></div>' +
+          '<div style="padding:12px;background:#dbeafe;border-radius:8px;">' +
+          '<div style="font-weight:700;margin-bottom:8px;">🌙 閉店時チェック</div>' +
+          '<ul style="padding-left:16px;line-height:2;">' +
+          '<li>全ガスコック閉確認</li>' +
+          '<li>ガス元栓閉確認（必須）</li>' +
+          '<li>鉄板・コンロの冷却確認</li>' +
+          '<li>換気扇の停止確認</li>' +
+          '<li>チェックシートへの記録・署名</li>' +
+          '</ul></div>' +
+          '</div>' },
+      { heading: '🚨 火災発生時の初動対応',
+        body:
+          '<div class="step-list">' +
+          '<div class="step-item"><span class="step-num">1</span><div><strong>ガスを止める（最優先）</strong><br>出火を発見したらまずガスコック・元栓を閉める。燃料の供給を断つことが最重要。</div></div>' +
+          '<div class="step-item"><span class="step-num">2</span><div><strong>叫び声で知らせる・119番通報</strong><br>「火事だ！」と叫び、非常ベルを押す。スタッフが119番通報。</div></div>' +
+          '<div class="step-item"><span class="step-num">3</span><div><strong>初期消火（炎が小さい場合のみ）</strong><br>油火災は水不可。消火器・濡れ布で対応。天井に火が回ったら即避難。</div></div>' +
+          '<div class="step-item"><span class="step-num">4</span><div><strong>お客様の避難誘導</strong><br>「火災が発生しました。落ち着いてこちらへ」と声かけして誘導。</div></div>' +
+          '<div class="step-item"><span class="step-num">5</span><div><strong>全員の安全確認・報告</strong><br>集合場所でスタッフ・お客様全員の人数を確認し責任者に報告。</div></div>' +
+          '</div>' }
+    ]
+  },
+  'training-hygiene': {
+    title: '🧼 衛生管理研修（HACCP準拠）',
+    sections: [
+      { heading: '🎯 研修の目的', body: 'お客様に安全な食品を提供するため、食品衛生の基本知識とHACCPに基づいた衛生管理の手順を習得します。食中毒の予防と品質管理がこの研修の核心です。' },
+      { heading: '📌 HACCPとは', body:
+        '<p style="margin-bottom:10px;"><strong>HACCP（ハサップ）</strong>とは Hazard Analysis and Critical Control Points の略で、食品の安全を確保するための国際的な管理システムです。</p>' +
+        '<div style="padding:12px;background:#dbeafe;border-radius:8px;font-size:13px;line-height:1.8;">' +
+        '<strong>7原則：</strong><br>' +
+        '① 危害要因分析（HA）<br>② 重要管理点（CCP）の特定<br>③ 管理基準の設定<br>' +
+        '④ モニタリング方法の設定<br>⑤ 改善措置の設定<br>⑥ 検証方法の設定<br>⑦ 記録・文書化の設定' +
+        '</div>' },
+      { heading: '🌡️ 温度管理（最重要）', body:
+        '<table style="width:100%;border-collapse:collapse;font-size:13px;">' +
+        '<tr style="background:#dbeafe;"><th style="padding:8px;border:1px solid #93c5fd;">区分</th><th style="padding:8px;border:1px solid #93c5fd;">管理温度</th><th style="padding:8px;border:1px solid #93c5fd;">対象食品</th></tr>' +
+        '<tr><td style="padding:8px;border:1px solid #ddd;">冷蔵保管</td><td style="padding:8px;border:1px solid #ddd;font-weight:700;color:#2563eb;">10℃以下</td><td style="padding:8px;border:1px solid #ddd;">生肉・魚・乳製品・加工品</td></tr>' +
+        '<tr><td style="padding:8px;border:1px solid #ddd;">冷凍保管</td><td style="padding:8px;border:1px solid #ddd;font-weight:700;color:#2563eb;">-15℃以下</td><td style="padding:8px;border:1px solid #ddd;">冷凍食品全般</td></tr>' +
+        '<tr><td style="padding:8px;border:1px solid #ddd;">加熱調理</td><td style="padding:8px;border:1px solid #ddd;font-weight:700;color:#dc2626;">中心温度75℃以上・1分以上</td><td style="padding:8px;border:1px solid #ddd;">肉類・魚介類</td></tr>' +
+        '<tr><td style="padding:8px;border:1px solid #ddd;">危険温度帯</td><td style="padding:8px;border:1px solid #ddd;font-weight:700;color:#dc2626;">10℃〜60℃</td><td style="padding:8px;border:1px solid #ddd;">細菌が最も増殖しやすい温度帯</td></tr>' +
+        '</table>' +
+        '<div style="margin-top:10px;padding:10px;background:#fee2e2;border-radius:8px;font-size:13px;">⚠️ 食品を危険温度帯（10〜60℃）に長時間置かないことが食中毒予防の基本です。</div>' },
+      { heading: '🤲 正しい手洗いの方法', body:
+        '<div class="step-list">' +
+        '<div class="step-item"><span class="step-num">1</span><div>流水で手を濡らす（20秒以上）</div></div>' +
+        '<div class="step-item"><span class="step-num">2</span><div>石けんをつけて手のひら・手の甲・指の間・爪の間を洗う</div></div>' +
+        '<div class="step-item"><span class="step-num">3</span><div>流水でしっかり洗い流す（20秒以上）</div></div>' +
+        '<div class="step-item"><span class="step-num">4</span><div>清潔なペーパータオルで拭く</div></div>' +
+        '<div class="step-item"><span class="step-num">5</span><div>アルコール消毒液で仕上げ消毒</div></div>' +
+        '</div>' +
+        '<p style="margin-top:10px;font-size:13px;"><strong>手洗いが必要なタイミング：</strong>出勤時・調理前後・生肉魚介を触った後・トイレ後・ゴミ処理後・食事後・咳やくしゃみをした後</p>' },
+      { heading: '⚠️ 交差汚染の防止', body:
+        '<ul style="padding-left:18px;line-height:2;font-size:13px;">' +
+        '<li><strong>まな板・包丁は用途別に使い分ける</strong>（肉用・魚用・野菜用）</li>' +
+        '<li>生肉・魚介類は他の食品と接触しないよう保管する</li>' +
+        '<li>調理後の食品と生食材は同じ場所に置かない</li>' +
+        '<li>手袋を使用する場合も、作業が変わるごとに交換する</li>' +
+        '<li>調理台は使用前後に必ず消毒する</li>' +
+        '</ul>' },
+      { heading: '🥜 アレルギー対応（特定原材料8品目）', body:
+        '<div style="padding:10px;background:#fef3c7;border-radius:8px;margin-bottom:10px;font-size:13px;">' +
+        '<strong>特定原材料8品目（表示義務）：</strong><br>' +
+        '卵・乳・小麦・えび・かに・そば・落花生（ピーナッツ）・くるみ' +
+        '</div>' +
+        '<ul style="padding-left:18px;line-height:2;font-size:13px;">' +
+        '<li>アレルギー確認は必ずキッチンに伝達し、正確な情報を提供する</li>' +
+        '<li>「おそらく大丈夫」など曖昧な回答は絶対にしない</li>' +
+        '<li>アレルギー対応食材の調理には専用器具を使用する</li>' +
+        '<li>微量でもアレルギー反応が起きる場合があることを理解する</li>' +
+        '</ul>' },
+      { heading: '📝 記録・管理の徹底', body:
+        '<ul style="padding-left:18px;line-height:2;font-size:13px;">' +
+        '<li>冷蔵庫・冷凍庫の温度を始業時・終業時に記録する</li>' +
+        '<li>食材の納品時に品質・鮮度・温度を確認して記録する</li>' +
+        '<li>賞味期限・消費期限を必ず確認し、先入れ先出しを徹底する</li>' +
+        '<li>異常を発見した場合は即座に責任者に報告する</li>' +
+        '<li>記録は最低1年間保存する</li>' +
+        '</ul>' }
+    ]
+  }
+};
+
+// ── 特別テスト（衛生・火災）──────────────────────────────────────────────
+var SPECIAL_QUIZ = {
+  'quiz-hygiene': {
+    title: '🧼 衛生管理テスト',
+    passMark: 8,
+    questions: [
+      { q: 'HACCPの正式名称はどれですか？', opts: ['Health and Critical Control Points','Hazard Analysis and Critical Control Points','Hygiene and Compliance Control Program','Hazard Assessment and Cleanliness Control Points'], ans: 1, exp: 'HACCPはHazard Analysis（危害要因分析）and Critical Control Points（重要管理点）の略で、食品の安全を確保するための国際管理システムです。' },
+      { q: '食品の冷蔵保管の正しい温度はどれですか？', opts: ['15℃以下','10℃以下','5℃以下','20℃以下'], ans: 1, exp: '冷蔵保管は10℃以下が基本です。生肉・魚・乳製品などはこの温度を守ることで細菌の増殖を抑えます。' },
+      { q: '加熱調理時に食肉の中心温度は何℃以上、何分以上加熱する必要がありますか？', opts: ['65℃以上・30秒以上','70℃以上・2分以上','75℃以上・1分以上','80℃以上・3分以上'], ans: 2, exp: '食肉の加熱は中心温度75℃以上・1分以上が基準です。これにより食中毒の原因となる病原菌を死滅させることができます。' },
+      { q: '細菌が最も増殖しやすい「危険温度帯」はどれですか？', opts: ['0℃〜10℃','10℃〜60℃','20℃〜50℃','30℃〜70℃'], ans: 1, exp: '10℃〜60℃は細菌が最も増殖しやすい危険温度帯です。食品をこの温度帯に長時間置かないことが食中毒予防の基本です。' },
+      { q: '特定原材料8品目に含まれないものはどれですか？', opts: ['えび','そば','牛肉','くるみ'], ans: 2, exp: '特定原材料8品目は卵・乳・小麦・えび・かに・そば・落花生（ピーナッツ）・くるみです。牛肉は含まれません（特定原材料に準ずる品目には含まれます）。' },
+      { q: '交差汚染を防ぐための正しい方法はどれですか？', opts: ['一つのまな板をよく洗えば肉・魚・野菜に使い回せる','まな板・包丁は肉用・魚用・野菜用に使い分ける','生肉は野菜の上に置いても冷蔵庫内なら問題ない','手袋をすれば途中で交換しなくてよい'], ans: 1, exp: 'まな板・包丁は用途別に使い分けることが交差汚染防止の基本です。生肉・魚介類は他の食品に触れないよう保管し、器具もこまめに洗浄・消毒します。' },
+      { q: '正しい手洗いの手順として適切なものはどれですか？', opts: ['水洗いのみで十分','石けんで洗い→流水で流す→アルコール消毒','アルコール消毒のみでよい','石けんで洗うのは1日3回まで'], ans: 1, exp: '正しい手洗いは①流水で濡らす②石けんで20秒以上洗う③流水で洗い流す④清潔なペーパータオルで拭く⑤アルコール消毒の順です。' },
+      { q: '冷凍食品の正しい保管温度はどれですか？', opts: ['-5℃以下','-10℃以下','-15℃以下','-20℃以下'], ans: 2, exp: '冷凍食品は-15℃以下で保管します。この温度を維持することで食品の品質を保ち、細菌の増殖を防ぐことができます。' },
+      { q: '食材の「先入れ先出し」とはどういう意味ですか？', opts: ['新しく入荷した食材から先に使用する','古い食材を前に置き先に使用する','高価な食材を優先して使用する','重い食材を下に置き先に使用する'], ans: 1, exp: '先入れ先出しとは、先に入荷した（古い）食材を手前・前列に置き先に使用する方法です。食品ロスと食中毒リスクを減らすための基本管理方法です。' },
+      { q: 'アレルギーのお客様への対応として正しいものはどれですか？', opts: ['「たぶん入っていないと思います」と伝える','キッチンに確認し正確な情報を提供する','「自己責任でお願いします」と伝える','アレルギーメニューはないと断る'], ans: 1, exp: 'アレルギー対応は必ずキッチンに確認し、正確な情報を提供します。「たぶん」「おそらく」などの曖昧な回答は絶対にNGです。お客様の命に関わります。' },
+      { q: '衛生管理の記録はどのくらいの期間保存する必要がありますか？', opts: ['1週間','1ヶ月','6ヶ月','1年以上'], ans: 3, exp: 'HACCPに基づく衛生管理の記録は最低1年間保存します。記録は問題発生時の原因追跡や保健所の立入検査時に必要となります。' },
+      { q: '食中毒予防の三原則として正しい組み合わせはどれですか？', opts: ['冷やす・温める・洗う','つけない・増やさない・やっつける','保存する・加熱する・冷却する','除去する・分離する・消毒する'], ans: 1, exp: '食中毒予防の三原則は「つけない（清潔）」「増やさない（迅速・冷却）」「やっつける（加熱）」です。この3つを常に意識して食品を取り扱います。' },
+      { q: '調理中に体調不良（発熱・下痢・嘔吐など）を感じた場合の正しい対応はどれですか？', opts: ['マスクをして作業を続ける','すぐに責任者に報告し調理業務から外れる','休憩をとってから作業を再開する','薬を飲んで対処する'], ans: 1, exp: '体調不良時は食品への二次汚染を防ぐため、すぐに責任者に報告し調理業務から外れます。特に感染症（ノロウイルスなど）は食中毒の主要原因となるため厳重な管理が必要です。' },
+      { q: '食品の温度確認に使用する温度計の正しい使い方はどれですか？', opts: ['1日1回確認すれば十分','測定後は水洗いのみでよい','測定のたびにアルコール消毒して使用する','測定箇所は表面だけでよい'], ans: 2, exp: '温度計は使用のたびにアルコール消毒します。交差汚染を防ぐためです。また食肉などは中心温度を測定することが重要です。' },
+      { q: '受け取った食材の品質確認で最初に確認すべきことはどれですか？', opts: ['価格が正しいか','賞味期限・消費期限と品質・温度管理状態','色や見た目のみ','重量が正しいか'], ans: 1, exp: '食材受け取り時は賞味期限・消費期限の確認と、冷蔵・冷凍品の温度管理が正しく行われているかを確認します。品質に問題があれば受け取りを拒否します。' }
+    ]
+  },
+  'quiz-fire': {
+    title: '🔥 火災・避難訓練テスト',
+    passMark: 8,
+    questions: [
+      { q: '火災を発見した際に最初にすべき行動はどれですか？', opts: ['すぐに消火器で消火する','「火事だ！」と叫んで周囲に知らせ非常ベルを押す','お客様を全員外に逃がしてから通報する','まず店長に連絡する'], ans: 1, exp: '火災発見時はまず「火事だ！」と叫んで周囲に知らせ非常ベルを押すことが最優先です。知らせることで全員が素早く行動できます。' },
+      { q: '消火器の使い方「PASS」の「P」は何を意味しますか？', opts: ['Push（レバーを押す）','Pull（安全ピンを抜く）','Point（ノズルを向ける）','Pour（液体を注ぐ）'], ans: 1, exp: 'PASSのP=Pull（安全ピンを抜く）、A=Aim（ノズルを炎の根元に向ける）、S=Squeeze（レバーを握る）、S=Sweep（左右に掃く）です。' },
+      { q: '消火器で消火する際、ノズルはどこに向けますか？', opts: ['炎の上部に向ける','炎の中央に向ける','炎の根元に向ける','煙が出ている場所に向ける'], ans: 2, exp: '消火器のノズルは炎の根元に向けます。炎の先に噴射しても効果がありません。根元に向けて左右に掃くように噴射することが効果的です。' },
+      { q: '火災時にエレベーターを使用することについて正しいのはどれですか？', opts: ['少人数なら使用してよい','煙が出ていなければ使用できる','いかなる場合もエレベーターは使用しない','高齢者・障害者には使用を許可する'], ans: 2, exp: '火災時はいかなる場合もエレベーターを使用してはいけません。停電や火災による故障で閉じ込められる危険があります。必ず階段を使用して避難します。' },
+      { q: '避難時に煙から身を守るための正しい行動はどれですか？', opts: ['走って素早く煙の中を抜ける','姿勢を低くし口をハンカチ等で覆いながら移動する','煙が少なければ普通に歩いて避難する','息を止めて走れば問題ない'], ans: 1, exp: '煙は上に溜まるため姿勢を低くすることで吸入を防げます。また口・鼻をハンカチやタオルで覆い、なるべく煙を吸わないようにします。' },
+      { q: '119番通報時に最初に伝えるべき情報はどれですか？', opts: ['けが人の人数','出火場所（住所・店名）と火災の状況','店長の名前と連絡先','何が燃えているか'], ans: 1, exp: '通報時はまず出火場所（住所・建物名）と火災の状況を明確に伝えます。「〇〇区〇〇のこぼれや〇〇店で火災が発生しました」のように伝えましょう。' },
+      { q: '初期消火を中止して避難を優先すべき状況はどれですか？', opts: ['消火器が1本使い終わった時','炎が天井まで届いた・煙が充満してきた時','火が少しでも大きくなってきた時','30秒以上消火できない場合'], ans: 1, exp: '炎が天井に達したり煙が充満してきた場合は、初期消火を中止して即座に避難を優先します。人命救助と自身の安全が最優先です。' },
+      { q: '避難誘導時のお客様への声かけとして正しいものはどれですか？', opts: ['「火事です！逃げてください！」と大声で叫ぶ','「火災が発生しました。落ち着いてこちらの出口へお進みください」','「危険です。早く走ってください」','静かに誘導しパニックを防ぐため火事であることは言わない'], ans: 1, exp: '「火災が発生しました。落ち着いてこちらの出口へお進みください」のように、事実を伝えながら冷静に誘導することが重要です。パニックを防ぎながらも正確な状況を伝えます。' },
+      { q: '避難完了後に確認すべきことはどれですか？', opts: ['お店の損害状況を確認する','全スタッフ・全お客様の安全を確認し責任者に報告する','消防車が来るまで建物の前で待つ','すぐにSNSで状況を発信する'], ans: 1, exp: '避難完了後は指定の集合場所で全スタッフと全お客様の人数を確認し、責任者に報告します。全員の安全確認が最優先です。' },
+      { q: '火災時のスタッフの役割分担として「誘導係」の主な役割はどれですか？', opts: ['119番への通報','消火器による初期消火','お客様の避難誘導・人数確認','報道機関への連絡'], ans: 2, exp: '誘導係はお客様の避難誘導と人数確認が主な役割です。全スタッフが誘導係を担います。事前に役割を決めておくことでスムーズな避難が可能になります。' },
+      { q: '火災予防のために日常的に行うべきことはどれですか？', opts: ['消火器の有効期限を月に一度確認する','避難経路に物を置かない・非常口を常に確認しておく','電気機器は使用後も電源を入れたままにする','調理中はその場を離れず全て見張る'], ans: 1, exp: '日常的な火災予防として、避難経路に荷物を置かず非常口を常に確認しておくことが最重要です。避難経路が塞がれていると火災時に逃げられなくなります。' },
+      { q: '消火器の設置場所について正しいのはどれですか？', opts: ['普段は倉庫に保管しておく','誰でもすぐ取り出せる場所に設置し全スタッフが場所を把握する','高い場所に設置して子どもが触れないようにする','1店舗に1本あれば十分'], ans: 1, exp: '消火器は誰でもすぐに取り出せる場所に設置し、全スタッフがその場所を把握しておく必要があります。緊急時に探している時間はありません。' },
+      { q: '火元の近くのドアを閉める理由として正しいのはどれですか？', opts: ['煙や炎の拡散を防ぐため','外から見えないようにするため','風で火が大きくなるのを防ぐため','消防士が消火しやすいようにするため'], ans: 0, exp: 'ドアを閉めることで煙や炎の他室への拡散を防ぐことができます。火災の延焼を遅らせ、避難時間を確保する重要な行動です。' },
+      { q: '定期的な避難訓練を実施する主な目的はどれですか？', opts: ['法律で義務付けられているから仕方なく','緊急時に冷静・迅速に行動できるよう手順を体に覚えさせるため','保健所の検査に備えるため','新入スタッフの入社研修のため'], ans: 1, exp: '避難訓練の目的は緊急時に冷静・迅速に行動できるよう手順を体に覚えさせることです。訓練を繰り返すことで、本番時にパニックにならず適切な行動ができます。' },
+      { q: 'スプリンクラーが作動した場合のスタッフの行動として正しいのはどれですか？', opts: ['スプリンクラーが消火してくれるので待機する','スプリンクラーの誤作動として止める操作をする','119番に通報し避難誘導を行う','濡れないように逃げる'], ans: 2, exp: 'スプリンクラーが作動した場合は火災が発生しているとみなし、119番通報と避難誘導を行います。スプリンクラーは消火を助けますが、避難行動は必ず実施します。' }
+    ]
+  }
+};
+
+// ── 特別テスト用変数・関数 ────────────────────────────────────────────────
+var specialQuizState = null;
+
+function openSpecialQuiz(quizId) {
+  var qData = SPECIAL_QUIZ[quizId];
+  if (!qData) return;
+  var pool = qData.questions.slice();
+  for (var i = pool.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+  }
+  var questions = pool.slice(0, 10);
+  specialQuizState = { quizId: quizId, title: qData.title, passMark: qData.passMark, questions: questions, current: 0, score: 0, answers: [] };
+  var el = document.getElementById('man-tab-content');
+  if (!el) return;
+  el.innerHTML = '<div style="max-width:620px;">' +
+    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">' +
+    '<button class="btn btn-secondary btn-sm" onclick="switchManualTab(\'docs\')">← 戻る</button>' +
+    '<h3 style="margin:0;font-size:16px;">' + esc(qData.title) + '</h3></div>' +
+    '<div id="special-quiz-area"></div></div>';
+  renderSpecialQuizQuestion();
+}
+
+
+function renderSpecialQuizQuestion() {
+  var el = document.getElementById('special-quiz-area');
+  if (!el || !specialQuizState) return;
+  var s = specialQuizState;
+  var q = s.questions[s.current];
+  var total = s.questions.length;
+  var pct = Math.round((s.current / total) * 100);
+  var html = '<div style="background:var(--surface);border-radius:12px;padding:20px;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">' +
+    '<span style="font-size:12px;color:var(--light);">' + esc(s.title) + '</span>' +
+    '<span style="font-size:13px;font-weight:700;">' + (s.current+1) + ' / ' + total + '問</span>' +
+    '</div>' +
+    '<div style="height:6px;border-radius:6px;background:var(--border);margin-bottom:16px;overflow:hidden;">' +
+    '<div style="height:100%;border-radius:6px;background:var(--primary);width:' + pct + '%;"></div></div>' +
+    '<div style="font-size:15px;font-weight:700;line-height:1.6;margin-bottom:18px;">' + esc(q.q) + '</div>' +
+    '<div id="sq-opts" style="display:flex;flex-direction:column;gap:8px;">';
+  q.opts.forEach(function(opt, i) {
+    html += '<button id="sqopt-' + i + '" onclick="answerSpecialQuiz(' + i + ')" style="text-align:left;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);cursor:pointer;font-size:13px;line-height:1.5;">' +
+      '<span style="display:inline-block;width:22px;height:22px;border-radius:50%;background:var(--border);font-size:11px;font-weight:700;text-align:center;line-height:22px;margin-right:8px;">' + ['A','B','C','D'][i] + '</span>' +
+      esc(opt) + '</button>';
+  });
+  html += '</div></div>';
+  el.innerHTML = html;
+}
+
+function answerSpecialQuiz(idx) {
+  if (!specialQuizState) return;
+  var s = specialQuizState;
+  var q = s.questions[s.current];
+  var correct = (idx === q.ans);
+  if (correct) s.score++;
+  s.answers.push({ q: q.q, chose: idx, correct: correct, exp: q.exp, correctOpt: q.opts[q.ans] });
+  var el = document.getElementById('special-quiz-area');
+  var opts = el.querySelectorAll('button[id^="sqopt-"]');
+  opts.forEach(function(btn, i) {
+    btn.disabled = true;
+    if (i === q.ans) { btn.style.background='#d1fae5'; btn.style.borderColor='#10b981'; }
+    else if (i === idx && !correct) { btn.style.background='#fee2e2'; btn.style.borderColor='#ef4444'; }
+  });
+  var expDiv = document.createElement('div');
+  expDiv.style.cssText = 'margin-top:12px;padding:12px;background:' + (correct ? '#d1fae5' : '#fee2e2') + ';border-radius:8px;font-size:12px;line-height:1.6;';
+  expDiv.innerHTML = (correct ? '<b style="color:#065f46;">✅ 正解！</b>' : '<b style="color:#991b1b;">❌ 不正解</b> 正解: ' + esc(q.opts[q.ans])) + '<br>' + esc(q.exp);
+  var inner = el.querySelector('div');
+  inner.appendChild(expDiv);
+  var nextBtn = document.createElement('button');
+  nextBtn.className = 'btn btn-primary';
+  nextBtn.style.marginTop = '12px';
+  nextBtn.textContent = s.current + 1 < s.questions.length ? '次の問題 →' : '結果を見る';
+  nextBtn.onclick = function() {
+    s.current++;
+    if (s.current < s.questions.length) { renderSpecialQuizQuestion(); }
+    else { showSpecialQuizResult(); }
+  };
+  inner.appendChild(nextBtn);
+}
+
+function showSpecialQuizResult() {
+  var s = specialQuizState;
+  var passed = s.score >= s.passMark;
+  var el = document.getElementById('special-quiz-area');
+  var grade = passed ? '合格' : '不合格';
+  var color = passed ? '#10b981' : '#ef4444';
+  var parts = [];
+  parts.push('<div style="background:var(--surface);border-radius:12px;padding:24px;text-align:center;">');
+  parts.push('<div style="font-size:48px;margin-bottom:12px;">' + (passed ? '🎉' : '📚') + '</div>');
+  parts.push('<div style="font-size:22px;font-weight:800;color:' + color + ';margin-bottom:8px;">' + grade + '</div>');
+  parts.push('<div style="font-size:18px;margin-bottom:4px;">' + s.score + ' / ' + s.questions.length + ' 問正解</div>');
+  parts.push('<div style="font-size:13px;color:var(--light);margin-bottom:20px;">合格ライン: ' + s.passMark + '問以上</div>');
+  if (!passed) {
+    parts.push('<p style="font-size:13px;color:var(--light);margin-bottom:16px;">研修内容を復習してから再チャレンジしましょう。</p>');
+  }
+  parts.push('<div style="display:flex;gap:8px;justify-content:center;">');
+  parts.push('<button class="btn btn-secondary" onclick="switchManualTab(\'docs\')">← 戻る</button>');
+  parts.push('<button class="btn btn-primary" onclick="openSpecialQuiz(\'' + s.quizId + '\')">もう一度</button>');
+  parts.push('</div>');
+  parts.push('<div style="margin-top:20px;text-align:left;"><div style="font-size:13px;font-weight:700;margin-bottom:10px;">📋 解答結果</div>');
+  s.answers.forEach(function(a, i) {
+    var bg = a.correct ? '#d1fae5' : '#fee2e2';
+    var resultText = a.correct ? '<span style="color:#065f46;">✅ 正解</span>' : '<span style="color:#991b1b;">❌ 不正解 → 正解: ' + esc(a.correctOpt) + '</span>';
+    parts.push('<div style="margin-bottom:8px;padding:10px;background:' + bg + ';border-radius:8px;font-size:12px;">');
+    parts.push('<div style="font-weight:700;margin-bottom:4px;">Q' + (i+1) + '. ' + esc(a.q) + '</div>');
+    parts.push(resultText);
+    parts.push('<div style="margin-top:4px;color:#555;">' + esc(a.exp) + '</div></div>');
+  });
+  parts.push('</div></div>');
+  el.innerHTML = parts.join('');
+}
+
+
+function openTrainingContent(trainingId) {
+  var tData = TRAINING_CONTENT[trainingId];
+  if (!tData) return;
+  var el = document.getElementById('man-tab-content');
+  if (!el) return;
+  var html = '<div style="max-width:720px;">' +
+    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">' +
+    '<button class="btn btn-secondary btn-sm" onclick="switchManualTab(\'docs\')">← 戻る</button>' +
+    '<h3 style="margin:0;font-size:17px;">' + tData.title + '</h3></div>';
+  tData.sections.forEach(function(sec) {
+    html += '<div class="card" style="margin-bottom:16px;">' +
+      '<div style="font-size:14px;font-weight:700;color:var(--primary);margin-bottom:10px;">' + sec.heading + '</div>' +
+      '<div style="font-size:13px;line-height:1.8;color:var(--text);">' + sec.body + '</div>' +
+      '</div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
 var MANUAL_QUIZ = {
   '初級': [
     { q: 'こぼれやのサービスミッションは次のうちどれですか？', opts: ['全てのお客様にこぼれやの魅力を伝え、魅了する。','お客様に最高の食体験を提供する。','安全・安心・清潔を第一に考えるサービスを提供する。','もんじゃ焼きの文化を全国に広める。'], ans: 0, exp: 'こぼれやのミッションは「全てのお客様にこぼれやの魅力を伝え、魅了する。」です。' },
@@ -1759,7 +2085,11 @@ function switchManualTab(tab) {
         '<div class="manual-meta">'+esc(m.desc)+'</div></div>'+
         '<span class="badge badge-gray">'+esc(m.cat)+'</span>'+
         (m.file === 'quiz' ?
-          '<button class="btn btn-sm btn-primary" onclick="openManualQuiz()">&#x270F;&#xFE0F; テストを受ける</button>' :
+          '<button class="btn btn-sm btn-primary" onclick="openManualQuiz()">✏️ テストを受ける</button>' :
+          m.file === 'quiz-hygiene' || m.file === 'quiz-fire' ?
+          '<button class="btn btn-sm btn-primary" onclick="openSpecialQuiz(\'' + m.file + '\')">✏️ テストを受ける</button>' :
+          m.file && m.file.startsWith('training-') ?
+          '<button class="btn btn-sm btn-secondary" onclick="openTrainingContent(\'' + m.file + '\')">📖 研修を受ける</button>' :
           m.file ? '<a href="'+encodeURI(m.file)+'" target="_blank" class="btn btn-sm btn-primary" style="text-decoration:none;">開く</a>' :
           '<span style="font-size:11px;color:var(--light);">準備中</span>')+'</div>';
     });
