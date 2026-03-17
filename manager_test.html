@@ -434,10 +434,18 @@ function renderTopbar(){
 }
 
 function renderLogin(){
+  var accounts = getAccounts();
+  var opts = '<option value="">名前を選択してください...</option>';
+  accounts.forEach(function(a){
+    opts += '<option value="'+esc(a.id)+'">'+esc(a.name)+(a.store?' ('+esc(a.store)+')':'')+'</option>';
+  });
+  var noAccMsg = accounts.length===0 ? '<p style="font-size:12px;color:#c0392b;margin-top:8px">ポータルにアカウントが登録されていません。先にポータルにログインしてください。</p>' : '';
   return '<div class="screen"><div class="login-card">' +
     '<div class="login-title"><h1>🍶 こぼれや</h1><p>店長力テスト</p></div>' +
     '<div style="text-align:center;margin-bottom:20px"><span class="login-badge">飲食業版 アセスメント</span></div>' +
-    '<div class="form-group"><label>ログインID</label><input id="li" type="text" placeholder="ログインID" autocomplete="username"></div>' +
+    '<div class="form-group"><label>名前</label>' +
+    '<select id="ln" style="width:100%;padding:10px 14px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;background:#fff;cursor:pointer">'+opts+'</select>' +
+    noAccMsg+'</div>' +
     '<div class="form-group"><label>パスワード</label><input id="lp" type="password" placeholder="パスワード" autocomplete="current-password"></div>' +
     '<button class="btn-primary" onclick="doLogin()">ログイン</button>' +
     '<div class="login-err" id="lerr"></div>' +
@@ -723,20 +731,18 @@ function drawRadar(canvasId, catScores){
    ACTIONS
 ============================================================ */
 function attachEvents(){
-  var li = document.getElementById('li');
   var lp = document.getElementById('lp');
-  if(li && lp){
-    [li, lp].forEach(function(el){
-      el.addEventListener('keydown', function(e){
-        if(e.key==='Enter') doLogin();
-      });
+  if(lp){
+    lp.addEventListener('keydown', function(e){
+      if(e.key==='Enter') doLogin();
     });
   }
 }
 
 function doLogin(){
-  var id = (document.getElementById('li')||{}).value||'';
+  var id = (document.getElementById('ln')||{}).value||'';
   var pw = (document.getElementById('lp')||{}).value||'';
+  if(!id){ document.getElementById('lerr').textContent='名前を選択してください。'; return; }
   var accounts = getAccounts();
   var found = accounts.find(function(a){return a.id===id && a.password===pw;});
   if(found){
