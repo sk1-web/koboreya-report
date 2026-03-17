@@ -692,6 +692,21 @@ function getAccounts() {
   catch(e) { return []; }
 }
 function saveAccounts(arr) { localStorage.setItem('koboreya_accounts', JSON.stringify(arr)); }
+
+// ── SEED ACCOUNTS (キャッシュ消去後の自動復元) ──
+var SEED_ACCOUNTS = [
+  {id:'u1773664788502', name:'久野　慧', store:'本部', role:'admin',
+   pwHash:'c3ffb432b7d6c06cffedcce3590d42feb28953e758111a55e063f63ff70bb1c3', points:0}
+];
+function initSeedAccounts() {
+  try {
+    var existing = JSON.parse(localStorage.getItem('koboreya_accounts') || '[]');
+    if (existing.length === 0) {
+      localStorage.setItem('koboreya_accounts', JSON.stringify(SEED_ACCOUNTS));
+    }
+  } catch(e) {}
+}
+
 function getNewsData() {
   try { return JSON.parse(localStorage.getItem('koboreya_news') || '{"store":[],"hq":[]}'); }
   catch(e) { return {store:[],hq:[]}; }
@@ -3307,6 +3322,10 @@ function renderAdminPanel() {
   var accounts = getAccounts();
   var html = '<div class="card"><div class="card-title">🔧 管理パネル</div>'+
     '<p style="font-size:13px;color:var(--light);margin-bottom:16px;">スタッフアカウントの管理・権限設定</p>'+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">'+
+    '<button class="btn btn-secondary btn-sm" onclick="exportAccounts()" style="font-size:12px;">📥 アカウントをエクスポート</button>'+
+    '<label class="btn btn-secondary btn-sm" style="font-size:12px;cursor:pointer;">📤 アカウントをインポート<input type="file" accept=".json" style="display:none;" onchange="importAccounts(event)"></label>'+
+    '</div>'+
     '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>名前</th><th>店舗</th><th>役職</th><th>ポイント</th><th>操作</th></tr></thead><tbody>';
   accounts.forEach(function(a) {
     html += '<tr><td><strong>'+esc(a.name)+'</strong></td><td>'+esc(a.store)+'</td>'+
@@ -3339,6 +3358,39 @@ function deleteAccount(id) {
   var accounts = getAccounts().filter(function(a) { return a.id !== id; });
   saveAccounts(accounts);
   renderAdminPanel();
+}
+function exportAccounts() {
+  var accounts = getAccounts();
+  var blob = new Blob([JSON.stringify(accounts, null, 2)], {type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  var d = new Date();
+  a.href = url;
+  a.download = 'koboreya_accounts_' + d.getFullYear() + ('0'+(d.getMonth()+1)).slice(-2) + ('0'+d.getDate()).slice(-2) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('📥 アカウントをエクスポートしました（' + accounts.length + '件）');
+}
+function importAccounts(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      var data = JSON.parse(ev.target.result);
+      if (!Array.isArray(data)) throw new Error('Invalid format');
+      if (!confirm('既存の' + getAccounts().length + '件のアカウントを' + data.length + '件で上書きします。よろしいですか？')) return;
+      saveAccounts(data);
+      showToast('📤 ' + data.length + '件のアカウントをインポートしました');
+      renderAdminPanel();
+    } catch(err) {
+      alert('インポートに失敗しました: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
 }
 function showProfile() {
   if (!currentUser) { showLogin(); return; }
@@ -3778,6 +3830,7 @@ function initPortal() {
 
 // result-sub ID fix
 document.addEventListener('DOMContentLoaded', function() {
+  initSeedAccounts();
   var modal = document.getElementById('register-overlay');
   if (modal) {
     var subEl = document.querySelector('.modal-sub[id]');
