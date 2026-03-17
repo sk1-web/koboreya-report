@@ -1186,17 +1186,11 @@ function filterTasks() {
   if (addArea) addArea.style.display = canEdit ? 'block' : 'none';
 }
 function editTask(idx) {
-  var t = D.tasks[idx];
-  if (!t) return;
-  var cat1 = prompt('大カテゴリ', t.cat1||'')||t.cat1;
-  var cat2 = prompt('小カテゴリ', t.cat2||'')||t.cat2;
-  var task = prompt('業務内容', t.task||'')||t.task;
-  var freq = prompt('頻度', t.freq||'')||t.freq;
-  var mgmt = prompt('管理方法', t.mgmt||'')||t.mgmt;
-  var dept = prompt('担当部門', t.dept||'')||t.dept;
-  var person = prompt('担当者', t.person||'')||t.person;
-  D.tasks[idx] = {cat1:cat1,cat2:cat2,task:task,freq:freq,mgmt:mgmt,dept:dept,person:person};
-  markDirty(); saveData(); filterTasks();
+  var t = D.tasks[idx]; if (!t) return;
+  showEditModal('✏️ 業務を編集',
+    [{k:'cat1',l:'大カテゴリ'},{k:'cat2',l:'小カテゴリ'},{k:'task',l:'業務内容',rows:3},
+     {k:'freq',l:'頻度'},{k:'mgmt',l:'管理方法'},{k:'dept',l:'担当部門'},{k:'person',l:'担当者'}],
+    t, function(v){ D.tasks[idx]=Object.assign({},t,v); markDirty(); saveData(); filterTasks(); });
 }
 function deleteTask(idx) {
   if (!confirm('この業務を削除しますか？')) return;
@@ -1204,15 +1198,13 @@ function deleteTask(idx) {
   markDirty(); saveData(); renderTasks();
 }
 function addTask() {
-  var cat1 = prompt('大カテゴリ','')||'新規';
-  var cat2 = prompt('小カテゴリ','')||'―';
-  var task = prompt('業務内容','')||'新しい業務';
-  var freq = prompt('頻度','')||'―';
-  var mgmt = prompt('管理方法','')||'―';
-  var dept = prompt('担当部門','')||'―';
-  var person = prompt('担当者','')||'―';
-  D.tasks.push({cat1:cat1,cat2:cat2,task:task,freq:freq,mgmt:mgmt,dept:dept,person:person});
-  markDirty(); saveData(); renderTasks();
+  showEditModal('➕ 業務を追加',
+    [{k:'cat1',l:'大カテゴリ'},{k:'cat2',l:'小カテゴリ'},{k:'task',l:'業務内容',rows:3},
+     {k:'freq',l:'頻度'},{k:'mgmt',l:'管理方法'},{k:'dept',l:'担当部門'},{k:'person',l:'担当者'}],
+    {}, function(v){
+      D.tasks.push({cat1:v.cat1||'新規',cat2:v.cat2||'―',task:v.task||'新しい業務',
+                    freq:v.freq||'―',mgmt:v.mgmt||'―',dept:v.dept||'―',person:v.person||'―'});
+      markDirty(); saveData(); renderTasks(); });
 }
 
 // ── RENDER SCHEDULE ──
@@ -1244,13 +1236,10 @@ function renderSchedule() {
 // ── SCHEDULE EDIT FUNCTIONS ──
 function editScheduleRow(idx) {
   var s = D.schedule[idx]; if (!s) return;
-  var fields = [{k:'period',l:'期'},{k:'q',l:'Q'},{k:'month',l:'月'},{k:'event',l:'イベント'},{k:'training',l:'研修'},{k:'hr',l:'人事'},{k:'ab_eval',l:'AB評価'},{k:'clean',l:'清掃'},{k:'misc',l:'その他'}];
-  var changed = false;
-  fields.forEach(function(f) {
-    var val = prompt(f.l, s[f.k]||''  );
-    if (val !== null) { s[f.k] = val; changed = true; }
-  });
-  if (changed) { markDirty(); saveData(); renderSchedule(); }
+  showEditModal('✏️ 年間スケジュールを編集',
+    [{k:'period',l:'期'},{k:'q',l:'Q'},{k:'month',l:'月'},{k:'event',l:'イベント'},
+     {k:'training',l:'研修'},{k:'hr',l:'人事'},{k:'ab_eval',l:'AB評価'},{k:'clean',l:'清掃'},{k:'misc',l:'その他'}],
+    s, function(v){ Object.assign(D.schedule[idx],v); markDirty(); saveData(); renderSchedule(); });
 }
 function deleteScheduleRow(idx) {
   if (!confirm('この行を削除しますか？')) return;
@@ -1258,12 +1247,10 @@ function deleteScheduleRow(idx) {
   markDirty(); saveData(); renderSchedule();
 }
 function addScheduleRow() {
-  var s = {};
-  [{k:'period',l:'期'},{k:'q',l:'Q'},{k:'month',l:'月'},{k:'event',l:'イベント'},{k:'training',l:'研修'},{k:'hr',l:'人事'},{k:'ab_eval',l:'AB評価'},{k:'clean',l:'清掃'},{k:'misc',l:'その他'}].forEach(function(f){
-    var val = prompt(f.l,''  ); s[f.k] = (val !== null ? val : '');
-  });
-  D.schedule.push(s);
-  markDirty(); saveData(); renderSchedule();
+  showEditModal('➕ スケジュールを追加',
+    [{k:'period',l:'期'},{k:'q',l:'Q'},{k:'month',l:'月'},{k:'event',l:'イベント'},
+     {k:'training',l:'研修'},{k:'hr',l:'人事'},{k:'ab_eval',l:'AB評価'},{k:'clean',l:'清掃'},{k:'misc',l:'その他'}],
+    {}, function(v){ D.schedule.push(v); markDirty(); saveData(); renderSchedule(); });
 }
 
 // ── RENDER MEETINGS SUB ──
@@ -1281,10 +1268,10 @@ function renderMeetingsSub() {
 }
 function editMeeting(idx) {
   var m = D.meetings[idx]; if (!m) return;
-  [{k:'name',l:'会議名'},{k:'host',l:'主催'},{k:'members',l:'参加メンバー'},{k:'w1',l:'第1週'},{k:'w2',l:'第2週'},{k:'w3',l:'第3週'},{k:'w4',l:'第4週'}].forEach(function(f){
-    var val = prompt(f.l, m[f.k]||''  ); if (val !== null) m[f.k] = val;
-  });
-  markDirty(); saveData(); renderMeetingsSub();
+  showEditModal('✏️ 会議体を編集',
+    [{k:'name',l:'会議名'},{k:'host',l:'主催'},{k:'members',l:'参加メンバー'},
+     {k:'w1',l:'第1週'},{k:'w2',l:'第2週'},{k:'w3',l:'第3週'},{k:'w4',l:'第4週'}],
+    m, function(v){ Object.assign(D.meetings[idx],v); markDirty(); saveData(); renderMeetingsSub(); });
 }
 function deleteMeeting(idx) {
   if (!confirm('この会議体を削除しますか？')) return;
@@ -1292,12 +1279,10 @@ function deleteMeeting(idx) {
   markDirty(); saveData(); renderMeetingsSub();
 }
 function addMeeting() {
-  var m = {};
-  [{k:'name',l:'会議名'},{k:'host',l:'主催'},{k:'members',l:'参加メンバー'},{k:'w1',l:'第1週'},{k:'w2',l:'第2週'},{k:'w3',l:'第3週'},{k:'w4',l:'第4週'}].forEach(function(f){
-    var val = prompt(f.l,''  ); m[f.k] = (val !== null ? val : '');
-  });
-  D.meetings.push(m);
-  markDirty(); saveData(); renderMeetingsSub();
+  showEditModal('➕ 会議体を追加',
+    [{k:'name',l:'会議名'},{k:'host',l:'主催'},{k:'members',l:'参加メンバー'},
+     {k:'w1',l:'第1週'},{k:'w2',l:'第2週'},{k:'w3',l:'第3週'},{k:'w4',l:'第4週'}],
+    {}, function(v){ D.meetings.push(v); markDirty(); saveData(); renderMeetingsSub(); });
 }
 function renderTrainingsSub() {
   var el = document.getElementById('meetings-sub-trainings');
@@ -1316,10 +1301,9 @@ function renderTrainingsSub() {
 }
 function editTraining(idx) {
   var t = D.trainings[idx]; if (!t) return;
-  [{k:'genre',l:'ジャンル'},{k:'title',l:'タイトル'},{k:'duration',l:'時間（分）'},{k:'content',l:'内容'}].forEach(function(f){
-    var val = prompt(f.l, t[f.k]||''  ); if (val !== null) t[f.k] = val;
-  });
-  markDirty(); saveData(); renderTrainingsSub();
+  showEditModal('✏️ 研修を編集',
+    [{k:'genre',l:'ジャンル'},{k:'title',l:'タイトル'},{k:'duration',l:'時間（分）',type:'number'},{k:'content',l:'内容',rows:3}],
+    t, function(v){ Object.assign(D.trainings[idx],v); markDirty(); saveData(); renderTrainingsSub(); });
 }
 function deleteTraining(idx) {
   if (!confirm('この研修を削除しますか？')) return;
@@ -1327,12 +1311,9 @@ function deleteTraining(idx) {
   markDirty(); saveData(); renderTrainingsSub();
 }
 function addTraining() {
-  var t = {};
-  [{k:'genre',l:'ジャンル'},{k:'title',l:'タイトル'},{k:'duration',l:'時間（分）'},{k:'content',l:'内容'}].forEach(function(f){
-    var val = prompt(f.l,''  ); t[f.k] = (val !== null ? val : '');
-  });
-  D.trainings.push(t);
-  markDirty(); saveData(); renderTrainingsSub();
+  showEditModal('➕ 研修を追加',
+    [{k:'genre',l:'ジャンル'},{k:'title',l:'タイトル'},{k:'duration',l:'時間（分）',type:'number'},{k:'content',l:'内容',rows:3}],
+    {}, function(v){ D.trainings.push(v); markDirty(); saveData(); renderTrainingsSub(); });
 }
 function renderRolesSub() {
   var el = document.getElementById('meetings-sub-roles');
@@ -1356,18 +1337,15 @@ function renderRules() {
 }
 
 function editRule(idx) {
-  if (!confirm) return;
-  var item = prompt('項目名', D.rules[idx] && D.rules[idx].item || '');
-  if (item === null) return;
-  var content_val = prompt('内容', D.rules[idx] && D.rules[idx].content || '');
-  if (content_val === null) return;
-  var store = prompt('店舗（例: 全店 / 本店 / 結 など）', D.rules[idx] && D.rules[idx].store || '全店');
-  if (store === null) return;
-  if (!D.rules[idx]) D.rules[idx] = {};
-  D.rules[idx].item = item;
-  D.rules[idx].content = content_val;
-  D.rules[idx].store = store;
-  markDirty(); saveData(); filterRules();
+  var r = D.rules[idx] || {}; 
+  showEditModal('✏️ ルールを編集',
+    [{k:'item',l:'項目名'},{k:'content',l:'内容',rows:3},{k:'store',l:'店舗（例: 全店 / 本店 / 結）'}],
+    r, function(v){
+      if (!D.rules[idx]) D.rules[idx] = {};
+      D.rules[idx].item = v.item;
+      D.rules[idx].content = v.content;
+      D.rules[idx].store = v.store || '全店';
+      markDirty(); saveData(); filterRules(); });
 }
 function deleteRule(idx) {
   if (!confirm('このルールを削除しますか？')) return;
@@ -1430,12 +1408,9 @@ function renderContacts() {
 }
 function editContact(idx) {
   var c = D.contacts[idx]; if (!c) return;
-  var fields = [{k:'name',l:'業者名'},{k:'person',l:'担当者'},{k:'phone',l:'電話番号'},{k:'contact',l:'社内担当'},{k:'note',l:'備考'}];
-  fields.forEach(function(f) {
-    var val = prompt(f.l, c[f.k]||''  );
-    if (val !== null) c[f.k] = val;
-  });
-  markDirty(); saveData(); renderContacts();
+  showEditModal('✏️ 連絡先を編集',
+    [{k:'name',l:'業者名'},{k:'person',l:'担当者'},{k:'phone',l:'電話番号'},{k:'contact',l:'社内担当'},{k:'note',l:'備考'}],
+    c, function(v){ Object.assign(D.contacts[idx],v); markDirty(); saveData(); renderContacts(); });
 }
 function deleteContact(idx) {
   if (!confirm('この連絡先を削除しますか？')) return;
@@ -1443,12 +1418,9 @@ function deleteContact(idx) {
   markDirty(); saveData(); renderContacts();
 }
 function addContact() {
-  var c = {};
-  [{k:'name',l:'業者名'},{k:'person',l:'担当者'},{k:'phone',l:'電話番号'},{k:'contact',l:'社内担当'},{k:'note',l:'備考'}].forEach(function(f){
-    var val = prompt(f.l,''  ); c[f.k] = (val !== null ? val : '');
-  });
-  D.contacts.push(c);
-  markDirty(); saveData(); renderContacts();
+  showEditModal('➕ 連絡先を追加',
+    [{k:'name',l:'業者名'},{k:'person',l:'担当者'},{k:'phone',l:'電話番号'},{k:'contact',l:'社内担当'},{k:'note',l:'備考'}],
+    {}, function(v){ D.contacts.push(v); markDirty(); saveData(); renderContacts(); });
 }
 
 // ── RENDER TRAINING PROGRESS ──
@@ -3972,5 +3944,82 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
+
+<!-- ══ EDIT MODAL ══════════════════════════════════════════════════════ -->
+<div id="edit-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;"></div>
+<style>
+#edit-modal-overlay { display:none; }
+#edit-modal-overlay.open { display:flex !important; }
+.em-box { background:#fff;border-radius:14px;padding:24px;width:100%;max-width:520px;max-height:85vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,0.35);animation:emSlide .18s ease; }
+@keyframes emSlide { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:none} }
+.em-title { display:flex;align-items:center;justify-content:space-between;margin-bottom:18px; }
+.em-title h3 { margin:0;font-size:16px;font-weight:700; }
+.em-close { background:none;border:none;font-size:22px;cursor:pointer;color:#aaa;line-height:1;padding:0; }
+.em-close:hover { color:#333; }
+.em-field { margin-bottom:14px; }
+.em-label { display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:4px; }
+.em-input, .em-textarea { width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px;font-family:inherit;transition:border .15s; }
+.em-input:focus, .em-textarea:focus { outline:none;border-color:#e91e63;box-shadow:0 0 0 3px rgba(233,30,99,.12); }
+.em-textarea { resize:vertical; }
+.em-footer { display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid #f0f0f0; }
+.em-btn-cancel { padding:8px 18px;border:1px solid #ddd;border-radius:7px;background:#fff;cursor:pointer;font-size:13px; }
+.em-btn-save { padding:8px 22px;border:none;border-radius:7px;background:#e91e63;color:#fff;cursor:pointer;font-size:13px;font-weight:600; }
+.em-btn-save:hover { background:#c2185b; }
+</style>
+<script>
+// ── UNIVERSAL EDIT MODAL ──────────────────────────────────────────────
+function _emEsc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function showEditModal(title, fields, values, onSave) {
+  var overlay = document.getElementById('edit-modal-overlay');
+  var formHtml = fields.map(function(f){
+    var val = (values && values[f.k] !== undefined) ? values[f.k] : '';
+    var input;
+    if (f.rows) {
+      input = '<textarea id="emf-'+f.k+'" class="em-textarea" rows="'+f.rows+'">'+_emEsc(val)+'</textarea>';
+    } else {
+      input = '<input type="'+(f.type||'text')+'" id="emf-'+f.k+'" class="em-input" value="'+_emEsc(val)+'">';
+    }
+    return '<div class="em-field"><label class="em-label">'+_emEsc(f.l)+'</label>'+input+'</div>';
+  }).join('');
+  overlay.innerHTML =
+    '<div class="em-box">'+
+    '<div class="em-title"><h3>'+_emEsc(title)+'</h3>'+
+    '<button class="em-close" onclick="closeEditModal()">×</button></div>'+
+    formHtml+
+    '<div class="em-footer">'+
+    '<button class="em-btn-cancel" onclick="closeEditModal()">キャンセル</button>'+
+    '<button class="em-btn-save" onclick="submitEditModal()">保存</button>'+
+    '</div></div>';
+  overlay._fields = fields;
+  overlay._onSave = onSave;
+  overlay.classList.add('open');
+  // Close on backdrop click
+  overlay.onclick = function(e){ if(e.target === overlay) closeEditModal(); };
+  // Focus first field
+  setTimeout(function(){
+    var first = document.getElementById('emf-'+fields[0].k);
+    if (first) first.focus();
+  }, 60);
+  // Enter key submits
+  overlay.onkeydown = function(e){ if(e.key==='Escape') closeEditModal(); };
+}
+function closeEditModal() {
+  var overlay = document.getElementById('edit-modal-overlay');
+  overlay.classList.remove('open');
+  overlay._onSave = null;
+}
+function submitEditModal() {
+  var overlay = document.getElementById('edit-modal-overlay');
+  if (!overlay._onSave) return;
+  var result = {};
+  overlay._fields.forEach(function(f){
+    var el = document.getElementById('emf-'+f.k);
+    if (el) result[f.k] = el.value;
+  });
+  overlay._onSave(result);
+  closeEditModal();
+}
+</script>
+
 </body>
 </html>
