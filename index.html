@@ -1284,27 +1284,27 @@ function renderSchedule() {
       '<td>'+esc(s.ab_eval)+'</td><td>'+esc(s.clean)+'</td><td>'+esc(s.misc)+'</td>'+editBtns+'</tr>';
   });
   html += '</tbody></table></div>';
-  // 店長会スケジュール (editable)
-  if (!D.mgrMeetings) D.mgrMeetings = [];
+  // Store mgr schedule (editable)
+  if (!D.store_mgr_schedule) D.store_mgr_schedule = [];
   html += '<div class="card" style="margin-top:20px;">';
   html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">';
-  html += '<div class="card-title" style="margin-bottom:0;">🗓️ 店長会スケジュール</div>';
-  if (canEdit) html += '<button class="btn btn-primary btn-sm" onclick="addMgrMeeting()">➕ 日程を追加</button>';
+  html += '<div class="card-title" style="margin-bottom:0;">📅 店長会スケジュール</div>';
+  if (canEdit) html += '<button class="btn btn-primary btn-sm" onclick="addStoreMgrRow()">➕ 行を追加</button>';
   html += '</div>';
-  if (D.mgrMeetings.length === 0) {
+  if (D.store_mgr_schedule.length === 0) {
     html += '<p style="color:var(--light);font-size:13px;text-align:center;padding:12px;">スケジュールがありません。</p>';
   } else {
     html += '<div class="tbl-wrap"><table class="tbl"><thead><tr>'
-      + '<th>日付</th><th>時間</th><th>場所</th><th>議題</th><th>備考</th>'
+      + '<th>日付</th><th>週</th><th>研修内容</th>'
       + (canEdit ? '<th>操作</th>' : '')
       + '</tr></thead><tbody>';
-    D.mgrMeetings.forEach(function(m, i) {
+    D.store_mgr_schedule.forEach(function(s, i) {
       var ops = canEdit
-        ? '<td style="white-space:nowrap;"><button class="btn btn-secondary btn-sm" onclick="editMgrMeeting('+i+')" style="margin-right:4px;">✏️</button>'
-          + '<button class="btn btn-danger btn-sm" onclick="deleteMgrMeeting('+i+')">🗑️</button></td>'
+        ? '<td style="white-space:nowrap;"><button class="btn btn-secondary btn-sm" onclick="editStoreMgrRow('+i+')" style="margin-right:4px;">✏️</button>'
+          + '<button class="btn btn-danger btn-sm" onclick="deleteStoreMgrRow('+i+')">🗑️</button></td>'
         : '';
-      html += '<tr><td><strong>'+esc(m.date)+'</strong></td><td>'+esc(m.time)+'</td><td>'+esc(m.venue)+'</td>'
-        + '<td style="max-width:220px;">'+esc(m.agenda)+'</td><td style="max-width:140px;">'+esc(m.note)+'</td>'+ops+'</tr>';
+      html += '<tr><td>'+esc(s.date ? s.date.split(' ')[0] : '')+'</td><td>'+esc(s.week)+'</td>'
+        + '<td>'+linkify(s.training || '')+'</td>'+ops+'</tr>';
     });
     html += '</tbody></table></div>';
   }
