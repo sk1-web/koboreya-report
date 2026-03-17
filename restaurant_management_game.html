@@ -1155,6 +1155,16 @@ function goToResults(){
   if(rr.bonusSales>0) tHTML+=pRow('　アクション・管理ボーナス',rr.bonusSales,true);
   if(savedPending>0) tHTML+=pRow('　前月MSアンケートボーナス',savedPending,true);
   // (risk details shown individually below totals)
+  // Risk cards breakdown in P&L (売上高セクション - 軽減後の実額を表示)
+  G.riskCards.forEach((rc,idx)=>{
+    let displayPen=rc.salesPenalty||0;
+    if(displayPen>0&&rr.riskReduction&&idx===0) displayPen=Math.floor(displayPen*(1-rr.riskReduction));
+    const lbl=idx===0?`　リスク（${rc.name}）`:`　追加リスク${idx}（${rc.name}）`;
+    if(rc.salesPenalty>0&&displayPen===0) tHTML+=pRow(lbl+' 🛡️軽減済',0,true);
+    else if(displayPen>0) tHTML+=pRow(lbl,-displayPen,true);
+    else if(displayPen<0) tHTML+=pRow(lbl,-displayPen,true);
+    else if(rc.cogsUp) tHTML+=pRow(lbl+' （原価率+'+( rc.cogsUp*100).toFixed(0)+'%）',0,true);
+  });
   tHTML+=pRow(`■ 売上原価（${(cogsRate*100).toFixed(0)}%${totalCogsUp>0?' ※食材高騰+'+( totalCogsUp*100).toFixed(0)+'%':''}）`,-cogs,false,false,true);
   tHTML+=pRow('◆ 売上総利益',grossProfit,false,true);
   tHTML+=pRow('■ 販売管理費',-totalCost,false,false,true);
@@ -1166,8 +1176,6 @@ function goToResults(){
   tHTML+=pRow('　システム費',-sysCost,true);
   tHTML+=pRow('　設備費',-eqCost,true);
   if(rr.actionCosts>0) tHTML+=pRow('　アクションコスト',-rr.actionCosts,true);
-  // Risk cards breakdown in P&L
-  G.riskCards.forEach((rc,idx)=>{ const pen=(rc.salesPenalty||0); if(pen!==0||rc.cogsUp) { const lbl=idx===0?`　リスク（${rc.name}）`:`　追加リスク${idx}（${rc.name}）`; if(pen>0) tHTML+=pRow(lbl,-pen,true); else if(pen<0) tHTML+=pRow(lbl,-pen,true); } });
   tHTML+=pRow('◆ 営業利益',opProfit,false,true);
   document.getElementById('pl-body').innerHTML=tHTML;
 
