@@ -739,23 +739,29 @@ function attachEvents(){
   }
 }
 
+async function sha256(msg){
+  var buf = new TextEncoder().encode(msg);
+  var hash = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+}
+
 function doLogin(){
   var id = (document.getElementById('ln')||{}).value||'';
   var pw = (document.getElementById('lp')||{}).value||'';
   if(!id){ document.getElementById('lerr').textContent='名前を選択してください。'; return; }
+  if(!pw){ document.getElementById('lerr').textContent='パスワードを入力してください。'; return; }
   var accounts = getAccounts();
-  var found = accounts.find(function(a){return a.id===id && a.password===pw;});
-  if(found){
-    if(found.role !== 'admin' && found.role !== 'manager' && found.role !== 'editor' && found.role !== 'staff'){
-      document.getElementById('lerr').textContent = 'このアカウントは受験権限がありません。';
+  var acct = accounts.find(function(a){return a.id===id;});
+  if(!acct){ document.getElementById('lerr').textContent='アカウントが見つかりません。'; return; }
+  sha256(pw).then(function(hash){
+    if(acct.pwHash !== hash){
+      document.getElementById('lerr').textContent='パスワードが違います。';
       return;
     }
-    state.user = found;
+    state.user = acct;
     state.screen = 'intro';
     render();
-  } else {
-    document.getElementById('lerr').textContent = 'IDまたはパスワードが正しくありません。';
-  }
+  });
 }
 
 function doLogout(){
