@@ -399,6 +399,7 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
             <option value="">全カテゴリ</option>
           </select>
         </div>
+        <div id="tasks-add-area" style="display:none;margin-bottom:10px;"><button class="btn btn-primary btn-sm" onclick="addTask()">➕ 業務を追加</button></div>
         <div class="tbl-wrap"><table class="tbl" id="tasks-table">
           <thead><tr>
             <th>大分類</th><th>小分類</th><th>業務内容</th><th>頻度</th><th>管理者</th><th>部署</th><th>担当者</th>
@@ -1144,13 +1145,7 @@ function toggleEditMode() {
     markDirty();
   }
   // 現在のページを再レンダリングして編集UIを反映
-  var ap = document.querySelector('.page[style*="display: flex"], .page[style*="display:flex"]');
-  if (!ap) ap = document.querySelector('.page[style*="block"]');
-  if (ap) {
-    var pid = ap.id ? ap.id.replace('page-','') : '';
-    if (pid === 'rules') { filterRules(); }
-    else if (pid === 'tasks') { renderTasks(); }
-  }
+  if (currentPage) renderPage(currentPage);
 }
 function openImgViewer(src) {
   var v = document.getElementById('img-viewer');
@@ -1176,26 +1171,63 @@ function filterTasks() {
   var cat = (document.getElementById('tasks-cat') || {value:''}).value;
   var tbody = document.getElementById('tasks-body');
   if (!tbody) return;
+  var canEdit = editMode && currentUser && (currentUser.role==='admin'||currentUser.role==='manager');
   var html = '';
-  D.tasks.forEach(function(t) {
+  D.tasks.forEach(function(t, idx) {
     if (cat && t.cat1 !== cat) return;
     if (q && !JSON.stringify(t).toLowerCase().includes(q)) return;
+    var editBtns = canEdit ? '<td><button class="btn btn-secondary btn-sm" onclick="editTask('+idx+')" style="margin-right:4px;">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteTask('+idx+')">🗑️</button></td>' : '';
     html += '<tr><td>'+esc(t.cat1)+'</td><td>'+esc(t.cat2)+'</td><td>'+esc(t.task)+
-      '</td><td>'+esc(t.freq)+'</td><td>'+esc(t.mgmt)+'</td><td>'+esc(t.dept)+'</td><td>'+esc(t.person)+'</td></tr>';
+      '</td><td>'+esc(t.freq)+'</td><td>'+esc(t.mgmt)+'</td><td>'+esc(t.dept)+'</td><td>'+esc(t.person)+'</td>'+editBtns+'</tr>';
   });
-  tbody.innerHTML = html || '<tr><td colspan="7" style="text-align:center;color:var(--light);padding:20px;">該当なし</td></tr>';
+  tbody.innerHTML = html || '<tr><td colspan="8" style="text-align:center;color:var(--light);padding:20px;">該当なし</td></tr>';
+  // add button
+  var addArea = document.getElementById('tasks-add-area');
+  if (addArea) addArea.style.display = canEdit ? 'block' : 'none';
+}
+function editTask(idx) {
+  var t = D.tasks[idx];
+  if (!t) return;
+  var cat1 = prompt('大カテゴリ', t.cat1||'')||t.cat1;
+  var cat2 = prompt('小カテゴリ', t.cat2||'')||t.cat2;
+  var task = prompt('業務内容', t.task||'')||t.task;
+  var freq = prompt('頻度', t.freq||'')||t.freq;
+  var mgmt = prompt('管理方法', t.mgmt||'')||t.mgmt;
+  var dept = prompt('担当部門', t.dept||'')||t.dept;
+  var person = prompt('担当者', t.person||'')||t.person;
+  D.tasks[idx] = {cat1:cat1,cat2:cat2,task:task,freq:freq,mgmt:mgmt,dept:dept,person:person};
+  markDirty(); saveData(); filterTasks();
+}
+function deleteTask(idx) {
+  if (!confirm('この業務を削除しますか？')) return;
+  D.tasks.splice(idx,1);
+  markDirty(); saveData(); renderTasks();
+}
+function addTask() {
+  var cat1 = prompt('大カテゴリ','')||'新規';
+  var cat2 = prompt('小カテゴリ','')||'―';
+  var task = prompt('業務内容','')||'新しい業務';
+  var freq = prompt('頻度','')||'―';
+  var mgmt = prompt('管理方法','')||'―';
+  var dept = prompt('担当部門','')||'―';
+  var person = prompt('担当者','')||'―';
+  D.tasks.push({cat1:cat1,cat2:cat2,task:task,freq:freq,mgmt:mgmt,dept:dept,person:person});
+  markDirty(); saveData(); renderTasks();
 }
 
 // ── RENDER SCHEDULE ──
 function renderSchedule() {
   var el = document.getElementById('schedule-content');
-  var html = '<div class="tbl-wrap"><table class="tbl"><thead><tr>' +
-    '<th>期</th><th>Q</th><th>月</th><th>イベント</th><th>研修</th><th>人事</th><th>AB評価</th><th>清掃</th><th>その他</th>' +
+  var canEdit = editMode && currentUser && (currentUser.role==='admin'||currentUser.role==='manager');
+  var html = (canEdit ? '<div style="margin-bottom:10px;"><button class="btn btn-primary btn-sm" onclick="addScheduleRow()">➕ 行を追加</button></div>' : '')+
+    '<div class="tbl-wrap"><table class="tbl"><thead><tr>' +
+    '<th>期</th><th>Q</th><th>月</th><th>イベント</th><th>研修</th><th>人事</th><th>AB評価</th><th>清掃</th><th>その他</th>'+(canEdit?'<th>操作</th>':'')+
     '</tr></thead><tbody>';
-  D.schedule.forEach(function(s) {
+  D.schedule.forEach(function(s, idx) {
+    var editBtns = canEdit ? '<td><button class="btn btn-secondary btn-sm" onclick="editScheduleRow('+idx+')" style="margin-right:4px;">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteScheduleRow('+idx+')">🗑️</button></td>' : '';
     html += '<tr><td>'+esc(s.period)+'</td><td>'+esc(s.q)+'</td><td><strong>'+esc(s.month)+'</strong></td>'+
       '<td>'+esc(s.event)+'</td><td>'+esc(s.training)+'</td><td>'+esc(s.hr)+'</td>'+
-      '<td>'+esc(s.ab_eval)+'</td><td>'+esc(s.clean)+'</td><td>'+esc(s.misc)+'</td></tr>';
+      '<td>'+esc(s.ab_eval)+'</td><td>'+esc(s.clean)+'</td><td>'+esc(s.misc)+'</td>'+editBtns+'</tr>';
   });
   html += '</tbody></table></div>';
   // Store mgr schedule
@@ -1209,29 +1241,98 @@ function renderSchedule() {
   el.innerHTML = html;
 }
 
+// ── SCHEDULE EDIT FUNCTIONS ──
+function editScheduleRow(idx) {
+  var s = D.schedule[idx]; if (!s) return;
+  var fields = [{k:'period',l:'期'},{k:'q',l:'Q'},{k:'month',l:'月'},{k:'event',l:'イベント'},{k:'training',l:'研修'},{k:'hr',l:'人事'},{k:'ab_eval',l:'AB評価'},{k:'clean',l:'清掃'},{k:'misc',l:'その他'}];
+  var changed = false;
+  fields.forEach(function(f) {
+    var val = prompt(f.l, s[f.k]||''  );
+    if (val !== null) { s[f.k] = val; changed = true; }
+  });
+  if (changed) { markDirty(); saveData(); renderSchedule(); }
+}
+function deleteScheduleRow(idx) {
+  if (!confirm('この行を削除しますか？')) return;
+  D.schedule.splice(idx,1);
+  markDirty(); saveData(); renderSchedule();
+}
+function addScheduleRow() {
+  var s = {};
+  [{k:'period',l:'期'},{k:'q',l:'Q'},{k:'month',l:'月'},{k:'event',l:'イベント'},{k:'training',l:'研修'},{k:'hr',l:'人事'},{k:'ab_eval',l:'AB評価'},{k:'clean',l:'清掃'},{k:'misc',l:'その他'}].forEach(function(f){
+    var val = prompt(f.l,''  ); s[f.k] = (val !== null ? val : '');
+  });
+  D.schedule.push(s);
+  markDirty(); saveData(); renderSchedule();
+}
+
 // ── RENDER MEETINGS SUB ──
 function renderMeetingsSub() {
   var el = document.getElementById('meetings-sub-meetings');
-  var html = '';
-  D.meetings.forEach(function(m) {
+  var canEdit = editMode && currentUser && (currentUser.role==='admin'||currentUser.role==='manager');
+  var html = canEdit ? '<div style="margin-bottom:10px;"><button class="btn btn-primary btn-sm" onclick="addMeeting()">➕ 会議体を追加</button></div>' : '';
+  D.meetings.forEach(function(m, idx) {
+    var editBtns = canEdit ? '<div style="margin-top:8px;display:flex;gap:8px;"><button class="btn btn-secondary btn-sm" onclick="editMeeting('+idx+')">✏️ 編集</button><button class="btn btn-danger btn-sm" onclick="deleteMeeting('+idx+')">🗑️ 削除</button></div>' : '';
     html += '<div class="card"><div class="card-title">🤝 '+esc(m.name)+'</div><div style="font-size:12px;color:var(--light);margin-bottom:10px;">主催: '+esc(m.host)+'　参加: '+esc(m.members)+'</div>'+
       '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>第1週</th><th>第2週</th><th>第3週</th><th>第4週</th></tr></thead>'+
-      '<tbody><tr><td>'+esc(m.w1)+'</td><td>'+esc(m.w2)+'</td><td>'+esc(m.w3)+'</td><td>'+esc(m.w4)+'</td></tr></tbody></table></div></div>';
+      '<tbody><tr><td>'+esc(m.w1)+'</td><td>'+esc(m.w2)+'</td><td>'+esc(m.w3)+'</td><td>'+esc(m.w4)+'</td></tr></tbody></table></div>'+editBtns+'</div>';
   });
   el.innerHTML = html;
 }
+function editMeeting(idx) {
+  var m = D.meetings[idx]; if (!m) return;
+  [{k:'name',l:'会議名'},{k:'host',l:'主催'},{k:'members',l:'参加メンバー'},{k:'w1',l:'第1週'},{k:'w2',l:'第2週'},{k:'w3',l:'第3週'},{k:'w4',l:'第4週'}].forEach(function(f){
+    var val = prompt(f.l, m[f.k]||''  ); if (val !== null) m[f.k] = val;
+  });
+  markDirty(); saveData(); renderMeetingsSub();
+}
+function deleteMeeting(idx) {
+  if (!confirm('この会議体を削除しますか？')) return;
+  D.meetings.splice(idx,1);
+  markDirty(); saveData(); renderMeetingsSub();
+}
+function addMeeting() {
+  var m = {};
+  [{k:'name',l:'会議名'},{k:'host',l:'主催'},{k:'members',l:'参加メンバー'},{k:'w1',l:'第1週'},{k:'w2',l:'第2週'},{k:'w3',l:'第3週'},{k:'w4',l:'第4週'}].forEach(function(f){
+    var val = prompt(f.l,''  ); m[f.k] = (val !== null ? val : '');
+  });
+  D.meetings.push(m);
+  markDirty(); saveData(); renderMeetingsSub();
+}
 function renderTrainingsSub() {
   var el = document.getElementById('meetings-sub-trainings');
-  var html = '<div class="grid-3">';
-  D.trainings.forEach(function(t) {
+  var canEdit = editMode && currentUser && (currentUser.role==='admin'||currentUser.role==='manager');
+  var html = (canEdit ? '<div style="margin-bottom:10px;"><button class="btn btn-primary btn-sm" onclick="addTraining()">➕ 研修を追加</button></div>' : '')+'<div class="grid-3">';
+  D.trainings.forEach(function(t, idx) {
     if (t.genre === 'ジャンル') return;
+    var editBtns = canEdit ? '<div style="margin-top:8px;display:flex;gap:6px;"><button class="btn btn-secondary btn-sm" onclick="editTraining('+idx+')">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteTraining('+idx+')">🗑️</button></div>' : '';
     html += '<div class="card"><div style="font-size:11px;color:var(--primary);font-weight:700;margin-bottom:6px;">'+esc(t.genre)+'</div>'+
       '<div style="font-weight:700;margin-bottom:6px;">'+esc(t.title)+'</div>'+
       '<div style="font-size:12px;color:var(--light);">⏱ '+esc(t.duration)+'分</div>'+
-      '<div style="font-size:12px;margin-top:6px;">'+esc(t.content)+'</div></div>';
+      '<div style="font-size:12px;margin-top:6px;">'+esc(t.content)+'</div>'+editBtns+'</div>';
   });
   html += '</div>';
   el.innerHTML = html;
+}
+function editTraining(idx) {
+  var t = D.trainings[idx]; if (!t) return;
+  [{k:'genre',l:'ジャンル'},{k:'title',l:'タイトル'},{k:'duration',l:'時間（分）'},{k:'content',l:'内容'}].forEach(function(f){
+    var val = prompt(f.l, t[f.k]||''  ); if (val !== null) t[f.k] = val;
+  });
+  markDirty(); saveData(); renderTrainingsSub();
+}
+function deleteTraining(idx) {
+  if (!confirm('この研修を削除しますか？')) return;
+  D.trainings.splice(idx,1);
+  markDirty(); saveData(); renderTrainingsSub();
+}
+function addTraining() {
+  var t = {};
+  [{k:'genre',l:'ジャンル'},{k:'title',l:'タイトル'},{k:'duration',l:'時間（分）'},{k:'content',l:'内容'}].forEach(function(f){
+    var val = prompt(f.l,''  ); t[f.k] = (val !== null ? val : '');
+  });
+  D.trainings.push(t);
+  markDirty(); saveData(); renderTrainingsSub();
 }
 function renderRolesSub() {
   var el = document.getElementById('meetings-sub-roles');
@@ -1314,15 +1415,40 @@ function filterRules() {
 // ── RENDER CONTACTS ──
 function renderContacts() {
   var el = document.getElementById('contacts-content');
-  var html = '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>業者名</th><th>担当者</th><th>電話</th><th>社内担当</th><th>備考</th></tr></thead><tbody>';
-  D.contacts.forEach(function(c) {
+  var canEdit = editMode && currentUser && (currentUser.role==='admin'||currentUser.role==='manager');
+  var html = (canEdit ? '<div style="margin-bottom:10px;"><button class="btn btn-primary btn-sm" onclick="addContact()">➕ 連絡先を追加</button></div>' : '')+
+    '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>業者名</th><th>担当者</th><th>電話</th><th>社内担当</th><th>備考</th>'+(canEdit?'<th>操作</th>':'')+'</tr></thead><tbody>';
+  D.contacts.forEach(function(c, idx) {
     if (c.name === '各業者') return;
+    var editBtns = canEdit ? '<td><button class="btn btn-secondary btn-sm" onclick="editContact('+idx+')" style="margin-right:4px;">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteContact('+idx+')">🗑️</button></td>' : '';
     html += '<tr><td><strong>'+esc(c.name)+'</strong></td><td>'+esc(c.person)+'</td>'+
       '<td>'+(c.phone ? '<a href="tel:'+esc(c.phone)+'">'+esc(c.phone)+'</a>' : '')+'</td>'+
-      '<td>'+esc(c.contact)+'</td><td>'+esc(c.note)+'</td></tr>';
+      '<td>'+esc(c.contact)+'</td><td>'+esc(c.note)+'</td>'+editBtns+'</tr>';
   });
   html += '</tbody></table></div>';
   el.innerHTML = html;
+}
+function editContact(idx) {
+  var c = D.contacts[idx]; if (!c) return;
+  var fields = [{k:'name',l:'業者名'},{k:'person',l:'担当者'},{k:'phone',l:'電話番号'},{k:'contact',l:'社内担当'},{k:'note',l:'備考'}];
+  fields.forEach(function(f) {
+    var val = prompt(f.l, c[f.k]||''  );
+    if (val !== null) c[f.k] = val;
+  });
+  markDirty(); saveData(); renderContacts();
+}
+function deleteContact(idx) {
+  if (!confirm('この連絡先を削除しますか？')) return;
+  D.contacts.splice(idx,1);
+  markDirty(); saveData(); renderContacts();
+}
+function addContact() {
+  var c = {};
+  [{k:'name',l:'業者名'},{k:'person',l:'担当者'},{k:'phone',l:'電話番号'},{k:'contact',l:'社内担当'},{k:'note',l:'備考'}].forEach(function(f){
+    var val = prompt(f.l,''  ); c[f.k] = (val !== null ? val : '');
+  });
+  D.contacts.push(c);
+  markDirty(); saveData(); renderContacts();
 }
 
 // ── RENDER TRAINING PROGRESS ──
