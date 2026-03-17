@@ -1043,6 +1043,16 @@ function confirmActions(){
     const backClass=isMain?'':'minor';
     const numLabel=isMain?'通常カード':`追加カード ${idx}`;
     const numCls=isMain?'card-num-main':'card-num-extra';
+    // リスク管理選択時はメインカード(idx=0)のペナルティを無効化表示
+    const riskMgmtActive=s.actions.includes('risk_mgmt');
+    const effText=(()=>{
+      if(idx===0&&riskMgmtActive&&risk.salesPenalty>0) return '🛡️ リスク管理: 無効化';
+      if(risk.salesPenalty>0) return '−¥'+(risk.salesPenalty/10000).toFixed(0)+'万';
+      if(risk.salesPenalty<0) return '+¥'+(-risk.salesPenalty/10000).toFixed(0)+'万';
+      if(risk.cogsUp) return '原価率+'+(risk.cogsUp*100).toFixed(0)+'%';
+      return '影響なし';
+    })();
+    const cardType=(idx===0&&riskMgmtActive&&risk.salesPenalty>0)?'good':risk.type;
     return `<div class="risk-card-sm" id="rcard-${idx}" onclick="flipRiskCard(${idx})">
       <div class="rci">
         <div class="rcf rcf-back ${backClass}">
@@ -1050,10 +1060,10 @@ function confirmActions(){
           <div style="font-size:2em;opacity:0.5;">🃏</div>
           <div style="font-size:0.7em;color:rgba(255,255,255,0.65);margin-top:4px;">タップ</div>
         </div>
-        <div id="rcfront-${idx}" class="rcf rcf-front type-${risk.type}">
+        <div id="rcfront-${idx}" class="rcf rcf-front type-${cardType}">
           <div class="ri-icon">${risk.icon}</div>
           <div class="ri-name">${risk.name}</div>
-          <div class="ri-eff">${risk.salesPenalty>0?'−¥'+(risk.salesPenalty/10000).toFixed(0)+'万':risk.salesPenalty<0?'+¥'+(-risk.salesPenalty/10000).toFixed(0)+'万':risk.cogsUp?'原価率+'+( risk.cogsUp*100).toFixed(0)+'%':'影響なし'}</div>
+          <div class="ri-eff">${effText}</div>
         </div>
       </div>
     </div>`;
