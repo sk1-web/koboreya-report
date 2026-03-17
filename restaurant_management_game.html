@@ -518,9 +518,9 @@ const MANAGER_TASKS = [
    canUse:()=>true,
    effect:(s,r)=>{ r.bonusSales+=100000; r.actionDesc.push('売上管理: +10万円'); }},
   {id:'risk_mgmt', name:'リスク管理', icon:'🛡️', cost:20000, hours:4,
-   desc:'ヒヤリ・ハットを事前対策', eff:'リスク 50%軽減',
+   desc:'ヒヤリ・ハットを事前対策', eff:'リスク 100%軽減',
    canUse:()=>true,
-   effect:(s,r)=>{ r.riskReduction+=0.5; r.actionDesc.push('リスク管理: リスク50%軽減'); }},
+   effect:(s,r)=>{ r.riskReduction+=1.0; r.actionDesc.push('リスク管理: リスク100%軽減（ペナルティ無効）'); }},
   {id:'pa_labor2', name:'P/A最適化', icon:'⚙️', cost:0, hours:8,
    desc:'シフトとグレード配置を高度最適化', eff:'PA費 −8%',
    canUse:()=>true,
@@ -626,13 +626,13 @@ const MINOR_RISK_CARDS = [
 
 // 人時売上ゾーン thresholds (円/時)
 const HU_ZONES = [
-  {min:0,    max:3799, zone:'z-danger', label:'⛔ 危険ゾーン（低）', extraCards:3, reason:'人時売上が低すぎ（人員過多）'},
-  {min:3800, max:4799, zone:'z-caution',label:'⚠️ 警告ゾーン（低）', extraCards:2, reason:'人時売上がやや低い'},
-  {min:4800, max:5999, zone:'z-warn',   label:'🟡 注意ゾーン（低）', extraCards:1, reason:'人時売上がやや低め'},
-  {min:6000, max:7499, zone:'z-safe',   label:'✅ セーフゾーン',     extraCards:0, reason:'人時売上が適正範囲内'},
-  {min:7500, max:8999, zone:'z-warn',   label:'🟡 注意ゾーン（高）', extraCards:1, reason:'人時売上がやや高め（人員不足気味）'},
-  {min:9000, max:10999,zone:'z-caution',label:'⚠️ 警告ゾーン（高）', extraCards:2, reason:'人時売上が高すぎ（人員不足）'},
-  {min:11000,max:99999,zone:'z-danger', label:'⛔ 危険ゾーン（高）', extraCards:3, reason:'人時売上が高すぎ（激しい人員不足）'},
+  {min:0,    max:2999, zone:'z-danger', label:'⛔ 危険ゾーン（低）', extraCards:3, reason:'人時売上が低すぎ（人員過多）'},
+  {min:3000, max:3999, zone:'z-caution',label:'⚠️ 警告ゾーン（低）', extraCards:2, reason:'人時売上がやや低い（人員過多）'},
+  {min:4000, max:4999, zone:'z-warn',   label:'🟡 注意ゾーン（低）', extraCards:1, reason:'人時売上がやや低め'},
+  {min:5000, max:6999, zone:'z-safe',   label:'✅ セーフゾーン',     extraCards:0, reason:'人時売上が適正範囲内'},
+  {min:7000, max:8499, zone:'z-warn',   label:'🟡 注意ゾーン（高）', extraCards:1, reason:'人時売上がやや高め（人員不足気味）'},
+  {min:8500, max:9999, zone:'z-caution',label:'⚠️ 警告ゾーン（高）', extraCards:2, reason:'人時売上が高すぎ（人員不足）'},
+  {min:10000,max:99999,zone:'z-danger', label:'⛔ 危険ゾーン（高）', extraCards:3, reason:'人時売上が高すぎ（激しい人員不足）'},
 ];
 function getHuZoneInfo(hu){
   return HU_ZONES.find(z=>hu>=z.min&&hu<=z.max) || HU_ZONES[HU_ZONES.length-1];
@@ -1098,9 +1098,10 @@ function goToResults(){
   const p=calcPower(s), rank=calcRank(p);
   const baseRev=BASE_REV[mi][rank-1]*10000;
   const powerBonus=p*20000;
-  let totalRiskPen=G.riskCards.reduce((sum,rc)=>{
+  let totalRiskPen=G.riskCards.reduce((sum,rc,idx)=>{
     let pen=rc.salesPenalty||0;
-    if(pen>0&&rr.riskReduction) pen=Math.floor(pen*(1-rr.riskReduction));
+    // riskReduction（リスク管理タスク）はメインカード(idx=0)のみ有効。人時売上ゾーンペナルティカード(idx>=1)には適用しない
+    if(pen>0&&rr.riskReduction&&idx===0) pen=Math.floor(pen*(1-rr.riskReduction));
     return sum+pen;
   },0);
   const riskPen=totalRiskPen; // alias for display
