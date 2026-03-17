@@ -328,7 +328,6 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
     <div class="sb-item" data-page="store-tasks"><span class="sb-icon">📋</span>業務一覧</div>
     <div class="sb-item" data-page="store-schedule"><span class="sb-icon">📅</span>年間スケジュール</div>
     <div class="sb-item" data-page="store-meetings"><span class="sb-icon">🤝</span>会議体・研修</div>
-    <div class="sb-item" data-page="mgr-meeting"><span class="sb-icon">🗓️</span>店長会スケジュール</div>
     <div class="sb-item" data-page="store-rules"><span class="sb-icon">📜</span>店舗ルール</div>
     <div class="sb-item" data-page="store-contacts"><span class="sb-icon">📞</span>連絡先一覧</div>
     <div class="sb-item" data-page="store-progress"><span class="sb-icon">📊</span>業務進捗</div>
@@ -414,12 +413,6 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
     <div id="page-store-schedule" class="page">
       <div class="page-header"><h2>📅 年間スケジュール・店長会</h2></div>
       <div id="schedule-content"></div>
-    </div>
-
-    <!-- ── 店舗管理: 店長会スケジュール ── -->
-    <div id="page-mgr-meeting" class="page">
-      <div class="page-header"><h2>🗓️ 店長会スケジュール</h2></div>
-      <div id="mgr-meeting-content"></div>
     </div>
 
     <!-- ── 店舗管理: 会議体・研修 ── -->
@@ -604,7 +597,7 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
 // ── CONSTANTS ──
 var PAGE_TITLES = {
   'sales':'店舗売上','store-tasks':'業務一覧','store-schedule':'年間スケジュール',
-  'store-meetings':'会議体・研修','mgr-meeting':'店長会スケジュール','store-rules':'店舗ルール','store-contacts':'連絡先一覧',
+  'store-meetings':'会議体・研修','store-rules':'店舗ルール','store-contacts':'連絡先一覧',
   'training-progress':'育成進捗管理','manuals':'各種マニュアル',
   'manager-test-results':'店長力テスト',
   'meyasu':'目安箱','interview-req':'面談申し込み','store-progress':'業務進捗',
@@ -1044,7 +1037,6 @@ function renderPage(id) {
   if (id === 'store-tasks') renderTasks();
   else if (id === 'store-schedule') renderSchedule();
   else if (id === 'store-meetings') renderMeetings();
-  else if (id === 'mgr-meeting') renderMgrMeeting();
   else if (id === 'store-rules') renderRules();
   else if (id === 'store-contacts') renderContacts();
   else if (id === 'training-progress') renderTrainingProgress();
@@ -1260,12 +1252,12 @@ function editMgrMeeting(idx) {
      {k:'venue',l:'場所'},
      {k:'agenda',l:'議題',rows:3},
      {k:'note',l:'備考'}],
-    m, function(v){ Object.assign(D.mgrMeetings[idx],v); markDirty(); saveData(); renderMgrMeeting(); });
+    m, function(v){ Object.assign(D.mgrMeetings[idx],v); markDirty(); saveData(); renderSchedule(); });
 }
 function deleteMgrMeeting(idx) {
   if (!confirm('この日程を削除しますか？')) return;
   D.mgrMeetings.splice(idx,1);
-  markDirty(); saveData(); renderMgrMeeting();
+  markDirty(); saveData(); renderSchedule();
 }
 function addMgrMeeting() {
   showEditModal('➕ 店長会日程を追加',
@@ -1274,7 +1266,7 @@ function addMgrMeeting() {
      {k:'venue',l:'場所'},
      {k:'agenda',l:'議題',rows:3},
      {k:'note',l:'備考'}],
-    {}, function(v){ D.mgrMeetings.push(v); markDirty(); saveData(); renderMgrMeeting(); });
+    {}, function(v){ D.mgrMeetings.push(v); markDirty(); saveData(); renderSchedule(); });
 }
 
 // ── RENDER SCHEDULE ──
@@ -1292,14 +1284,31 @@ function renderSchedule() {
       '<td>'+esc(s.ab_eval)+'</td><td>'+esc(s.clean)+'</td><td>'+esc(s.misc)+'</td>'+editBtns+'</tr>';
   });
   html += '</tbody></table></div>';
-  // Store mgr schedule
-  if (D.store_mgr_schedule && D.store_mgr_schedule.length > 0) {
-    html += '<div class="card" style="margin-top:16px;"><div class="card-title">📅 店長会スケジュール</div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>日付</th><th>週</th><th>研修内容</th></tr></thead><tbody>';
-    D.store_mgr_schedule.forEach(function(s) {
-      html += '<tr><td>'+esc(s.date ? s.date.split(' ')[0] : '')+'</td><td>'+esc(s.week)+'</td><td>'+linkify(s.training || '')+'</td></tr>';
+  // 店長会スケジュール (editable)
+  if (!D.mgrMeetings) D.mgrMeetings = [];
+  html += '<div class="card" style="margin-top:20px;">';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">';
+  html += '<div class="card-title" style="margin-bottom:0;">🗓️ 店長会スケジュール</div>';
+  if (canEdit) html += '<button class="btn btn-primary btn-sm" onclick="addMgrMeeting()">➕ 日程を追加</button>';
+  html += '</div>';
+  if (D.mgrMeetings.length === 0) {
+    html += '<p style="color:var(--light);font-size:13px;text-align:center;padding:12px;">スケジュールがありません。</p>';
+  } else {
+    html += '<div class="tbl-wrap"><table class="tbl"><thead><tr>'
+      + '<th>日付</th><th>時間</th><th>場所</th><th>議題</th><th>備考</th>'
+      + (canEdit ? '<th>操作</th>' : '')
+      + '</tr></thead><tbody>';
+    D.mgrMeetings.forEach(function(m, i) {
+      var ops = canEdit
+        ? '<td style="white-space:nowrap;"><button class="btn btn-secondary btn-sm" onclick="editMgrMeeting('+i+')" style="margin-right:4px;">✏️</button>'
+          + '<button class="btn btn-danger btn-sm" onclick="deleteMgrMeeting('+i+')">🗑️</button></td>'
+        : '';
+      html += '<tr><td><strong>'+esc(m.date)+'</strong></td><td>'+esc(m.time)+'</td><td>'+esc(m.venue)+'</td>'
+        + '<td style="max-width:220px;">'+esc(m.agenda)+'</td><td style="max-width:140px;">'+esc(m.note)+'</td>'+ops+'</tr>';
     });
-    html += '</tbody></table></div></div>';
+    html += '</tbody></table></div>';
   }
+  html += '</div>';
   el.innerHTML = html;
 }
 
