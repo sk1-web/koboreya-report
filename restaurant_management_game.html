@@ -196,6 +196,59 @@ body { font-family: 'Hiragino Sans','Noto Sans JP','Meiryo',sans-serif; backgrou
 .profit-num.neg { color: var(--red); }
 .profit-sub { font-size: 0.82em; color: var(--muted); margin-top: 3px; }
 
+/* ===== KPI PANEL ===== */
+.kpi-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 10px; }
+.kpi-box { border: 2px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; }
+.kpi-label { font-size: 0.74em; color: var(--muted); margin-bottom: 3px; }
+.kpi-val { font-size: 1.25em; font-weight: bold; margin-bottom: 4px; }
+.kpi-zone { font-size: 0.7em; font-weight: bold; padding: 2px 7px; border-radius: 10px; display: inline-block; }
+.kpi-box.z-good { border-color: var(--green); background: var(--green-bg); }
+.kpi-box.z-good .kpi-val { color: var(--green); }
+.kpi-box.z-good .kpi-zone { background: var(--green); color: #fff; }
+.kpi-box.z-warn { border-color: #f9a825; background: var(--gold-bg); }
+.kpi-box.z-warn .kpi-val { color: #b8860b; }
+.kpi-box.z-warn .kpi-zone { background: #f9a825; color: #fff; }
+.kpi-box.z-bad { border-color: var(--red); background: var(--red-bg); }
+.kpi-box.z-bad .kpi-val { color: var(--red); }
+.kpi-box.z-bad .kpi-zone { background: var(--red); color: #fff; }
+.kpi-box.z-normal { border-color: var(--blue); background: var(--blue-bg); }
+.kpi-box.z-normal .kpi-val { color: var(--blue); }
+.kpi-box.z-normal .kpi-zone { background: var(--blue); color: #fff; }
+.hitoji-table { width: 100%; border-collapse: collapse; font-size: 0.8em; }
+
+/* ===== RISK ZONE & MULTI-CARD ===== */
+.zone-hdr { text-align:center; padding: 12px 16px; border-radius: 10px; margin-bottom: 14px; border: 2px solid; }
+.zone-hdr.z-safe { background:#e8f5e9; border-color:var(--green); color:var(--green); }
+.zone-hdr.z-warn { background:var(--gold-bg); border-color:#f9a825; color:#b8860b; }
+.zone-hdr.z-caution { background:#fff3e0; border-color:var(--orange); color:var(--orange); }
+.zone-hdr.z-danger { background:var(--red-bg); border-color:var(--red); color:var(--red); }
+.zone-hdr .zh-title { font-size:1.2em; font-weight:bold; margin-bottom:4px; }
+.zone-hdr .zh-detail { font-size:0.82em; opacity:0.85; }
+.zone-hdr .zh-cards { font-size:1em; font-weight:bold; margin-top:6px; }
+.multi-cards-row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin: 12px 0; }
+.risk-card-sm { width:140px; height:200px; perspective:800px; cursor:pointer; flex-shrink:0; }
+.risk-card-sm .rci { width:100%; height:100%; position:relative; transform-style:preserve-3d; transition:transform 0.7s; }
+.risk-card-sm.flipped .rci { transform:rotateY(180deg); }
+.risk-card-sm .rcf { position:absolute; width:100%; height:100%; border-radius:12px; backface-visibility:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:12px; }
+.risk-card-sm .rcf-back { background:linear-gradient(135deg,#7b1010,#b71c1c); border:2px solid #ef9a9a; box-shadow:0 0 18px rgba(183,28,28,0.4); }
+.risk-card-sm .rcf-back.minor { background:linear-gradient(135deg,#1a3a6e,#1565c0); border:2px solid #90caf9; box-shadow:0 0 18px rgba(21,101,192,0.35); }
+.risk-card-sm .rcf-front { transform:rotateY(180deg); }
+.risk-card-sm .ri-icon { font-size:2em; margin-bottom:6px; }
+.risk-card-sm .ri-name { font-size:0.82em; font-weight:bold; text-align:center; margin-bottom:5px; color:#fff; }
+.risk-card-sm .ri-eff { font-size:0.75em; font-weight:bold; color:#fff; text-align:center; }
+.risk-tap-hint { font-size:0.82em; color:var(--muted); text-align:center; margin-bottom:8px; }
+.risk-card-num { font-size:0.7em; font-weight:bold; padding:2px 6px; border-radius:3px; margin-bottom:4px; }
+.card-num-main { background:var(--red); color:#fff; }
+.card-num-extra { background:var(--blue); color:#fff; }
+
+.hitoji-table th,.hitoji-table td { border:1px solid var(--border); padding:5px 7px; text-align:center; }
+.hitoji-table thead th { background: var(--hdr); color:#fff; }
+.htg { background:#e8f5e9; color:var(--green); font-weight:bold; }
+.htn { background:var(--blue-bg); color:var(--blue); }
+.htw { background:var(--gold-bg); color:#b8860b; font-weight:bold; }
+.htb { background:var(--red-bg); color:var(--red); font-weight:bold; }
+
+
 /* ===== ALERTS ===== */
 .alert { padding: 9px 12px; border-radius: 6px; font-size: 0.85em; margin-bottom: 8px; }
 .a-warn { background: var(--gold-bg); border: 1px solid var(--gold); color: #7a5500; }
@@ -357,25 +410,12 @@ body { font-family: 'Hiragino Sans','Noto Sans JP','Meiryo',sans-serif; backgrou
 <!-- ===== RISK CARD ===== -->
 <div id="screen-risk" class="screen">
   <div id="sb-risk" class="sbar"></div>
-  <div class="risk-wrap">
-    <h2 style="font-size:1.4em; color:var(--hdr); margin-bottom:4px;">🎴 リスクカード</h2>
-    <p style="color:var(--muted); font-size:0.85em; margin-bottom:16px;">カードをタップして今月のリスクを確認！</p>
-    <div id="risk-card-el" class="risk-card-3d" onclick="flipRiskCard()">
-      <div class="rci">
-        <div class="rcf rcf-back">
-          <div style="font-size:2.6em; opacity:0.4;">🃏</div>
-          <div style="font-size:1.1em; font-weight:bold; color:rgba(255,255,255,0.8); margin-top:8px;">RISK CARD</div>
-          <div style="font-size:0.75em; color:rgba(255,255,255,0.6); margin-top:6px;">タップして開く</div>
-        </div>
-        <div id="rc-front" class="rcf rcf-front type-bad">
-          <div id="rc-icon" class="rc-icon">❓</div>
-          <div id="rc-name" class="rc-name">-</div>
-          <div id="rc-desc" class="rc-desc">-</div>
-          <div id="rc-eff" class="rc-eff"></div>
-        </div>
-      </div>
-    </div>
-    <div id="risk-go-btn" style="display:none; margin-top:14px;">
+  <div class="main" style="max-width:600px;">
+    <h2 style="font-size:1.2em; color:var(--hdr); margin-bottom:10px; text-align:center;">🎴 リスクカード フェーズ</h2>
+    <div id="zone-hdr-box"></div>
+    <p id="risk-tap-hint" class="risk-tap-hint">カードを順番にタップして開いてください</p>
+    <div id="multi-cards-row" class="multi-cards-row"></div>
+    <div id="risk-go-btn" style="display:none; margin-top:14px; text-align:center;">
       <button class="btn btn-primary" onclick="goToResults()">📊 月次決算へ →</button>
     </div>
   </div>
@@ -390,6 +430,14 @@ body { font-family: 'Hiragino Sans','Noto Sans JP','Meiryo',sans-serif; backgrou
       <div style="font-size:0.82em; color:var(--muted);">今月の営業利益</div>
       <div id="profit-num" class="profit-num pos">+¥0</div>
       <div id="profit-sub" class="profit-sub"></div>
+    </div>
+
+    <div class="panel" id="kpi-panel">
+      <div class="sec-hdr3">📈 今月のKPI（人時売上・PA人件費比率）</div>
+      <div class="panel-body">
+        <div id="kpi-row" class="kpi-row"></div>
+        <div id="kpi-notes" style="font-size:0.8em; color:var(--muted); line-height:1.7;"></div>
+      </div>
     </div>
     <div class="panel">
       <div class="sec-hdr">📋 損益計算書（P&L）</div>
@@ -563,12 +611,40 @@ const RISK_CARDS = [
   {id:'inspect', name:'衛生検査', icon:'📋', salesPenalty:100000, type:'neutral', desc:'保健所の抜き打ち検査。対応コストが発生'},
 ];
 
+
+// Minor risk cards drawn in non-safe zones
+const MINOR_RISK_CARDS = [
+  {id:'m_loss',name:'食材廃棄増加',icon:'🗑️',salesPenalty:80000,type:'bad',desc:'適正在庫管理ができず廃棄が増加'},
+  {id:'m_claim',name:'サービスクレーム',icon:'😤',salesPenalty:60000,type:'bad',desc:'品質低下でお客様からクレーム'},
+  {id:'m_absent',name:'スタッフ欠勤',icon:'⏰',salesPenalty:50000,type:'bad',desc:'急な欠員で業務に支障が出た'},
+  {id:'m_order',name:'発注ミス',icon:'📋',salesPenalty:100000,type:'bad',desc:'発注ミスで食材不足・機会損失'},
+  {id:'m_overtime',name:'残業代発生',icon:'💸',salesPenalty:120000,type:'bad',desc:'業務過多で残業代が予算を超過'},
+  {id:'m_energy',name:'光熱費超過',icon:'💡',salesPenalty:70000,type:'bad',desc:'省エネ不備で光熱費が予算超過'},
+  {id:'m_quality',name:'品質低下',icon:'📉',salesPenalty:80000,type:'bad',desc:'料理品質に問題。リピーターが減少'},
+  {id:'m_safe',name:'追加問題なし',icon:'✅',salesPenalty:0,type:'neutral',desc:'追加の問題は発生しなかった'},
+];
+
+// 人時売上ゾーン thresholds (円/時)
+const HU_ZONES = [
+  {min:0,    max:3799, zone:'z-danger', label:'⛔ 危険ゾーン（低）', extraCards:3, reason:'人時売上が低すぎ（人員過多）'},
+  {min:3800, max:4799, zone:'z-caution',label:'⚠️ 警告ゾーン（低）', extraCards:2, reason:'人時売上がやや低い'},
+  {min:4800, max:5999, zone:'z-warn',   label:'🟡 注意ゾーン（低）', extraCards:1, reason:'人時売上がやや低め'},
+  {min:6000, max:7499, zone:'z-safe',   label:'✅ セーフゾーン',     extraCards:0, reason:'人時売上が適正範囲内'},
+  {min:7500, max:8999, zone:'z-warn',   label:'🟡 注意ゾーン（高）', extraCards:1, reason:'人時売上がやや高め（人員不足気味）'},
+  {min:9000, max:10999,zone:'z-caution',label:'⚠️ 警告ゾーン（高）', extraCards:2, reason:'人時売上が高すぎ（人員不足）'},
+  {min:11000,max:99999,zone:'z-danger', label:'⛔ 危険ゾーン（高）', extraCards:3, reason:'人時売上が高すぎ（激しい人員不足）'},
+];
+function getHuZoneInfo(hu){
+  return HU_ZONES.find(z=>hu>=z.min&&hu<=z.max) || HU_ZONES[HU_ZONES.length-1];
+}
+
 // ==================== STATE ====================
 let G = {};
 function initGame() {
   G = {
     month:0, staff:{S:0,A:0,B:11,C:7,D:2}, totalProfit:0,
-    monthlyResults:[], actions:[], risk:null, riskFlipped:false, pendingBonus:0,
+    monthlyResults:[], actions:[], riskCards:[], riskFlippedCount:0, pendingBonus:0,
+    hitojiVal:0, hitojiZoneInfo:null,
   };
 }
 
@@ -583,6 +659,10 @@ function loseRandomStaff(s){
   const lvls=RANKS.filter(r=>s.staff[r]>0);
   if(!lvls.length)return;
   s.staff[lvls[Math.floor(Math.random()*lvls.length)]]--;
+}
+
+function calcTotalPAHours(s){
+  return RANKS.reduce((n,r)=>n+s.staff[r]*STAFF_INFO[r].hours,0);
 }
 function calcPACost(s,reduction=0){
   const raw=RANKS.reduce((n,r)=>n+s.staff[r]*STAFF_INFO[r].rate*STAFF_INFO[r].hours,0);
@@ -688,6 +768,8 @@ function showResources(){
     </tr>`;
   }).join('');
 
+  const curHitoji=calcTotalPAHours(G)>0?Math.round((BASE_REV[mi][rank-1]*10000+p*20000)/calcTotalPAHours(G)):0;
+  const curPARaw=calcPACost(G,0); const curPARatio=((BASE_REV[mi][rank-1]*10000+p*20000)>0?curPARaw/(BASE_REV[mi][rank-1]*10000+p*20000)*100:0);
   document.getElementById('res-content').innerHTML=`
     <!-- Staff Level Reference Table -->
     <div class="panel">
@@ -797,7 +879,44 @@ function showResources(){
           <div style="font-size:0.7em;color:var(--muted);margin-top:5px;">🔵 現在の規模に近い行</div>
         </div>
       </div>
-    </div>`;
+    </div>
+    <!-- 人時売上ゾーン表 -->
+    <div class="panel">
+      <div class="sec-hdr4">📊 KPI目標ゾーン表（研修資料 p.13準拠）</div>
+      <div class="panel-body">
+        <div style="font-size:0.82em;color:var(--muted);margin-bottom:8px;line-height:1.6;">
+          <b>人時売上</b> = 月次売上 ÷ PA総労働時間 &nbsp;｜&nbsp; <b>PA人件費比率</b> = PA人件費 ÷ 月次売上 × 100
+        </div>
+        <div class="grid2">
+          <div>
+            <div style="font-size:0.82em;font-weight:bold;color:var(--hdr);margin-bottom:5px;">人時売上ゾーン</div>
+            <table class="hitoji-table">
+              <thead><tr><th>人時売上</th><th>ゾーン</th><th>P&L影響</th></tr></thead>
+              <tbody>
+                <tr class="htg"><td>6,000円以上</td><td>✨ 優良</td><td>+10万円</td></tr>
+                <tr class="htn"><td>5,000〜5,999円</td><td>✅ 標準</td><td>±0</td></tr>
+                <tr class="htw"><td>4,500〜4,999円</td><td>⚠️ 注意</td><td>−10万円</td></tr>
+                <tr class="htb"><td>4,500円未満</td><td>🔴 危険</td><td>−30万円</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <div style="font-size:0.82em;font-weight:bold;color:var(--hdr);margin-bottom:5px;">PA人件費比率ゾーン</div>
+            <table class="hitoji-table">
+              <thead><tr><th>PA人件費比率</th><th>ゾーン</th><th>P&L影響</th></tr></thead>
+              <tbody>
+                <tr class="htg"><td>25%以下</td><td>✨ 優良</td><td>+10万円</td></tr>
+                <tr class="htn"><td>25〜30%</td><td>✅ 良好</td><td>±0</td></tr>
+                <tr class="htw"><td>30〜35%</td><td>⚠️ 注意</td><td>−5万円</td></tr>
+                <tr class="htb"><td>35%超</td><td>🔴 超過</td><td>−20万円</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div id="res-kpi-preview" style="margin-top:10px;"></div>
+      </div>
+    </div>
+  `;
   showScreen('resources');
 }
 
@@ -883,32 +1002,82 @@ function toggleAction(id){
 }
 
 function confirmActions(){
-  G.risk=RISK_CARDS[Math.floor(Math.random()*RISK_CARDS.length)];
-  G.riskFlipped=false;
+  // --- 人時売上ゾーン計算 (projected revenue) ---
+  const s=G, mi=s.month;
+  // Apply actions to a temp state copy for projection
+  const rr0={bonusSales:0,cogsReduction:0,laborReduction:0,nextMonthBonus:0,riskReduction:0,actionCosts:0,actionDesc:[],cogsUp:0};
+  const tempStaff={...s.staff};
+  const tempS={staff:tempStaff};
+  [...MANAGER_TASKS,...ACTION_CARDS].filter(c=>s.actions.includes(c.id)).forEach(c=>c.effect(tempS,rr0));
+  const projPower=calcPower(tempS), projRank=calcRank(projPower);
+  const projRev=(BASE_REV[mi][projRank-1]*10000)+(projPower*20000)+rr0.bonusSales+s.pendingBonus;
+  const projHours=calcTotalPAHours(tempS);
+  const hitojiVal=projHours>0?Math.round(projRev/projHours):0;
+  G.hitojiVal=hitojiVal;
+  G.hitojiZoneInfo=getHuZoneInfo(hitojiVal);
+
+  // --- Draw risk cards ---
+  const mainRisk=RISK_CARDS[Math.floor(Math.random()*RISK_CARDS.length)];
+  G.riskCards=[mainRisk];
+  for(let i=0;i<G.hitojiZoneInfo.extraCards;i++){
+    G.riskCards.push(MINOR_RISK_CARDS[Math.floor(Math.random()*MINOR_RISK_CARDS.length)]);
+  }
+  G.riskFlippedCount=0;
+
   buildSbar('sb-risk');
-  document.getElementById('risk-card-el').classList.remove('flipped');
+
+  // --- Build zone header ---
+  const zi=G.hitojiZoneInfo;
+  const totalCards=G.riskCards.length;
+  const zHdrEl=document.getElementById('zone-hdr-box');
+  zHdrEl.innerHTML=`<div class="zone-hdr ${zi.zone}">
+    <div class="zh-title">${zi.label}</div>
+    <div class="zh-detail">人時売上高: ${hitojiVal.toLocaleString()}円/時 ｜ ${zi.reason}</div>
+    <div class="zh-cards">🃏 リスクカード: <b>${totalCards}枚</b>${totalCards>1?' (通常1枚 + ゾーンペナルティ'+(totalCards-1)+'枚)':' (セーフゾーン)'}</div>
+  </div>`;
+
+  // --- Build card row ---
+  const row=document.getElementById('multi-cards-row');
+  row.innerHTML=G.riskCards.map((risk,idx)=>{
+    const isMain=idx===0;
+    const backClass=isMain?'':'minor';
+    const numLabel=isMain?'通常カード':`追加カード ${idx}`;
+    const numCls=isMain?'card-num-main':'card-num-extra';
+    return `<div class="risk-card-sm" id="rcard-${idx}" onclick="flipRiskCard(${idx})">
+      <div class="rci">
+        <div class="rcf rcf-back ${backClass}">
+          <div class="risk-card-num ${numCls}">${numLabel}</div>
+          <div style="font-size:2em;opacity:0.5;">🃏</div>
+          <div style="font-size:0.7em;color:rgba(255,255,255,0.65);margin-top:4px;">タップ</div>
+        </div>
+        <div id="rcfront-${idx}" class="rcf rcf-front type-${risk.type}">
+          <div class="ri-icon">${risk.icon}</div>
+          <div class="ri-name">${risk.name}</div>
+          <div class="ri-eff">${risk.salesPenalty>0?'−¥'+(risk.salesPenalty/10000).toFixed(0)+'万':risk.salesPenalty<0?'+¥'+(-risk.salesPenalty/10000).toFixed(0)+'万':risk.cogsUp?'原価率+'+( risk.cogsUp*100).toFixed(0)+'%':'影響なし'}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
   document.getElementById('risk-go-btn').style.display='none';
   showScreen('risk');
 }
 
-function flipRiskCard(){
-  if(G.riskFlipped) return;
-  G.riskFlipped=true;
-  const risk=G.risk;
-  const front=document.getElementById('rc-front');
-  front.className=`rcf rcf-front type-${risk.type}`;
-  document.getElementById('rc-icon').textContent=risk.icon;
-  document.getElementById('rc-name').textContent=risk.name;
-  document.getElementById('rc-desc').textContent=risk.desc;
-  let effTxt='', effCls='#fff';
-  if(risk.salesPenalty>0){ effTxt=`損失: −¥${(risk.salesPenalty/10000).toFixed(0)}万`; effCls='#ffcdd2'; }
-  else if(risk.salesPenalty<0){ effTxt=`ボーナス: +¥${(-risk.salesPenalty/10000).toFixed(0)}万`; effCls='#c8e6c9'; }
-  else if(risk.cogsUp){ effTxt=`原価率 +${(risk.cogsUp*100).toFixed(0)}%`; effCls='#ffcdd2'; }
-  else { effTxt='影響なし'; effCls='rgba(255,255,255,0.7)'; }
-  const effEl=document.getElementById('rc-eff');
-  effEl.textContent=effTxt; effEl.style.color=effCls;
-  document.getElementById('risk-card-el').classList.add('flipped');
-  setTimeout(()=>{ document.getElementById('risk-go-btn').style.display='block'; },900);
+function flipRiskCard(idx){
+  const cardEl=document.getElementById('rcard-'+idx);
+  if(!cardEl||cardEl.classList.contains('flipped')) return;
+  // Only allow flipping in order
+  if(idx!==G.riskFlippedCount) return;
+  cardEl.classList.add('flipped');
+  G.riskFlippedCount++;
+  // Update hint text
+  const remaining=G.riskCards.length-G.riskFlippedCount;
+  const hint=document.getElementById('risk-tap-hint');
+  if(remaining>0){ hint.textContent=`残り ${remaining}枚 — 次のカードをタップ`; }
+  else { hint.textContent='すべてのカードを確認しました'; }
+  // Show results button after all flipped
+  if(G.riskFlippedCount>=G.riskCards.length){
+    setTimeout(()=>{ document.getElementById('risk-go-btn').style.display='block'; },700);
+  }
 }
 
 function goToResults(){
@@ -922,19 +1091,24 @@ function goToResults(){
   // Apply actions
   allCards.filter(c=>s.actions.includes(c.id)).forEach(c=>{ c.effect(s,rr); rr.actionCosts+=c.cost; });
 
-  // Apply risk on-apply
-  if(risk.onApply) risk.onApply(s);
+  // Apply all risk cards' on-apply effects
+  G.riskCards.forEach(risk=>{ if(risk.onApply) risk.onApply(s); });
 
-  // Revenue
+  // Revenue - apply ALL risk cards' penalties
   const p=calcPower(s), rank=calcRank(p);
   const baseRev=BASE_REV[mi][rank-1]*10000;
   const powerBonus=p*20000;
-  let riskPen=risk.salesPenalty||0;
-  if(riskPen>0&&rr.riskReduction) riskPen=Math.floor(riskPen*(1-rr.riskReduction));
+  let totalRiskPen=G.riskCards.reduce((sum,rc)=>{
+    let pen=rc.salesPenalty||0;
+    if(pen>0&&rr.riskReduction) pen=Math.floor(pen*(1-rr.riskReduction));
+    return sum+pen;
+  },0);
+  const riskPen=totalRiskPen; // alias for display
+  const totalCogsUp=G.riskCards.reduce((sum,rc)=>sum+(rc.cogsUp||0),0);
   const revenue=baseRev+powerBonus+rr.bonusSales+savedPending-riskPen;
 
   // Costs
-  const cogsRate=Math.max(0.15, 0.30-rr.cogsReduction+rr.cogsUp);
+  const cogsRate=Math.max(0.15, 0.30-rr.cogsReduction+totalCogsUp);
   const cogs=Math.round(revenue*cogsRate);
   const grossProfit=revenue-cogs;
   const paCost=calcPACost(s,rr.laborReduction);
@@ -942,9 +1116,23 @@ function goToResults(){
   const promoCost=Math.round(revenue*0.02);
   const otherMgmt=100000, sysCost=100000, eqCost=100000;
   const totalCost=paCost+mgrCost+utilityCost+promoCost+otherMgmt+sysCost+eqCost+rr.actionCosts;
+
+  // ===== KPI display (informational - zone effect already applied via extra risk cards) =====
+  const totalPAHoursR=calcTotalPAHours(s);
+  const hitojiUriage=totalPAHoursR>0?Math.round(revenue/totalPAHoursR):0;
+  const paCostRatio=revenue>0?(paCost/revenue*100):0;
+  const huZoneInfo=getHuZoneInfo(G.hitojiVal); // use projected value (set at risk phase)
+  const prZone=paCostRatio<=25?'z-good':paCostRatio<=30?'z-normal':paCostRatio<=35?'z-warn':'z-bad';
+  const prLabel=paCostRatio<=25?'✨ 優良':paCostRatio<=30?'✅ 良好':paCostRatio<=35?'⚠️ 注意':'🔴 超過';
+  const kpiItems=[
+    {label:'人時売上（実績）',val:hitojiUriage.toLocaleString()+'円/時',zone:huZoneInfo.zone,zoneLbl:huZoneInfo.label},
+    {label:'PA人件費比率',val:paCostRatio.toFixed(1)+'%',zone:prZone,zoneLbl:prLabel},
+    {label:'PA総労働時間',val:totalPAHoursR.toLocaleString()+'時間',zone:'z-normal',zoneLbl:'参考'},
+  ];
+
   const opProfit=grossProfit-totalCost;
 
-  s.monthlyResults.push({month:MONTHS[mi],rank,revenue,cogs,grossProfit,paCost,mgrCost,utilityCost,promoCost,otherMgmt,sysCost,eqCost,actionCosts:rr.actionCosts,totalCost,opProfit,riskCard:risk,riskPen,staff:{...s.staff},power:p,cogsRate,laborReduction:rr.laborReduction});
+  s.monthlyResults.push({month:MONTHS[mi],rank,revenue,cogs,grossProfit,paCost,mgrCost,utilityCost,promoCost,otherMgmt,sysCost,eqCost,actionCosts:rr.actionCosts,totalCost,opProfit,riskCards:[...G.riskCards],riskPen,hitojiVal:G.hitojiVal,hitojiZone:G.hitojiZoneInfo,staff:{...s.staff},power:p,cogsRate,laborReduction:rr.laborReduction});
   s.totalProfit+=opProfit;
   s.pendingBonus=rr.nextMonthBonus;
 
@@ -965,9 +1153,8 @@ function goToResults(){
   tHTML+=pRow(`　営業力ボーナス（${p}P×2万）`,powerBonus,true);
   if(rr.bonusSales>0) tHTML+=pRow('　アクション・管理ボーナス',rr.bonusSales,true);
   if(savedPending>0) tHTML+=pRow('　前月MSアンケートボーナス',savedPending,true);
-  if(riskPen>0) tHTML+=pRow(`　リスク損失（${risk.name}）`,-riskPen,true);
-  if(riskPen<0) tHTML+=pRow(`　ラッキーボーナス（${risk.name}）`,-riskPen,true);
-  tHTML+=pRow(`■ 売上原価（${(cogsRate*100).toFixed(0)}%）`,-cogs,false,false,true);
+  // (risk details shown individually below totals)
+  tHTML+=pRow(`■ 売上原価（${(cogsRate*100).toFixed(0)}%${totalCogsUp>0?' ※食材高騰+'+( totalCogsUp*100).toFixed(0)+'%':''}）`,-cogs,false,false,true);
   tHTML+=pRow('◆ 売上総利益',grossProfit,false,true);
   tHTML+=pRow('■ 販売管理費',-totalCost,false,false,true);
   tHTML+=pRow('　PA人件費（'+( rr.laborReduction>0?`${(rr.laborReduction*100).toFixed(0)}%削減後`:'管理なし')+'）',-paCost,true);
@@ -978,8 +1165,25 @@ function goToResults(){
   tHTML+=pRow('　システム費',-sysCost,true);
   tHTML+=pRow('　設備費',-eqCost,true);
   if(rr.actionCosts>0) tHTML+=pRow('　アクションコスト',-rr.actionCosts,true);
+  // Risk cards breakdown in P&L
+  G.riskCards.forEach((rc,idx)=>{ const pen=(rc.salesPenalty||0); if(pen!==0||rc.cogsUp) { const lbl=idx===0?`　リスク（${rc.name}）`:`　追加リスク${idx}（${rc.name}）`; if(pen>0) tHTML+=pRow(lbl,-pen,true); else if(pen<0) tHTML+=pRow(lbl,-pen,true); } });
   tHTML+=pRow('◆ 営業利益',opProfit,false,true);
   document.getElementById('pl-body').innerHTML=tHTML;
+
+  // KPI Panel render
+  document.getElementById('kpi-row').innerHTML=kpiItems.map(k=>`
+    <div class="kpi-box ${k.zone}">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-val">${k.val}</div>
+      <div class="kpi-zone">${k.zoneLbl}</div>
+    </div>`).join('');
+  const zi2=G.hitojiZoneInfo||getHuZoneInfo(G.hitojiVal);
+  const kpiNoteLines=[
+    `📊 引いたリスクカード: <b>${G.riskCards.length}枚</b>（${zi2.label}）`,
+    `📌 人時売上 = 月次売上 ÷ PA総労働時間 ｜ セーフゾーン: 6,000〜7,499円/時`,
+    `📌 PA人件費比率 = PA人件費 ÷ 月次売上 ｜ 目標: 30%以下`,
+  ];
+  document.getElementById('kpi-notes').innerHTML=kpiNoteLines.map(n=>`<div>${n}</div>`).join('');
 
   // Action effects
   const ep=document.getElementById('eff-panel'), eb=document.getElementById('eff-body');
