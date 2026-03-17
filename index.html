@@ -3913,6 +3913,7 @@ function initPortal() {
 }
 
 // Check session on load
+initSeedAccounts(); // ← シードアカウントを先に復元してからセッション確認
 (function() {
   var sess = sessionStorage.getItem('koboreya_session');
   if (sess) {
@@ -3928,7 +3929,7 @@ function initPortal() {
 
 // result-sub ID fix
 document.addEventListener('DOMContentLoaded', function() {
-  initSeedAccounts();
+  // initSeedAccounts() is already called earlier at page load
   var modal = document.getElementById('register-overlay');
   if (modal) {
     var subEl = document.querySelector('.modal-sub[id]');
