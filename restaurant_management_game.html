@@ -299,6 +299,9 @@ body { font-family: 'Hiragino Sans','Noto Sans JP','Meiryo',sans-serif; backgrou
 
 <!-- ===== TITLE ===== -->
 <div id="screen-title" class="screen">
+  <div id="pts-display" style="position:absolute;top:12px;right:16px;background:rgba(255,255,255,0.15);color:#fff;border-radius:20px;padding:4px 14px;font-size:0.85em;font-weight:700;cursor:pointer;" onclick="showTitleRanking()">
+    ⭐ <span id="title-pts">0</span>pt
+  </div>
   <div class="title-emblem">🍽️</div>
   <div class="title-main">こぼれや</div>
   <div class="title-sub">レストラン マネジメントゲーム</div>
@@ -480,6 +483,15 @@ body { font-family: 'Hiragino Sans','Noto Sans JP','Meiryo',sans-serif; backgrou
     <div class="end-table" style="margin-top:10px;">
       <h3 style="color:var(--hdr); margin-bottom:9px; font-size:0.9em;">📅 月次サマリー</h3>
       <div id="monthly-rows"></div>
+    </div>
+    <!-- ポイント表示 -->
+    <div id="pts-banner" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border-radius:12px;padding:12px 24px;margin:12px 0;font-size:1em;font-weight:700;text-align:center;">
+      🎉 +5pt 獲得！累計: <span id="total-pts">0</span>pt
+    </div>
+    <!-- ランキング -->
+    <div class="end-table" style="margin-top:10px;width:100%;max-width:480px;">
+      <h3 style="color:var(--hdr);margin-bottom:9px;font-size:0.95em;">🏆 ランキング（ベスト10）</h3>
+      <div id="ranking-rows"></div>
     </div>
     <div class="flex-center mt-16">
       <button class="btn btn-primary" onclick="restartGame()">🔄 もう一度プレイ</button>
@@ -1253,13 +1265,72 @@ function showEnding(){
       <span class="el">${r.month}（${rankLabel(r.rank)}）</span>
       <span class="ev" style="color:${r.opProfit>=0?'var(--green)':'var(--red)'}">${yenFmt(r.opProfit)}</span>
     </div>`).join('');
+
+  // ── ポイント付与・ランキング保存 ──
+  const newPts=addGamePoints(5);
+  document.getElementById('total-pts').textContent=newPts;
+  const now=new Date();
+  const dateStr=`${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`;
+  saveGameRanking({date:dateStr,profit:tot,grade,pts:newPts});
+  renderRanking(tot);
   showScreen('ending');
+}
+
+// ── ランキング・ポイント localStorage 関数 ──
+function loadGameRankings(){
+  try{return JSON.parse(localStorage.getItem('koboreya_mgmt_rankings')||'[]');}catch(e){return [];}
+}
+function saveGameRanking(entry){
+  const list=loadGameRankings();
+  list.push(entry);
+  list.sort((a,b)=>b.profit-a.profit);
+  localStorage.setItem('koboreya_mgmt_rankings',JSON.stringify(list.slice(0,20)));
+}
+function loadGamePoints(){
+  return parseInt(localStorage.getItem('koboreya_mgmt_pts')||'0');
+}
+function addGamePoints(pts){
+  const cur=loadGamePoints();
+  const next=cur+pts;
+  localStorage.setItem('koboreya_mgmt_pts',String(next));
+  return next;
+}
+function renderRanking(currentProfit){
+  const list=loadGameRankings();
+  const gradeColor={S:'#f59e0b',A:'#22c55e',B:'#3b82f6',C:'#6b7280',F:'#ef4444'};
+  const rows=list.slice(0,10).map((r,i)=>{
+    const isCurrent=(r.profit===currentProfit);
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}位`;
+    const highlight=isCurrent?'background:#fff8e1;font-weight:700;border-radius:6px;':'';
+    return `<div class="end-row" style="${highlight}padding:4px 8px;">
+      <span class="el" style="gap:6px;display:flex;align-items:center;">
+        <span style="font-size:1.1em;">${medal}</span>
+        <span style="background:${gradeColor[r.grade]||'#999'};color:#fff;border-radius:4px;padding:1px 6px;font-size:0.78em;font-weight:700;">${r.grade}</span>
+        <span style="font-size:0.8em;color:var(--muted);">${r.date}</span>
+      </span>
+      <span class="ev" style="color:${r.profit>=0?'var(--green)':'var(--red)'}">${yenFmt(r.profit)}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('ranking-rows').innerHTML=rows||'<div style="color:var(--muted);font-size:0.85em;padding:8px;">まだ記録がありません</div>';
 }
 
 window.onload=()=>{
   document.querySelectorAll('.screen').forEach(el=>{ el.style.display='none'; el.classList.remove('active'); });
   const ts=document.getElementById('screen-title'); ts.style.display='flex'; ts.classList.add('active');
+  // ポイント表示初期化
+  const titlePtsEl=document.getElementById('title-pts');
+  if(titlePtsEl) titlePtsEl.textContent=loadGamePoints();
 };
+function showTitleRanking(){
+  const list=loadGameRankings();
+  if(!list.length){alert('まだ記録がありません。プレイしてランキングに挑戦しよう！');return;}
+  const gradeColor={S:'#f59e0b',A:'#22c55e',B:'#3b82f6',C:'#6b7280',F:'#ef4444'};
+  const lines=list.slice(0,10).map((r,i)=>{
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}位`;
+    return `${medal} [${r.grade}] ${r.date} ${yenFmt(r.profit)}`;
+  });
+  alert('🏆 ランキング（TOP10）\n累計ポイント: '+loadGamePoints()+'pt\n\n'+lines.join('\n'));
+}
 </script>
 </body>
 </html>

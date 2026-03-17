@@ -358,7 +358,7 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
     <div class="sb-item" data-page="commit-staff"><span class="sb-icon">🎯</span>社員コミットシート</div>
     <div class="sb-item" data-page="commit-store"><span class="sb-icon">🏪</span>店舗コミットシート</div>
 <div class="sb-group">エンタメ</div>
-    
+    <div class="sb-item" data-page="mgmt-game"><span class="sb-icon">🎮</span>マネジメントゲーム</div>
   </nav>
 </div>
 
@@ -591,7 +591,22 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
     </div>
 
 <!-- ── シミュレーションゲーム ── -->
-    
+    <div id="page-mgmt-game" class="page">
+      <div class="page-header"><h2>🎮 マネジメントシミュレーション</h2><p>6ヶ月間レストランを経営するシミュレーションゲーム</p></div>
+      <div class="card" style="text-align:center;padding:32px;">
+        <div style="font-size:56px;margin-bottom:16px;">🍽️</div>
+        <div style="font-size:18px;font-weight:700;margin-bottom:8px;color:var(--primary);">レストランマネジメントゲーム</div>
+        <div style="font-size:13px;color:var(--light);margin-bottom:8px;line-height:1.8;">
+          スタッフ管理・原価管理・リスク対応…<br>6ヶ月間、あなたはどこまで利益を伸ばせるか？
+        </div>
+        <div style="font-size:12px;color:var(--light);margin-bottom:20px;">
+          ✅ プレイするたびに <b>+5pt</b> 獲得！ランキングに挑戦しよう
+        </div>
+        <a href="restaurant_management_game.html" target="_blank" class="btn btn-primary" style="text-decoration:none;font-size:15px;padding:14px 36px;">
+          🎮 ゲームをプレイする
+        </a>
+      </div>
+    </div>
 
   </div>
 </div>
@@ -609,6 +624,7 @@ var PAGE_TITLES = {
   'meyasu':'目安箱','interview-req':'面談申し込み','store-progress':'業務進捗',
 'job-board':'仕事掲示板',
 'commit-staff':'社員コミットシート','commit-store':'店舗コミットシート',
+'mgmt-game':'マネジメントゲーム',
 'hiring':'採用進捗',
   'reviews-ops':'臨店・口コミ',
   'news-store':'店長会報告',
