@@ -332,7 +332,7 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
     <div class="sb-item" data-page="sales"><span class="sb-icon">📊</span>店舗売上</div>
     <div class="sb-group">店舗管理</div>
     <div class="sb-item" data-page="store-tasks"><span class="sb-icon">📋</span>業務一覧</div>
-    <div class="sb-item" data-page="store-schedule"><span class="sb-icon">📅</span>年間スケジュール</div>
+    <div class="sb-item" data-page="store-schedule"><span class="sb-icon">📅</span>年間・店長会スケジュール</div>
     <div class="sb-item" data-page="store-meetings"><span class="sb-icon">🤝</span>会議体・研修</div>
     <div class="sb-item" data-page="store-rules"><span class="sb-icon">📜</span>店舗ルール</div>
     <div class="sb-item" data-page="store-contacts"><span class="sb-icon">📞</span>連絡先一覧</div>
@@ -630,7 +630,7 @@ body{font-family:'Hiragino Sans','Yu Gothic UI',Meiryo,sans-serif;background:var
 <script>
 // ── CONSTANTS ──
 var PAGE_TITLES = {
-  'sales':'店舗売上','store-tasks':'業務一覧','store-schedule':'年間スケジュール',
+  'sales':'店舗売上','store-tasks':'業務一覧','store-schedule':'年間・店長会スケジュール',
   'store-meetings':'会議体・研修','store-rules':'店舗ルール','store-contacts':'連絡先一覧',
   'training-progress':'育成進捗管理','manuals':'各種マニュアル',
   'manager-test-results':'店長力テスト',
@@ -1412,6 +1412,27 @@ function addScheduleRow() {
     {}, function(v){ D.schedule.push(v); markDirty(); saveData(); renderSchedule(); });
 }
 
+// ── 店長会スケジュール CRUD ──
+function addStoreMgrRow() {
+  if (!D.store_mgr_schedule) D.store_mgr_schedule = [];
+  showEditModal('➕ 店長会スケジュールを追加',
+    [{k:'date',l:'日付'},{k:'week',l:'週'},{k:'training',l:'研修内容'}],
+    {}, function(v){ D.store_mgr_schedule.push(v); markDirty(); saveData(); renderSchedule(); });
+}
+function editStoreMgrRow(idx) {
+  if (!D.store_mgr_schedule) return;
+  var s = D.store_mgr_schedule[idx]; if (!s) return;
+  showEditModal('✏️ 店長会スケジュールを編集',
+    [{k:'date',l:'日付'},{k:'week',l:'週'},{k:'training',l:'研修内容'}],
+    s, function(v){ Object.assign(D.store_mgr_schedule[idx],v); markDirty(); saveData(); renderSchedule(); });
+}
+function deleteStoreMgrRow(idx) {
+  if (!D.store_mgr_schedule) return;
+  if (!confirm('この行を削除しますか？')) return;
+  D.store_mgr_schedule.splice(idx,1);
+  markDirty(); saveData(); renderSchedule();
+}
+
 // ── RENDER MEETINGS SUB ──
 function renderMeetingsSub() {
   var el = document.getElementById('meetings-sub-meetings');
@@ -1421,7 +1442,7 @@ function renderMeetingsSub() {
     var editBtns = canEdit ? '<div style="margin-top:8px;display:flex;gap:8px;"><button class="btn btn-secondary btn-sm" onclick="editMeeting('+idx+')">✏️ 編集</button><button class="btn btn-danger btn-sm" onclick="deleteMeeting('+idx+')">🗑️ 削除</button></div>' : '';
     html += '<div class="card"><div class="card-title">🤝 '+esc(m.name)+'</div><div style="font-size:12px;color:var(--light);margin-bottom:10px;">主催: '+esc(m.host)+'　参加: '+esc(m.members)+'</div>'+
       '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>第1週</th><th>第2週</th><th>第3週</th><th>第4週</th></tr></thead>'+
-      '<tbody><tr><td>'+esc(m.w1)+'</td><td>'+esc(m.w2)+'</td><td>'+esc(m.w3)+'</td><td>'+esc(m.w4)+'</td></tr></tbody></table></div>'+editBtns+'</div>';
+      '<tbody><tr><td style="white-space:pre-wrap;font-size:12px;vertical-align:top;">'+linkify(m.w1)+'</td><td style="white-space:pre-wrap;font-size:12px;vertical-align:top;">'+linkify(m.w2)+'</td><td style="white-space:pre-wrap;font-size:12px;vertical-align:top;">'+linkify(m.w3)+'</td><td style="white-space:pre-wrap;font-size:12px;vertical-align:top;">'+linkify(m.w4)+'</td></tr></tbody></table></div>'+editBtns+'</div>';
   });
   el.innerHTML = html;
 }
