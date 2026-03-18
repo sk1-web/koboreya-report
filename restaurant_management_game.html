@@ -1324,7 +1324,11 @@ function renderRanking(currentProfit){
 
 // ── ポータルアカウント連携 ──
 function getPortalSession(){
-  try{var s=sessionStorage.getItem('koboreya_session');return s?JSON.parse(s):null;}catch(e){return null;}
+  try{
+    // localStorageを優先（新しいタブでも共有される）
+    var s=localStorage.getItem('koboreya_session')||sessionStorage.getItem('koboreya_session');
+    return s?JSON.parse(s):null;
+  }catch(e){return null;}
 }
 function addAccountPoints(userId,pts){
   try{

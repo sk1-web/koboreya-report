@@ -983,12 +983,14 @@ function doLogin() {
 function doLogout() {
   currentUser = null;
   sessionStorage.removeItem('koboreya_session');
+  localStorage.removeItem('koboreya_session');
   location.reload();
 }
 
 function setCurrentUser(acct) {
   currentUser = acct;
   sessionStorage.setItem('koboreya_session', JSON.stringify({id: acct.id, name: acct.name}));
+  localStorage.setItem('koboreya_session', JSON.stringify({id: acct.id, name: acct.name}));
   updateSidebarUser();
 }
 
