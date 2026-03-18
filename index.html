@@ -3532,14 +3532,7 @@ function submitQuiz() {
     ud[key+'_quiz'] = new Date().toISOString();
     saveTrainingUserData(ud);
     html += '<div style="margin-top:12px;color:var(--success);font-weight:700;">⭐ +1pt 付与！</div>';
-    var accounts = getAccounts();
-    var idx = accounts.findIndex(function(a){return a.id===currentUser.id;});
-    if (idx>=0) {
-      accounts[idx].points=(accounts[idx].points||0)+1;
-      if(!accounts[idx].activityLog)accounts[idx].activityLog=[];
-      accounts[idx].activityLog.push({ts:new Date().toISOString(),delta:1,reason:'小テスト合格: '+item.title});
-      saveAccounts(accounts); currentUser.points=accounts[idx].points;
-    }
+    addPoints(currentUser.id, 1, '小テスト合格: ' + item.title);
   }
   if (!passed) html += '<button class="btn btn-secondary" onclick="startQuiz()" style="margin-top:8px;width:100%;">再挑戦する</button>';
   html += '</div>';

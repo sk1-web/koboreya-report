@@ -315,12 +315,20 @@ function calcPoints(grade){
   var map = {S:5, A:4, B:3, C:2, D:1};
   return map[grade.label] || 1;
 }
-function addPointsToAccount(userId, pts){
+function addPointsToAccount(userId, pts, reason){
   try{
     var accounts = getAccounts();
     var idx = accounts.findIndex(function(a){return a.id===userId;});
     if(idx < 0) return;
-    accounts[idx].points = (accounts[idx].points || 0) + pts;
+    accounts[idx].points = parseFloat(((accounts[idx].points || 0) + pts).toFixed(1));
+    if(!accounts[idx].activityLog) accounts[idx].activityLog = [];
+    accounts[idx].activityLog.push({
+      ts: new Date().toISOString(),
+      delta: pts,
+      reason: reason || '店長力テスト'
+    });
+    if(accounts[idx].activityLog.length > 500)
+      accounts[idx].activityLog = accounts[idx].activityLog.slice(-500);
     localStorage.setItem('koboreya_accounts', JSON.stringify(accounts));
   }catch(e){}
 }
@@ -811,10 +819,10 @@ function nextQ(){
   if(state.currentQ === QUESTIONS.length - 1){
     // finish
     var r = computeResults(state.answers, state.user);
-    var earnedPts = calcPoints(r.grade);
+    var earnedPts = 3; // 店長力テスト完了固定3pt
     r.earnedPoints = earnedPts;
     saveTest(r);
-    addPointsToAccount(state.user.id, earnedPts);
+    addPointsToAccount(state.user.id, earnedPts, '店長力テスト完了 (グレード:'+r.grade.label+')');
     state.results = r;
     state.screen = 'results';
     render();

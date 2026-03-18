@@ -1280,7 +1280,7 @@ function showEnding(){
   // ── ポイント付与・ランキング保存 ──
   const now=new Date();
   const dateStr=`${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`;
-  addAccountPoints(G.userId,5);
+  addAccountPoints(G.userId,5,'マネジメントゲーム完了 ('+grade+'グレード)');
   const dispPts=getAccountPoints(G.userId);
   document.getElementById('total-pts').textContent=dispPts;
   const ptsBanner=document.getElementById('pts-banner');
@@ -1330,14 +1330,14 @@ function getPortalSession(){
     return s?JSON.parse(s):null;
   }catch(e){return null;}
 }
-function addAccountPoints(userId,pts){
+function addAccountPoints(userId,pts,reason){
   try{
     var accs=JSON.parse(localStorage.getItem('koboreya_accounts')||'[]');
     var idx=accs.findIndex(function(a){return a.id===userId;});
     if(idx<0)return false;
     accs[idx].points=parseFloat(((accs[idx].points||0)+pts).toFixed(1));
     accs[idx].activityLog=accs[idx].activityLog||[];
-    accs[idx].activityLog.push({ts:new Date().toISOString(),delta:pts,reason:'マネジメントゲーム'});
+    accs[idx].activityLog.push({ts:new Date().toISOString(),delta:pts,reason:reason||'マネジメントゲーム'});
     if(accs[idx].activityLog.length>500)accs[idx].activityLog=accs[idx].activityLog.slice(-500);
     localStorage.setItem('koboreya_accounts',JSON.stringify(accs));
     return true;
