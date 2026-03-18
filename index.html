@@ -3321,41 +3321,41 @@ var EXCEL_TRAINING = [
    content:'<ul><li>セルへのデータ入力と編集</li><li>行・列の挿入・削除</li><li>書式設定（フォント・色・罫線）</li><li>シートの追加・名前変更</li><li>Ctrl+C/V/Z/S などの基本ショートカット</li></ul>',
    refs:['https://support.microsoft.com/ja-jp/excel','https://www.google.com/intl/ja/sheets/about/'],
    quiz:[
-     {q:'Excelでセルをコピーするショートカットキーは？',opts:['Ctrl+C','Ctrl+V','Ctrl+X','Ctrl+Z'],ans:0},
-     {q:'行を挿入するには？',opts:['行番号を右クリック→挿入','Ctrl+Insert','File→New Row','Delete+Insert'],ans:0},
-     {q:'上書き保存のショートカットは？',opts:['Ctrl+S','Ctrl+W','Ctrl+P','Ctrl+O'],ans:0},
+  {q:'セルB2からB10の範囲で、B2を固定しながらB10まで参照をコピーする場合、B2を絶対参照にした式は？',opts:['=$B$2','=B$2','=$B2','=B2'],ans:0},
+  {q:'複数シートのセルをまとめて参照する「3D参照」の正しい記法は？',opts:['=SUM(Sheet1:Sheet3!A1)','=SUM(Sheet1!A1,Sheet3!A1)','=SUM(Sheet1+Sheet3)','=3D(Sheet1:Sheet3,A1)'],ans:0},
+  {q:'Excelで大量データを素早くフィルタリングする機能は？',opts:['フィルター（Ctrl+Shift+L）','ソート','条件付き書式','データの入力規則'],ans:0},
    ]},
   {id:'ex2',level:'初級',title:'基本的な数式と関数',desc:'SUM・AVERAGE・COUNTなど基本関数の使い方',
    content:'<ul><li>=SUM(A1:A10) で合計</li><li>=AVERAGE(B1:B10) で平均</li><li>=COUNT(C1:C10) で数値の個数</li><li>=COUNTA で空白以外の個数</li><li>=MAX/MIN で最大・最小値</li><li>オートSUM機能（Alt+=）</li></ul>',
    refs:['https://support.microsoft.com/ja-jp/office/excel-関数-機能別一覧-5f91f4e9-7b42-46d2-9bd1-63f26a86c0eb'],
    quiz:[
-     {q:'セルA1からA5の合計を求める式は？',opts:['=SUM(A1:A5)','=ADD(A1,A5)','=TOTAL(A1:A5)','=A1+A2+A3+A4+A5のみ'],ans:0},
-     {q:'平均を求める関数は？',opts:['=AVERAGE()','=MEAN()','=AVG()','=MID()'],ans:0},
-     {q:'数値の個数を数える関数は？',opts:['=COUNT()','=NUM()','=COUNTA()','=TOTAL()'],ans:0},
+  {q:'売上データでB列が「東京」の場合だけC列の値を合計するには？',opts:['=SUMIF(B:B,"東京",C:C)','=SUM(B:B,"東京",C:C)','=SUMIFS(B:B,"東京")','=IF(B="東京",SUM(C:C))'],ans:0},
+  {q:'COUNTIF(A1:A100,">=100")が返す値は？',opts:['A1:A100の中で100以上の数値セルの個数','100以上の値の合計','100以上のセルの平均','100より大きいセルの個数'],ans:0},
+  {q:'IFS関数（Excel 2019以降）の説明として正しいのは？',opts:['複数条件を順番に評価し最初にTRUEになった値を返す','全条件がTRUEの時だけ値を返す','2つの条件のみ評価できる','IFのネストと全く同じ動作をする'],ans:0},
    ]},
   {id:'ex3',level:'中級',title:'VLOOKUP・INDEX/MATCH',desc:'テーブル間のデータ参照・検索関数をマスター',
    content:'<ul><li>=VLOOKUP(検索値, 範囲, 列番号, FALSE)</li><li>VLOOKUPの限界（左側参照不可）</li><li>=INDEX(範囲, MATCH(検索値, 検索範囲, 0))</li><li>INDEX/MATCHの柔軟な使い方</li><li>エラー処理: =IFERROR(VLOOKUP(...), "なし")</li></ul>',
    refs:['https://support.microsoft.com/ja-jp/office/vlookup-関数-0bbc8083-26fe-4963-8ab8-93a18ad188a1'],
    quiz:[
-     {q:'VLOOKUPで完全一致検索をする場合、第4引数は？',opts:['FALSE','TRUE','0のみ','省略'],ans:0},
-     {q:'VLOOKUPで検索できる方向は？',opts:['左から右のみ','右から左のみ','両方','縦横どちらも'],ans:0},
-     {q:'IFERROR関数の使い方は？',opts:['=IFERROR(式, エラー時の値)','=IFERROR(エラー時, 式)','=IF(ERROR, 式)','=TRY(式)'],ans:0},
+  {q:'=VLOOKUP(A2,Sheet2!$A:$C,3,FALSE) でA2の値がSheet2のA列に見つからない場合の結果は？',opts:['#N/A エラー','0','空白','FALSE'],ans:0},
+  {q:'INDEX/MATCHがVLOOKUPより優れている点として正しいのは？',opts:['検索列の左側のデータも取得できる','処理速度が常に速い','数式が短くなる','全てのExcelバージョンで使える'],ans:0},
+  {q:'=MATCH("佐藤",A1:A10,0) が返す値は？',opts:['"佐藤"が最初に現れる行番号（1始まり）','セルのアドレス','行の内容','"佐藤"の文字数'],ans:0},
    ]},
   {id:'ex4',level:'中級',title:'ピボットテーブル',desc:'大量データを素早く集計・分析するピボットテーブルの使い方',
    content:'<ul><li>ピボットテーブルの作成（挿入→ピボットテーブル）</li><li>行・列・値・フィルターの設定</li><li>集計方法の変更（合計・平均・個数など）</li><li>スライサーでフィルタリング</li><li>ピボットグラフの作成</li></ul>',
    refs:['https://support.microsoft.com/ja-jp/office/ピボットテーブルを作成してワークシート-データを分析する-a9a84538-bfe9-40a9-a8e9-f99134456576'],
    quiz:[
-     {q:'ピボットテーブルはどのメニューから作成？',opts:['挿入→ピボットテーブル','データ→ピボット','ホーム→集計','表示→ピボット'],ans:0},
-     {q:'ピボットテーブルでデータを絞り込むUIは？',opts:['スライサー','フィルター関数','VLOOKUP','条件付き書式'],ans:0},
-     {q:'集計フィールドで平均を表示するには？',opts:['値フィールドの設定→平均','=AVERAGE関数を使う','行フィールドに設定','列フィールドに設定'],ans:0},
+  {q:'ピボットテーブルで元データを更新した後、集計結果に反映させるには？',opts:['「更新」ボタンを押す（右クリック→更新）','ピボットテーブルを作り直す','Ctrl+Sで保存する','元データを削除して再作成'],ans:0},
+  {q:'ピボットテーブルで「値の集計方法」をデフォルトの合計から個数に変える操作は？',opts:['値フィールドをクリック→「値フィールドの設定」→「個数」','フィールドリストの「値」欄を右クリック→削除して再追加','集計フィールドの挿入を使う','ピボットテーブルオプションから変更'],ans:0},
+  {q:'ピボットテーブルの「グループ化」機能で日付データをどのように整理できますか？',opts:['年・四半期・月などの単位でまとめることができる','同じ値のセルをひとつにまとめる','文字列を五十音順に並べる','日付の書式を変更する'],ans:0},
    ]},
   {id:'ex5',level:'上級',title:'マクロ・VBA入門',desc:'繰り返し作業を自動化するマクロとVBAの基礎',
    content:'<ul><li>マクロの記録と実行（開発→マクロの記録）</li><li>VBAエディタの開き方（Alt+F11）</li><li>Sub プロシージャの書き方</li><li>Cells(行, 列)でのセル操作</li><li>For〜Next ループ</li><li>If〜Then〜Else 条件分岐</li><li>MsgBox でダイアログ表示</li></ul>',
    refs:['https://learn.microsoft.com/ja-jp/office/vba/api/overview/excel'],
    quiz:[
-     {q:'VBAエディタを開くショートカットは？',opts:['Alt+F11','Ctrl+F11','Shift+F11','F11'],ans:0},
-     {q:'VBAでセルA1に値を入力するコードは？',opts:['Cells(1,1).Value = "値"','Cell(A1) = "値"','Range.A1 = "値"','Set(1,1) = "値"'],ans:0},
-     {q:'1〜10を繰り返すVBAループは？',opts:['For i=1 To 10 / Next i','While i<10 / End','Loop 10','Repeat 10 times'],ans:0},
+  {q:'VBAでシート "売上" のセルC5に値100を入力するコードは？',opts:['Sheets("売上").Cells(5,3).Value = 100','Sheet("売上").Cell(C5) = 100','Worksheets.Cells("C5") = 100','Range("売上!C5") = 100'],ans:0},
+  {q:'次のVBAコードの実行結果は？ For i = 1 To 5 / Cells(i,1).Value = i*2 / Next i',opts:['A1:A5に2,4,6,8,10が入力される','A1:A5に1,2,3,4,5が入力される','A1:A10に値が入力される','エラーになる'],ans:0},
+  {q:'VBAのMsgBox関数の説明として正しいのは？',opts:['メッセージダイアログを表示しユーザーの応答を取得できる','セルにテキストを表示する','印刷プレビューを表示する','メールを送信する'],ans:0},
    ]},
 ];
 
@@ -3364,41 +3364,41 @@ var PPTX_TRAINING = [
    content:'<ul><li>新規プレゼンテーションの作成</li><li>スライドの追加・削除・順序変更</li><li>テキストボックスへの入力と書式設定</li><li>スライドレイアウトの変更</li><li>テーマ・デザインの適用</li><li>スライドショーの開始（F5）</li></ul>',
    refs:['https://support.microsoft.com/ja-jp/powerpoint'],
    quiz:[
-     {q:'スライドショーを最初から開始するショートカットは？',opts:['F5','F1','Ctrl+P','F11'],ans:0},
-     {q:'スライドを追加するには？',opts:['Enter（アウトライン表示）または右クリック→スライドの追加','Ctrl+N','Ctrl+A','Alt+Ins'],ans:0},
-     {q:'テーマを変更するメニューは？',opts:['デザイン→テーマ','ホーム→スタイル','挿入→テーマ','表示→デザイン'],ans:0},
+  {q:'スライドショー中に現在のスライドから開始するショートカットは？',opts:['Shift+F5','F5','Ctrl+F5','Alt+F5'],ans:0},
+  {q:'スライドマスターを編集する目的として最も適切なのは？',opts:['全スライドの統一されたデザイン・フォント・レイアウトを一括管理するため','スライドを複製するため','アニメーションをまとめて設定するため','ファイルサイズを小さくするため'],ans:0},
+  {q:'PowerPointで「セクション」機能を使う利点は？',opts:['長いプレゼンをトピック別に整理して管理・移動しやすくなる','スライドを非表示にできる','印刷範囲を設定できる','アニメーションをグループ化できる'],ans:0},
    ]},
   {id:'pp2',level:'初級',title:'図形・画像の挿入',desc:'スマートアートや図形、画像を使った視覚的スライドの作り方',
    content:'<ul><li>図形の挿入（挿入→図形）</li><li>SmartArtの使い方（組織図・フロー図など）</li><li>画像の挿入とトリミング</li><li>図形の整列・グループ化</li><li>テキストと図形の組み合わせ</li><li>アイコン・3Dモデルの活用</li></ul>',
    refs:['https://support.microsoft.com/ja-jp/office/smartart-グラフィックを作成する-fafafd4d-905b-49b0-8892-a604aca73809'],
    quiz:[
-     {q:'SmartArtはどのメニューから挿入？',opts:['挿入→SmartArt','ホーム→図形','デザイン→SmartArt','表示→SmartArt'],ans:0},
-     {q:'複数の図形を同時に移動させるには？',opts:['グループ化（Ctrl+G）してから移動','Shift+ドラッグで全選択','図形ロックを使う','レイヤーを統合する'],ans:0},
-     {q:'画像をスライドに挿入するメニューは？',opts:['挿入→画像','ホーム→挿入','ファイル→インポート','デザイン→画像'],ans:0},
+  {q:'SmartArtを使って「意思決定フロー」を表現するのに最適なレイアウトは？',opts:['手順（プロセス系）','リスト','マトリックス','ピラミッド'],ans:0},
+  {q:'画像をスライドの中央に正確に配置するための最も効率的な方法は？',opts:['図形の書式→配置→上下・左右中央揃えを使う','ドラッグで目分量で中央に置く','座標を手入力する','グリッド線を表示してドラッグで合わせる'],ans:0},
+  {q:'挿入した画像の背景を削除する機能はどこにある？',opts:['「書式」タブ→「背景の削除」','「挿入」タブ→「画像の切り抜き」','右クリック→「背景を削除」','「デザイン」タブ→「画像フィルター」'],ans:0},
    ]},
   {id:'pp3',level:'中級',title:'アニメーション・画面切替',desc:'プロ品質のアニメーションと画面切替効果の設定',
    content:'<ul><li>アニメーションタブでの効果追加</li><li>開始タイミング（クリック時・直前と同時・直前の後）</li><li>アニメーションウィンドウでの管理</li><li>画面切替効果（切替タブ）</li><li>タイミングの自動設定</li><li>モーションパスの使い方</li></ul>',
    refs:['https://support.microsoft.com/ja-jp/office/アニメーションを追加する-b6a44e1b-c548-4b2c-8b4c-f52de6f4e0d9'],
    quiz:[
-     {q:'アニメーションのタイミング設定で「直前のアニメーションの後」とは？',opts:['前のアニメーション終了後に自動開始','クリック後に開始','同時に開始','手動でのみ開始'],ans:0},
-     {q:'画面切替の設定はどのタブ？',opts:['切替','アニメーション','デザイン','スライドショー'],ans:0},
-     {q:'アニメーションを管理するパネルは？',opts:['アニメーションウィンドウ','タスクウィンドウ','スライドパネル','効果オプション'],ans:0},
+  {q:'「モーションパス」アニメーションで何ができますか？',opts:['オブジェクトが指定した経路に沿って動く','画面全体が切り替わる','テキストが文字ごとに表示される','スライドが自動で進む'],ans:0},
+  {q:'発表中に特定のスライドだけをスキップしたい場合、最も適した方法は？',opts:['「スライドショーの設定」→「スライドを非表示」にする','そのスライドを削除する','アニメーションを設定しない','セクションに分けて管理する'],ans:0},
+  {q:'画面切替「モーフ」が使える条件は？',opts:['2枚のスライドに共通のオブジェクトがある場合にスムーズに変形する','全てのPowerPointバージョンで使える','テキストのみに適用できる','切替スピードが自動で設定される'],ans:0},
    ]},
   {id:'pp4',level:'中級',title:'プレゼン構成とデザイン原則',desc:'伝わるプレゼン資料を作るための設計・デザインの考え方',
    content:'<ul><li>PREP法（結論→理由→例→結論）</li><li>1スライド1メッセージの原則</li><li>テキスト量を減らしビジュアルで伝える</li><li>色の使い方（3色ルール）</li><li>フォントの統一（和文・英文それぞれ1〜2種類）</li><li>余白の重要性</li><li>グラフの選び方（棒・折れ線・円）</li></ul>',
    refs:['https://creator.line.me/ja/studio/'],
    quiz:[
-     {q:'PREP法の正しい順序は？',opts:['結論→理由→例→結論','理由→例→結論→結論','例→理由→結論→理由','結論→例→理由→まとめ'],ans:0},
-     {q:'1スライドに使う色数の推奨は？',opts:['3色以内','制限なし','5色以内','1色のみ'],ans:0},
-     {q:'時系列のデータ表示に最適なグラフは？',opts:['折れ線グラフ','円グラフ','散布図','ツリーマップ'],ans:0},
+  {q:'「MECE（ミッシー）」の説明として正しいのは？',opts:['モレなくダブりなく要素を整理する考え方','結論を最初に述べるプレゼン手法','聴衆の関心を引くオープニング手法','スライドのビジュアル設計原則'],ans:0},
+  {q:'プレゼン資料のフォントで「游ゴシック」より「メイリオ」が選ばれる理由として最も適切なのは？',opts:['画面表示での視認性が高くプロジェクター投影に向いているため','印刷時に綺麗に見えるため','ファイルサイズが小さくなるため','英数字のデザインが優れているため'],ans:0},
+  {q:'データビジュアライゼーションで「割合・構成比」を示すのに最適なグラフは？',opts:['円グラフまたは積み上げ棒グラフ','折れ線グラフ','散布図','ウォーターフォールグラフ'],ans:0},
    ]},
   {id:'pp5',level:'上級',title:'発表テクニックと配付資料',desc:'聴衆を引き込むプレゼンの実践スキルと資料作成',
    content:'<ul><li>発表者ツールの使い方（スピーカーノート表示）</li><li>レーザーポインタ・ズーム機能</li><li>アウトライン表示での構成管理</li><li>配付資料のレイアウト設定</li><li>PDFへのエクスポート</li><li>動画・音声の埋め込み</li><li>共同編集（SharePoint/OneDrive）</li></ul>',
    refs:['https://support.microsoft.com/ja-jp/office/発表者ツールを使用してスライドを表示する-4de90e28-487e-435c-9dc6-b5b5ab32a4fd'],
    quiz:[
-     {q:'スピーカーノートを見ながら発表するモードは？',opts:['発表者ツール','スライドショー標準','アウトライン表示','ノートビュー'],ans:0},
-     {q:'PowerPointファイルをPDFにエクスポートするには？',opts:['ファイル→エクスポート→PDF/XPS','名前を付けて保存→.pdf','印刷→PDF','共有→PDF'],ans:0},
-     {q:'スライドショー中にレーザーポインタを使うキーは？',opts:['Ctrl+L','Ctrl+P','Ctrl+R','Ctrl+K'],ans:0},
+  {q:'発表者ツールで「次のスライドのプレビュー」を確認できる利点は？',opts:['次に何が来るか把握しながら現在のスライドを説明できるため','聴衆にも次のスライドが見えるため','スライドを自動送りにできるため','音声ナレーションを確認できるため'],ans:0},
+  {q:'「リハーサル」機能を使う目的として最も正しいのは？',opts:['各スライドの発表時間を記録し本番での時間管理に活かすため','スライドの誤字を確認するため','アニメーションの速度を自動調整するため','聴衆のリアクションを記録するため'],ans:0},
+  {q:'PowerPointファイルを「読み取り専用」で配布する際の最適な方法は？',opts:['PDFにエクスポートして配布する','パスワードで保護する','「最終版としてマーク」を設定する','クラウドに上げてリンクを共有する'],ans:0},
    ]},
 ];
 
@@ -3528,13 +3528,35 @@ function submitQuiz() {
       (isCorrect?'✅':'❌')+' '+(qi+1)+'. '+esc(q.q)+'<br>'+
       '正解: '+esc(q.opts[q.ans])+(userAns!==undefined&&!isCorrect?'　あなたの解答: '+esc(q.opts[userAns]):'')+'</div>';
   });
+  // Always record attempt history
+  if (!ud[key+'_quiz_history']) ud[key+'_quiz_history'] = [];
+  ud[key+'_quiz_history'].push({ts: new Date().toISOString(), score: correct, total: qs.length, passed: passed});
+  if (ud[key+'_quiz_history'].length > 20) ud[key+'_quiz_history'] = ud[key+'_quiz_history'].slice(-20);
   if (passed && !ud[key+'_quiz']) {
     ud[key+'_quiz'] = new Date().toISOString();
     saveTrainingUserData(ud);
     html += '<div style="margin-top:12px;color:var(--success);font-weight:700;">⭐ +1pt 付与！</div>';
     addPoints(currentUser.id, 1, '小テスト合格: ' + item.title);
+  } else {
+    saveTrainingUserData(ud);
   }
   if (!passed) html += '<button class="btn btn-secondary" onclick="startQuiz()" style="margin-top:8px;width:100%;">再挑戦する</button>';
+  // Attempt history table
+  var histArr = (ud[key+'_quiz_history']||[]).slice().reverse();
+  if (histArr.length > 0) {
+    html += '<div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;">' +
+      '<div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;">📋 受験履歴（直近10回）</div>' +
+      '<table class="tbl" style="font-size:11px;"><thead><tr><th>日時</th><th>得点</th><th>結果</th></tr></thead><tbody>';
+    histArr.slice(0,10).forEach(function(h) {
+      var d = new Date(h.ts);
+      var ds = d.getFullYear()+'/'+(d.getMonth()+1).toString().padStart(2,'0')+'/'+d.getDate().toString().padStart(2,'0')+' '
+              +d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
+      var pct = Math.round(h.score/h.total*100);
+      var badge = h.passed ? '<span style="color:var(--success);font-weight:700;">✅ 合格</span>' : '<span style="color:var(--danger);">❌ 不合格</span>';
+      html += '<tr><td style="color:var(--light);">'+ds+'</td><td style="font-weight:700;">'+h.score+'/'+h.total+'（'+pct+'%）</td><td>'+badge+'</td></tr>';
+    });
+    html += '</tbody></table></div>';
+  }
   html += '</div>';
   document.getElementById('quiz-section').innerHTML = html;
 }
