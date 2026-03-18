@@ -1315,8 +1315,8 @@ function renderMgrMeeting() {
         + '<td><strong>'+esc(m.date)+'</strong></td>'
         + '<td>'+esc(m.time)+'</td>'
         + '<td>'+esc(m.venue)+'</td>'
-        + '<td style="max-width:260px;">'+esc(m.agenda)+'</td>'
-        + '<td style="max-width:160px;">'+esc(m.note)+'</td>'
+        + '<td style="max-width:260px;white-space:pre-wrap;font-size:12px;">'+linkify(m.agenda || '')+'</td>'
+        + '<td style="max-width:160px;white-space:pre-wrap;font-size:12px;">'+linkify(m.note || '')+'</td>'
         + ops
         + '</tr>';
     });
@@ -1440,7 +1440,7 @@ function renderMeetingsSub() {
   var html = canEdit ? '<div style="margin-bottom:10px;"><button class="btn btn-primary btn-sm" onclick="addMeeting()">➕ 会議体を追加</button></div>' : '';
   D.meetings.forEach(function(m, idx) {
     var editBtns = canEdit ? '<div style="margin-top:8px;display:flex;gap:8px;"><button class="btn btn-secondary btn-sm" onclick="editMeeting('+idx+')">✏️ 編集</button><button class="btn btn-danger btn-sm" onclick="deleteMeeting('+idx+')">🗑️ 削除</button></div>' : '';
-    html += '<div class="card"><div class="card-title">🤝 '+esc(m.name)+'</div><div style="font-size:12px;color:var(--light);margin-bottom:10px;">主催: '+esc(m.host)+'　参加: '+esc(m.members)+'</div>'+
+    html += '<div class="card"><div class="card-title">🤝 '+esc(m.name)+'</div><div style="font-size:12px;color:var(--light);margin-bottom:10px;">主催: '+esc(m.host).replace(/\\n|\n/g,'、')+'　参加: '+esc(m.members).replace(/\\n|\n/g,'、')+'</div>'+
       '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>第1週</th><th>第2週</th><th>第3週</th><th>第4週</th></tr></thead>'+
       '<tbody><tr><td style="white-space:pre-wrap;font-size:12px;vertical-align:top;">'+linkify(m.w1)+'</td><td style="white-space:pre-wrap;font-size:12px;vertical-align:top;">'+linkify(m.w2)+'</td><td style="white-space:pre-wrap;font-size:12px;vertical-align:top;">'+linkify(m.w3)+'</td><td style="white-space:pre-wrap;font-size:12px;vertical-align:top;">'+linkify(m.w4)+'</td></tr></tbody></table></div>'+editBtns+'</div>';
   });
@@ -1474,7 +1474,7 @@ function renderTrainingsSub() {
     html += '<div class="card"><div style="font-size:11px;color:var(--primary);font-weight:700;margin-bottom:6px;">'+esc(t.genre)+'</div>'+
       '<div style="font-weight:700;margin-bottom:6px;">'+esc(t.title)+'</div>'+
       '<div style="font-size:12px;color:var(--light);">⏱ '+esc(t.duration)+'分</div>'+
-      '<div style="font-size:12px;margin-top:6px;">'+esc(t.content)+'</div>'+editBtns+'</div>';
+      '<div style="font-size:12px;margin-top:6px;white-space:pre-wrap;">'+linkify(t.content || '')+'</div>'+editBtns+'</div>';
   });
   html += '</div>';
   el.innerHTML = html;
@@ -1581,7 +1581,7 @@ function renderContacts() {
     var editBtns = canEdit ? '<td><button class="btn btn-secondary btn-sm" onclick="editContact('+idx+')" style="margin-right:4px;">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteContact('+idx+')">🗑️</button></td>' : '';
     html += '<tr><td><strong>'+esc(c.name)+'</strong></td><td>'+esc(c.person)+'</td>'+
       '<td>'+(c.phone ? '<a href="tel:'+esc(c.phone)+'">'+esc(c.phone)+'</a>' : '')+'</td>'+
-      '<td>'+esc(c.contact)+'</td><td>'+esc(c.note)+'</td>'+editBtns+'</tr>';
+      '<td>'+esc(c.contact)+'</td><td style="white-space:pre-wrap;font-size:12px;">'+linkify(c.note || '')+'</td>'+editBtns+'</tr>';
   });
   html += '</tbody></table></div>';
   el.innerHTML = html;
@@ -3428,7 +3428,7 @@ function renderTrainingTab(el, type, items) {
         (done?'<span class="badge" style="background:#d1fae5;color:#065f46;">✓ 完了</span>':'')+
         (quizDone?'<span class="badge" style="background:#dbeafe;color:#1e40af;">📝 合格</span>':'')+
         '</div></div>'+
-        '<div style="font-size:12px;color:var(--light);margin-top:4px;">'+esc(item.desc)+'</div></div>';
+        '<div style="font-size:12px;color:var(--light);margin-top:4px;white-space:pre-wrap;">'+linkify(item.desc || '')+'</div></div>';
     });
     html += '</div></div>';
   });
@@ -3455,7 +3455,7 @@ function openTraining(type, id) {
     '<button onclick="document.getElementById(\'training-overlay\').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--light);">✕</button>'+
     '</div>'+
     '<div style="overflow-y:auto;flex:1;padding:20px;">'+
-    '<div style="font-size:13px;color:var(--light);margin-bottom:12px;">'+esc(item.desc)+'</div>'+
+    '<div style="font-size:13px;color:var(--light);margin-bottom:12px;white-space:pre-wrap;">'+linkify(item.desc || '')+'</div>'+
     '<div style="background:var(--surface);border-radius:10px;padding:16px;font-size:13px;line-height:1.8;">'+item.content+'</div>'+
     (item.refs&&item.refs.length?'<div style="margin-top:12px;"><div style="font-size:12px;color:var(--light);margin-bottom:6px;">📎 参考資料</div>'+
       item.refs.map(function(r){ return '<a href="'+r+'" target="_blank" rel="noopener" style="display:block;font-size:12px;color:var(--primary);margin-bottom:4px;">'+r+'</a>'; }).join('')+'</div>':'')+
@@ -3617,7 +3617,7 @@ function filterReviews() {
     html += '<tr><td style="white-space:nowrap;">'+esc(r.date ? r.date.split(' ')[0] : '')+'</td>'+
       '<td>'+esc(r.store)+'</td><td>'+esc(r.media)+'</td>'+
       '<td><span class="badge '+stars+'">'+esc(r.rating)+'</span></td>'+
-      '<td style="max-width:300px;font-size:12px;">'+esc(r.content)+'</td>'+
+      '<td style="max-width:300px;font-size:12px;white-space:pre-wrap;">'+linkify(r.content || '')+'</td>'+
       '<td style="max-width:200px;font-size:12px;">'+esc(r.strategy)+'</td></tr>';
   });
   html += '</tbody></table></div>';
