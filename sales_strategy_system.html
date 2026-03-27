@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>売上戦略会議システム | こぼれや グループ</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Hiragino Sans','Yu Gothic UI','Meiryo',sans-serif;background:#f1f5f9;color:#1e293b}
+input,select,button,textarea{font-family:inherit}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:#f1f5f9}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+.header{background:linear-gradient(135deg,#0f2460,#1e40af);padding:14px 28px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.header h1{color:#fff;font-size:20px;font-weight:700;letter-spacing:-.02em}
+.header .sub{color:#93c5fd;font-size:12px;margin-top:3px}
+.header .date{color:#fff;font-size:14px;font-weight:600;text-align:right}
+.header .week{color:#93c5fd;font-size:11px;margin-top:2px}
+.store-bar{background:#fff;border-bottom:2px solid #e2e8f0;padding:0 28px;display:flex;align-items:center;gap:0;overflow-x:auto}
+.store-bar-label{font-size:11px;color:#94a3b8;font-weight:600;margin-right:12px;white-space:nowrap;padding:10px 0}
+.store-btn{padding:10px 16px;border:none;background:none;cursor:pointer;font-size:12px;color:#64748b;font-weight:500;border-bottom:3px solid transparent;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:5px;font-family:inherit}
+.store-btn:hover:not(.active){background:#f8fafc;color:#1e293b}
+.store-btn.active{font-weight:700;border-bottom-color:currentColor}
+.store-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.compare-btn{margin-left:auto;padding:6px 14px;border-radius:20px;font-size:12px;border:1.5px solid #e2e8f0;background:#f8fafc;color:#475569;cursor:pointer;white-space:nowrap;font-weight:600;transition:all .2s;font-family:inherit}
+.compare-btn.active{background:#1e293b;color:#fff;border-color:#1e293b}
+.compare-btn:hover:not(.active){background:#f1f5f9;border-color:#cbd5e1}
+.nav{background:#fff;border-bottom:1px solid #e2e8f0;display:flex;padding:0 28px;overflow-x:auto}
+.nav-btn{padding:10px 20px;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;color:#94a3b8;font-size:13px;font-weight:400;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all .2s;font-family:inherit}
+.nav-btn.active{border-bottom-color:#2563eb;color:#2563eb;font-weight:700}
+.nav-btn:hover:not(.active){color:#64748b}
+.nav-icon{font-size:16px}
+.nav-label{line-height:1.3}
+.nav-sub{font-size:9px;font-weight:400;color:#cbd5e1}
+.nav-btn.active .nav-sub{color:#93c5fd}
+.content{max-width:1200px;margin:0 auto;padding:20px 24px}
+.card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.card-title{font-size:14px;font-weight:600;color:#1e293b;margin-bottom:12px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:16px}
+.grid-2-1{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.flex-col{display:flex;flex-direction:column;gap:12px}
+.mb-16{margin-bottom:16px}
+.kpi-card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.kpi-title{font-size:11px;color:#64748b;margin-bottom:4px}
+.kpi-value{font-size:22px;font-weight:700;color:#1e293b;line-height:1.2}
+.kpi-change{font-size:12px;margin-top:4px}
+.kpi-sub{font-size:11px;color:#94a3b8;margin-top:2px}
+.up{color:#16a34a}.down{color:#dc2626}
+.badge{display:inline-block;padding:2px 8px;border-radius:9999px;font-size:11px;font-weight:600;white-space:nowrap}
+.weather-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;font-size:11px}
+.weather-bar-track{flex:1;height:6px;background:#f1f5f9;border-radius:3px;overflow:hidden}
+.weather-bar-fill{height:100%;border-radius:3px}
+.issue-card{background:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.08);border-left:4px solid #3b82f6;margin-bottom:10px}
+.issue-meta{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;flex-wrap:wrap;gap:4px}
+.issue-content{font-size:13px;color:#1e293b;font-weight:500;margin-bottom:6px}
+.hypo-box{background:#f8fafc;border-radius:6px;padding:6px 10px;font-size:12px;color:#475569}
+.hypo-blue{background:#eff6ff;border-radius:6px;padding:6px 10px;font-size:12px;color:#1e40af;margin-bottom:8px}
+.measure-card{background:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:12px}
+.measure-text{font-size:13px;color:#1e293b;margin-bottom:8px}
+.measure-footer{display:flex;justify-content:space-between;align-items:center;font-size:11px}
+.ab-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:16px}
+.ab-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.ab-title{font-size:15px;font-weight:700;color:#1e293b;margin-bottom:4px}
+.ab-meta{font-size:11px;color:#94a3b8}
+.ab-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+.ab-pattern{border:2px solid #e2e8f0;border-radius:10px;padding:12px}
+.ab-pattern.winner{border-color:#16a34a;background:#f0fdf4}
+.ab-pattern-desc{font-size:12px;color:#475569;margin-bottom:8px;margin-top:6px}
+.ab-pattern-value{font-size:24px;font-weight:700;color:#1e293b}
+.ab-bar-track{height:6px;background:#f1f5f9;border-radius:3px;margin-top:8px}
+.ab-bar-fill{height:100%;border-radius:3px}
+.ab-note{border-radius:8px;padding:8px 12px;font-size:12px}
+.ab-note.done{background:#f0fdf4;color:#15803d}.ab-note.ongoing{background:#fefce8;color:#854d0e}.ab-note.plan{background:#f5f3ff;color:#5b21b6}
+.action-progress{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:16px}
+.progress-header{display:flex;justify-content:space-between;margin-bottom:8px}
+.progress-pct{font-size:22px;font-weight:700;color:#2563eb}
+.progress-bar-track{height:10px;background:#f1f5f9;border-radius:5px;overflow:hidden;margin-bottom:4px}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#06b6d4);border-radius:5px;transition:width .4s}
+.action-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;margin-bottom:6px;cursor:pointer}
+.action-item.done{background:#f0fdf4;border:1px solid #bbf7d0}
+.action-item.todo{background:#f8fafc;border:1px solid #e2e8f0}
+.action-text{flex:1;font-size:13px}
+.action-item.done .action-text{color:#94a3b8;text-decoration:line-through}
+.action-owner{font-size:11px;color:#94a3b8}
+.action-deadline{font-size:11px;font-weight:600}
+.action-item.done .action-deadline{color:#94a3b8;font-weight:400}
+.action-item.todo .action-deadline{color:#f59e0b}
+.add-row{display:grid;grid-template-columns:3fr 1fr 1fr auto;gap:8px;margin-top:12px}
+.add-input{padding:6px 10px;border-radius:6px;border:1px solid #cbd5e1;font-size:12px;outline:none;width:100%}
+.add-input:focus{border-color:#3b82f6}
+.btn-blue{padding:6px 14px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap}
+.btn-blue:hover{background:#1d4ed8}
+.btn-gray{padding:6px 12px;background:#f1f5f9;color:#64748b;border:none;border-radius:6px;cursor:pointer;font-size:12px}
+.issue-form{background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:16px;margin-bottom:14px}
+.form-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px}
+.form-label{font-size:11px;color:#64748b;margin-bottom:2px}
+.form-input{width:100%;padding:5px 8px;border-radius:6px;border:1px solid #cbd5e1;font-size:12px;outline:none}
+.form-input:focus{border-color:#3b82f6}
+.kpi-set-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.kpi-set-item{background:#f8fafc;border-radius:8px;padding:12px}
+.kpi-set-label{font-size:12px;color:#64748b;margin-bottom:4px}
+.kpi-set-current{font-size:11px;color:#94a3b8;margin-bottom:6px}
+.kpi-set-input{width:100%;padding:7px 10px;border-radius:6px;border:1px solid #cbd5e1;font-size:14px;font-weight:600;outline:none}
+.kpi-set-input:focus{border-color:#3b82f6}
+.filter-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.filter-btns{display:flex;gap:6px;flex-wrap:wrap}
+.filter-btn{padding:4px 12px;font-size:12px;border-radius:20px;border:none;cursor:pointer;background:#fff;color:#64748b;box-shadow:0 1px 2px rgba(0,0,0,.06);transition:all .2s;font-family:inherit}
+.filter-btn.active{background:#2563eb;color:#fff}
+.filter-btn:hover:not(.active){background:#f1f5f9}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.chart-btns{display:flex;gap:4px}
+.chart-btn{padding:3px 10px;font-size:11px;border-radius:6px;border:none;cursor:pointer;background:#f1f5f9;color:#64748b;transition:all .2s;font-family:inherit}
+.chart-btn.active{background:#2563eb;color:#fff;font-weight:600}
+.pie-wrap{display:flex;align-items:center;justify-content:center;gap:8px}
+.pie-legend-item{display:flex;align-items:center;gap:4px;margin-bottom:4px;font-size:12px}
+.pie-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.compare-section{max-width:1200px;margin:0 auto;padding:20px 24px}
+.compare-store-header{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.compare-store-badge{padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:700}
+.rank-table{width:100%;border-collapse:collapse}
+.rank-table th{background:#f8fafc;padding:8px 12px;font-size:11px;color:#64748b;font-weight:600;text-align:left;border-bottom:2px solid #e2e8f0}
+.rank-table td{padding:8px 12px;font-size:12px;border-bottom:1px solid #f1f5f9}
+.rank-table tr:hover td{background:#f8fafc}
+.rank-1{color:#f59e0b;font-weight:700}.rank-2{color:#94a3b8;font-weight:600}.rank-3{color:#cd7c2f;font-weight:600}
+.bottom{max-width:1200px;margin:0 auto;padding:0 24px 28px;display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.kpi-cycle{background:#1e293b;border-radius:12px;padding:14px 20px}
+.kpi-cycle-title{color:#94a3b8;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:12px}
+.kpi-cycle-steps{display:flex;align-items:center}
+.kpi-step{flex:1;text-align:center}
+.kpi-step-icon{width:40px;height:40px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.kpi-step-icon.done{background:#3b82f6;box-shadow:0 0 12px rgba(59,130,246,.4)}
+.kpi-step-icon.pending{background:#334155}
+.kpi-step-label{font-size:11px}
+.kpi-step-label.done{color:#fff;font-weight:600}
+.kpi-step-label.pending{color:#64748b}
+.kpi-step-sub{font-size:9px;color:#475569;margin-top:2px}
+.kpi-arrow{color:#334155;font-size:18px;padding-bottom:18px}
+.kpi-arrow.done{color:#3b82f6}
+.schedule-card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.sched-row{margin-bottom:10px}
+.sched-day{display:flex;align-items:center;gap:5px;margin-bottom:3px}
+.sched-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sched-day-label{font-size:12px;font-weight:600;color:#1e293b}
+.sched-task{font-size:11px;color:#64748b;padding-left:13px;line-height:1.6}
+.schedule-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.task-check{display:flex;align-items:center;gap:5px;margin-bottom:5px}
+.task-check-box{width:14px;height:14px;border-radius:3px;border:2px solid #3b82f6;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.task-check-inner{width:6px;height:6px;background:#3b82f6;border-radius:1px}
+.task-check-label{font-size:11px;color:#475569}
+.footer{background:#0f172a;padding:12px 24px;text-align:center}
+.footer-text{color:#475569;font-size:12px}
+.hidden{display:none}
+.cb{width:16px;height:16px;cursor:pointer;accent-color:#2563eb;flex-shrink:0}
+.axis-text{font-size:10px;fill:#94a3b8;font-family:'Hiragino Sans','Yu Gothic UI','Meiryo',sans-serif}
+.grid-line{stroke:#f1f5f9;stroke-dasharray:3,3}
+.bar-rect{cursor:default}
+.bar-rect:hover{opacity:.8}
+.disc-bar-track{height:10px;background:#f1f5f9;border-radius:5px;overflow:hidden;margin-top:4px}
+.disc-bar-fill{height:100%;border-radius:5px;transition:width .4s}
+@media(max-width:768px){
+  .grid-4{grid-template-columns:repeat(2,1fr)}
+  .grid-2-1{grid-template-columns:1fr}
+  .bottom{grid-template-columns:1fr}
+  .ab-grid{grid-template-columns:1fr}
+  .add-row{grid-template-columns:1fr 1fr}
+  .kpi-set-grid{grid-template-columns:1fr}
+  .grid-3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <h1>🍽️ 売上戦略会議システム｜こぼれや グループ</h1>
+    <div class="sub">データ分析から改善実行まで、"回る仕組み"で売上を最大化する</div>
+  </div>
+  <div>
+    <div class="date">集計期間：2026年2月（2/1〜2/28）</div>
+    <div class="week">全7店舗 実績データ｜ebica客数を正の客数として集計</div>
+  </div>
+</div>
+
+<!-- STORE SELECTOR -->
+<div class="store-bar">
+  <span class="store-bar-label">🏪 店舗：</span>
+  <button class="store-btn active" id="sbtn-個室もんじゃ こぼれや 囲" onclick="switchStore('個室もんじゃ こぼれや 囲')" style="color:#3b82f6">
+    <div class="store-dot" style="background:#3b82f6"></div>囲
+  </button>
+  <button class="store-btn" id="sbtn-月島もんじゃ こぼれや 二番街" onclick="switchStore('月島もんじゃ こぼれや 二番街')">
+    <div class="store-dot" style="background:#dc2626"></div>二番街
+  </button>
+  <button class="store-btn" id="sbtn-月島もんじゃ こぼれや 別邸" onclick="switchStore('月島もんじゃ こぼれや 別邸')">
+    <div class="store-dot" style="background:#8b5cf6"></div>別邸
+  </button>
+  <button class="store-btn" id="sbtn-月島もんじゃ こぼれや 本店" onclick="switchStore('月島もんじゃ こぼれや 本店')">
+    <div class="store-dot" style="background:#16a34a"></div>本店
+  </button>
+  <button class="store-btn" id="sbtn-月島もんじゃ こぼれや 浅草" onclick="switchStore('月島もんじゃ こぼれや 浅草')">
+    <div class="store-dot" style="background:#f59e0b"></div>浅草
+  </button>
+  <button class="store-btn" id="sbtn-月島もんじゃ こぼれや 縁" onclick="switchStore('月島もんじゃ こぼれや 縁')">
+    <div class="store-dot" style="background:#0891b2"></div>縁
+  </button>
+  <button class="store-btn" id="sbtn-路地裏もんじゃ こぼれや 結" onclick="switchStore('路地裏もんじゃ こぼれや 結')">
+    <div class="store-dot" style="background:#db2777"></div>結
+  </button>
+  <button class="compare-btn" id="sbtn-compare" onclick="switchStore('compare')">📊 全店舗比較</button>
+</div>
+
+<!-- STEP NAV -->
+<div class="nav" id="stepNav">
+  <button class="nav-btn active" onclick="switchTab(0,this)">
+    <span class="nav-icon">📊</span>
+    <div class="nav-label">① 分析<div class="nav-sub">AI活用</div></div>
+  </button>
+  <button class="nav-btn" onclick="switchTab(1,this)">
+    <span class="nav-icon">🔍</span>
+    <div class="nav-label">② 課題抽出<div class="nav-sub">弱点特定</div></div>
+  </button>
+  <button class="nav-btn" onclick="switchTab(2,this)">
+    <span class="nav-icon">💡</span>
+    <div class="nav-label">③ 改善案<div class="nav-sub">施策設計</div></div>
+  </button>
+  <button class="nav-btn" onclick="switchTab(3,this)">
+    <span class="nav-icon">⚗️</span>
+    <div class="nav-label">④ 検証<div class="nav-sub">A/Bテスト</div></div>
+  </button>
+  <button class="nav-btn" onclick="switchTab(4,this)">
+    <span class="nav-icon">✅</span>
+    <div class="nav-label">⑤ 実行・報告<div class="nav-sub">現場実装</div></div>
+  </button>
+</div>
+
+<!-- ===== TAB 0: 分析 ===== -->
+<div id="tab0" class="content">
+  <div class="grid-4" id="kpiCards"></div>
+  <div class="grid-2-1">
+    <div class="card">
+      <div class="chart-header">
+        <div class="card-title" style="margin-bottom:0">曜日別集計（2月累計）</div>
+        <div class="chart-btns">
+          <button class="chart-btn active" onclick="switchChart('sales',this)">売上</button>
+          <button class="chart-btn" onclick="switchChart('ebicaCust',this)">ebica客数</button>
+          <button class="chart-btn" onclick="switchChart('ebicaUnit',this)">客単価</button>
+        </div>
+      </div>
+      <div id="mainChart" style="margin-top:12px"></div>
+    </div>
+    <div class="flex-col">
+      <div class="card" style="flex:1">
+        <div class="card-title">ランチ / ディナー比</div>
+        <div class="pie-wrap" id="pieChart"></div>
+      </div>
+      <div class="card" id="discCard"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">予約客（ebica）vs ウォークイン客数（曜日別）</div>
+    <div id="reservChart"></div>
+  </div>
+</div>
+
+<!-- ===== TAB 1: 課題抽出 ===== -->
+<div id="tab1" class="content hidden">
+  <div class="filter-row">
+    <div class="filter-btns" id="issueFilterBtns">
+      <button class="filter-btn active" onclick="filterIssues('全て',this)">全て</button>
+      <button class="filter-btn" onclick="filterIssues('売上',this)">売上</button>
+      <button class="filter-btn" onclick="filterIssues('客数',this)">客数</button>
+      <button class="filter-btn" onclick="filterIssues('単価',this)">単価</button>
+      <button class="filter-btn" onclick="filterIssues('商品',this)">商品</button>
+      <button class="filter-btn" onclick="filterIssues('媒体',this)">媒体</button>
+      <button class="filter-btn" onclick="filterIssues('オペレーション',this)">オペレーション</button>
+    </div>
+    <button class="btn-blue" onclick="toggleIssueForm()">+ 課題追加</button>
+  </div>
+  <div class="issue-form hidden" id="issueForm">
+    <div class="form-grid-4">
+      <div><div class="form-label">日付</div><input class="form-input" id="iDate" placeholder="例：3/25"></div>
+      <div><div class="form-label">カテゴリ</div><select class="form-input" id="iCat"><option>売上</option><option>客数</option><option>単価</option><option>商品</option><option>媒体</option><option>フード</option><option>ドリンク</option><option>オペレーション</option></select></div>
+      <div><div class="form-label">優先度</div><select class="form-input" id="iPri"><option value="high">🔴 高</option><option value="medium">🟡 中</option><option value="low">🟢 低</option></select></div>
+      <div><div class="form-label">ステータス</div><select class="form-input" id="iStat"><option>分析中</option><option>対策検討</option><option>経過観察</option><option>実施中</option><option>完了</option></select></div>
+    </div>
+    <div class="form-label" style="margin-bottom:4px">課題内容</div>
+    <input class="form-input" id="iContent" placeholder="発見した課題を記入してください" style="margin-bottom:6px">
+    <div class="form-label" style="margin-bottom:4px">仮説</div>
+    <input class="form-input" id="iHypo" placeholder="原因の仮説を記入してください" style="margin-bottom:8px">
+    <div style="display:flex;gap:8px">
+      <button class="btn-blue" onclick="addIssue()">追加する</button>
+      <button class="btn-gray" onclick="toggleIssueForm()">キャンセル</button>
+    </div>
+  </div>
+  <div id="issueList"></div>
+</div>
+
+<!-- ===== TAB 2: 改善案 ===== -->
+<div id="tab2" class="content hidden">
+  <div class="filter-row">
+    <div>
+      <span style="font-size:13px;color:#1e293b;font-weight:600">改善施策一覧</span>
+      <span style="font-size:12px;color:#94a3b8;margin-left:10px" id="measureStatusSummary"></span>
+    </div>
+    <div class="filter-btns">
+      <button class="filter-btn active" onclick="filterMeasures('全て',this)">全て</button>
+      <button class="filter-btn" onclick="filterMeasures('フード',this)">フード</button>
+      <button class="filter-btn" onclick="filterMeasures('ドリンク',this)">ドリンク</button>
+      <button class="filter-btn" onclick="filterMeasures('客数',this)">客数</button>
+      <button class="filter-btn" onclick="filterMeasures('媒体',this)">媒体</button>
+      <button class="filter-btn" onclick="filterMeasures('オペレーション',this)">オペレーション</button>
+    </div>
+  </div>
+  <div id="measureList"></div>
+</div>
+
+<!-- ===== TAB 3: 検証 ===== -->
+<div id="tab3" class="content hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+    <div style="font-size:13px;font-weight:600;color:#1e293b">A/Bテスト一覧</div>
+    <div style="display:flex;gap:16px;font-size:12px" id="abStatus"></div>
+  </div>
+  <div id="abList"></div>
+</div>
+
+<!-- ===== TAB 4: 実行・報告 ===== -->
+<div id="tab4" class="content hidden">
+  <div class="action-progress">
+    <div class="progress-header">
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:2px">アクションアイテム進捗</div>
+        <div style="font-size:11px;color:#94a3b8" id="progressText"></div>
+      </div>
+      <div class="progress-pct" id="progressPct">0%</div>
+    </div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+  </div>
+  <div id="actionList"></div>
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">アクションアイテム追加</div>
+    <div class="add-row">
+      <input class="add-input" id="newAction" placeholder="アクション内容を入力">
+      <input class="add-input" id="newOwner" placeholder="担当者">
+      <input class="add-input" id="newDeadline" placeholder="期限">
+      <button class="btn-blue" onclick="addAction()">追加</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== COMPARE VIEW ===== -->
+<div id="compareView" class="compare-section hidden">
+  <div style="margin-bottom:20px">
+    <div style="font-size:18px;font-weight:700;color:#1e293b;margin-bottom:4px">📊 全店舗比較分析 — 2月実績</div>
+    <div style="font-size:12px;color:#64748b">集計期間：2026年2月1日〜28日　ebica客数を正の数値として使用</div>
+  </div>
+  <div class="grid-4" id="compareKPI" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px"></div>
+  <div style="grid-template-columns:repeat(3,1fr);display:grid;gap:16px;margin-bottom:20px">
+    <div class="card"><div class="card-title">月間売上比較（万円）</div><div id="compareSalesChart"></div></div>
+    <div class="card"><div class="card-title">ebica客単価比較（円）</div><div id="compareUnitChart"></div></div>
+    <div class="card"><div class="card-title">目標達成率比較（%）</div><div id="compareAchievChart"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">全店舗ランキングテーブル（2月実績）</div>
+    <table class="rank-table" id="rankTable"></table>
+  </div>
+</div>
+
+<!-- BOTTOM: KPI CYCLE + SCHEDULE -->
+<div class="bottom">
+  <div class="kpi-cycle">
+    <div class="kpi-cycle-title">🔄 戦略会議サイクル</div>
+    <div class="kpi-cycle-steps">
+      <div class="kpi-step">
+        <div class="kpi-step-icon done">📊</div>
+        <div class="kpi-step-label done">分析</div>
+        <div class="kpi-step-sub">AI活用</div>
+      </div>
+      <div class="kpi-arrow done">→</div>
+      <div class="kpi-step">
+        <div class="kpi-step-icon done">🔍</div>
+        <div class="kpi-step-label done">課題抽出</div>
+        <div class="kpi-step-sub">弱点特定</div>
+      </div>
+      <div class="kpi-arrow done">→</div>
+      <div class="kpi-step">
+        <div class="kpi-step-icon done">💡</div>
+        <div class="kpi-step-label done">改善案</div>
+        <div class="kpi-step-sub">施策設計</div>
+      </div>
+      <div class="kpi-arrow done">→</div>
+      <div class="kpi-step">
+        <div class="kpi-step-icon pending">⚗️</div>
+        <div class="kpi-step-label pending">検証</div>
+        <div class="kpi-step-sub">A/Bテスト</div>
+      </div>
+      <div class="kpi-arrow">→</div>
+      <div class="kpi-step">
+        <div class="kpi-step-icon pending">✅</div>
+        <div class="kpi-step-label pending">実行</div>
+        <div class="kpi-step-sub">現場実装</div>
+      </div>
+    </div>
+  </div>
+  <div class="schedule-card">
+    <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:12px">📅 今後のスケジュール</div>
+    <div class="sched-row">
+      <div class="sched-day"><div class="sched-dot" style="background:#3b82f6"></div><div class="sched-day-label">3月末</div></div>
+      <div class="sched-task">各店施策実施・中間集計<br>A/Bテスト中間評価</div>
+    </div>
+    <div class="sched-row">
+      <div class="sched-day"><div class="sched-dot" style="background:#f59e0b"></div><div class="sched-day-label">4月初旬</div></div>
+      <div class="sched-task">3月実績データ取込<br>戦略会議（第2回）</div>
+    </div>
+    <div class="sched-row">
+      <div class="sched-day"><div class="sched-dot" style="background:#16a34a"></div><div class="sched-day-label">4月末</div></div>
+      <div class="sched-task">A/Bテスト結果確定<br>有効施策の全店横展開</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="footer-text">🎯「<span style="color:#60a5fa">分析</span> → <span style="color:#34d399">仮説</span> → <span style="color:#fbbf24">検証</span> → <span style="color:#f472b6">改善</span>」を繰り返し、売上を継続的に最大化する　｜　客数はebica実績（チェックイン客数）を正の数値として集計</div>
+</div>
+
+<script>
+// ===================================================
+//  REAL STORE DATA (2月実績 — ebica客数を正として使用)
+// ===================================================
+const STORES = {
+  "個室もんじゃ こぼれや 囲": {"color": "#3b82f6", "tag": "囲", "summary": {"sales": 9721690, "target": 9252747, "achievement": 105.1, "ebicaCust": 1148, "posCust": 2113, "ebicaUnit": 8468, "posUnit": 4601, "discrepancy": 84.1, "lunchSales": 2019170, "dinnerSales": 7702520, "foodRatio": 52.9, "drinkRatio": 30.7, "costRate": 18.8, "lunchPct": 20.8, "dinnerPct": 79.2}, "weekData": [{"day": "月", "sales": 115.5, "customers": 254, "ebicaCust": 133, "unit": 4718, "ebicaUnit": 8858, "rsv": 133, "walk": 121, "lunch": 20.0, "dinner": 95.5}, {"day": "火", "sales": 82.2, "customers": 164, "ebicaCust": 92, "unit": 5029, "ebicaUnit": 8863, "rsv": 92, "walk": 72, "lunch": 0.0, "dinner": 82.2}, {"day": "水", "sales": 116.3, "customers": 247, "ebicaCust": 135, "unit": 4897, "ebicaUnit": 9337, "rsv": 135, "walk": 112, "lunch": 20.6, "dinner": 95.7}, {"day": "木", "sales": 97.9, "customers": 183, "ebicaCust": 107, "unit": 5332, "ebicaUnit": 9470, "rsv": 107, "walk": 76, "lunch": 0.0, "dinner": 97.9}, {"day": "金", "sales": 136.7, "customers": 257, "ebicaCust": 140, "unit": 5296, "ebicaUnit": 9803, "rsv": 140, "walk": 117, "lunch": 0.0, "dinner": 136.7}, {"day": "土", "sales": 229.9, "customers": 542, "ebicaCust": 289, "unit": 4237, "ebicaUnit": 7933, "rsv": 289, "walk": 253, "lunch": 83.6, "dinner": 146.2}, {"day": "日", "sales": 193.7, "customers": 466, "ebicaCust": 252, "unit": 4174, "ebicaUnit": 7654, "rsv": 252, "walk": 214, "lunch": 77.7, "dinner": 116.1}], "issues": [{"id": 1, "date": "2月全体", "cat": "客数", "content": "火曜日の売上が82万円と最低。平日中日の集客が課題", "pri": "high", "status": "対策検討", "hypo": "平日ランチ強化またはSNS告知で火曜来店を喚起できる可能性がある"}, {"id": 2, "date": "2月全体", "cat": "商品", "content": "ランチ比率20.8%と低く、ディナー依存が強い（79.2%）", "pri": "medium", "status": "分析中", "hypo": "個室利用の特性からランチ訴求を強化することで昼間の売上底上げが期待できる"}, {"id": 3, "date": "2月全体", "cat": "単価", "content": "ebica客単価8,468円は全店最高水準。高単価客層の維持・拡大が重要", "pri": "medium", "status": "経過観察", "hypo": "コースメニュー・プレミアム個室プランの強化でさらなる単価向上が見込める"}], "measures": [{"id": 1, "cat": "フード", "hypo": "ランチ向け個室限定セット（+500円）を設定することでランチ比率を改善できる", "measure": "平日ランチ「個室もんじゃランチセット」を設定、SNS・グルメサイトで告知", "owner": "担当者", "deadline": "3月末", "status": "計画中", "abTest": false, "result": "未実施", "resultColor": "#94a3b8"}, {"id": 2, "cat": "ドリンク", "hypo": "コース利用客へのペアリングドリンク提案で客単価をさらに上げられる", "measure": "予約確認時にドリンクコース追加オプションを案内するスクリプトを整備", "owner": "担当者", "deadline": "3月末", "status": "計画中", "abTest": true, "result": "未実施", "resultColor": "#94a3b8"}], "abTests": [{"id": 1, "name": "ドリンクコース追加提案", "pA": "予約確認なし（通常フロー）", "pB": "予約確認時にドリンクコース案内を追加", "metric": "客単価（円）", "rA": 8468, "rB": 0, "period": "3月実施予定", "status": "計画中", "winner": null, "note": "ebica経由の予約確認メッセージにドリンクオプションを追加する実験を計画中"}], "actions": [{"id": 1, "content": "ランチ個室セットのメニュー・価格を決定", "owner": "担当者", "deadline": "3月末", "done": false}, {"id": 2, "content": "ドリンクコース案内スクリプトの作成", "owner": "担当者", "deadline": "3月末", "done": false}, {"id": 3, "content": "2月実績レポートの全スタッフ共有", "owner": "担当者", "deadline": "3月中旬", "done": true}]},
+  "月島もんじゃ こぼれや 二番街": {"color": "#dc2626", "tag": "二番街", "summary": {"sales": 6224470, "target": 6896505, "achievement": 90.3, "ebicaCust": 872, "posCust": 1713, "ebicaUnit": 7138, "posUnit": 3634, "discrepancy": 96.4, "lunchSales": 1322770, "dinnerSales": 4901700, "foodRatio": 65.0, "drinkRatio": 34.0, "costRate": 22.0, "lunchPct": 21.3, "dinnerPct": 78.7}, "weekData": [{"day": "月", "sales": 66.7, "customers": 201, "ebicaCust": 106, "unit": 3359, "ebicaUnit": 6431, "rsv": 106, "walk": 95, "lunch": 21.9, "dinner": 44.7}, {"day": "火", "sales": 55.6, "customers": 145, "ebicaCust": 78, "unit": 3835, "ebicaUnit": 7244, "rsv": 78, "walk": 67, "lunch": 0.0, "dinner": 55.6}, {"day": "水", "sales": 77.7, "customers": 206, "ebicaCust": 105, "unit": 3914, "ebicaUnit": 8036, "rsv": 105, "walk": 101, "lunch": 16.1, "dinner": 61.6}, {"day": "木", "sales": 62.8, "customers": 148, "ebicaCust": 81, "unit": 4236, "ebicaUnit": 7758, "rsv": 81, "walk": 67, "lunch": 0.0, "dinner": 62.8}, {"day": "金", "sales": 79.7, "customers": 185, "ebicaCust": 100, "unit": 4307, "ebicaUnit": 8010, "rsv": 100, "walk": 85, "lunch": 0.0, "dinner": 79.7}, {"day": "土", "sales": 171.8, "customers": 496, "ebicaCust": 239, "unit": 3482, "ebicaUnit": 7243, "rsv": 239, "walk": 257, "lunch": 46.2, "dinner": 125.6}, {"day": "日", "sales": 108.1, "customers": 332, "ebicaCust": 163, "unit": 3359, "ebicaUnit": 6726, "rsv": 163, "walk": 169, "lunch": 48.1, "dinner": 60.0}], "issues": [{"id": 1, "date": "2月全体", "cat": "売上", "content": "目標達成率90.3%で全7店舗中唯一の目標未達。672万円の未達", "pri": "high", "status": "対策検討", "hypo": "客数・客単価ともに他店比較で低位。予約促進と追加注文の提案強化が急務"}, {"id": 2, "date": "2月全体", "cat": "単価", "content": "原価率22.0%が全店最高。利益を圧迫している", "pri": "high", "status": "分析中", "hypo": "フード原価率の見直しとドリンクの高利益商品への誘導で粗利改善が期待できる"}, {"id": 3, "date": "2月全体", "cat": "客数", "content": "稼働日数26日（他店28日比-2日）。休業日の売上機会損失が発生", "pri": "medium", "status": "経過観察", "hypo": "営業日最適化の検討、または営業日数確保で月間売上の押し上げが可能"}], "measures": [{"id": 1, "cat": "売上", "hypo": "予約率を高めることで売上予測が安定し、目標達成率が改善できる", "measure": "ebicaプロフィール・写真を更新し、検索上位表示を強化", "owner": "担当者", "deadline": "3月末", "status": "実施中", "abTest": false, "result": "検証中", "resultColor": "#d97706"}, {"id": 2, "cat": "オペレーション", "hypo": "原価率22%を20%以下に改善することで粗利が増加する", "measure": "仕入れ先の見直しと高原価メニューの代替検討。フードロス削減徹底", "owner": "担当者", "deadline": "4月末", "status": "計画中", "abTest": false, "result": "未実施", "resultColor": "#94a3b8"}, {"id": 3, "cat": "ドリンク", "hypo": "ドリンク追加注文の提案強化でフードのみ客を減らせる", "measure": "全テーブルに「ドリンクメニュー」卓上配置、口頭提案の徹底", "owner": "担当者", "deadline": "3月末", "status": "計画中", "abTest": true, "result": "未実施", "resultColor": "#94a3b8"}], "abTests": [{"id": 1, "name": "卓上ドリンクメニュー設置テスト", "pA": "通常メニュー表のみ", "pB": "卓上に専用ドリンクカード設置", "metric": "ドリンク注文率（%）", "rA": 28, "rB": 0, "period": "3月実施予定", "status": "計画中", "winner": null, "note": "ドリンク専用カードを卓上設置することで注文率向上を狙う"}], "actions": [{"id": 1, "content": "ebicaプロフィール・写真の更新作業", "owner": "担当者", "deadline": "3月末", "done": false}, {"id": 2, "content": "原価率の高いメニュー上位5品を特定", "owner": "担当者", "deadline": "3月中旬", "done": true}, {"id": 3, "content": "仕入れ先との価格見直し交渉", "owner": "担当者", "deadline": "4月末", "done": false}, {"id": 4, "content": "卓上ドリンクメニューカードのデザイン作成", "owner": "担当者", "deadline": "3月末", "done": false}]},
+  "月島もんじゃ こぼれや 別邸": {"color": "#8b5cf6", "tag": "別邸", "summary": {"sales": 20453823, "target": 19118136, "achievement": 107.0, "ebicaCust": 2674, "posCust": 5270, "ebicaUnit": 7649, "posUnit": 3881, "discrepancy": 97.1, "lunchSales": 6000593, "dinnerSales": 14453230, "foodRatio": 58.4, "drinkRatio": 32.7, "costRate": 20.3, "lunchPct": 29.3, "dinnerPct": 70.7}, "weekData": [{"day": "月", "sales": 234.6, "customers": 631, "ebicaCust": 315, "unit": 3870, "ebicaUnit": 7606, "rsv": 315, "walk": 316, "lunch": 86.7, "dinner": 147.9}, {"day": "火", "sales": 204.8, "customers": 428, "ebicaCust": 218, "unit": 4731, "ebicaUnit": 9525, "rsv": 218, "walk": 210, "lunch": 47.4, "dinner": 157.3}, {"day": "水", "sales": 247.6, "customers": 646, "ebicaCust": 346, "unit": 3876, "ebicaUnit": 7207, "rsv": 346, "walk": 300, "lunch": 77.6, "dinner": 169.9}, {"day": "木", "sales": 239.0, "customers": 541, "ebicaCust": 283, "unit": 4408, "ebicaUnit": 8478, "rsv": 283, "walk": 258, "lunch": 43.1, "dinner": 195.9}, {"day": "金", "sales": 304.3, "customers": 730, "ebicaCust": 375, "unit": 4177, "ebicaUnit": 8118, "rsv": 375, "walk": 355, "lunch": 38.6, "dinner": 265.7}, {"day": "土", "sales": 433.6, "customers": 1195, "ebicaCust": 579, "unit": 3618, "ebicaUnit": 7496, "rsv": 579, "walk": 616, "lunch": 137.8, "dinner": 295.8}, {"day": "日", "sales": 381.5, "customers": 1099, "ebicaCust": 558, "unit": 3500, "ebicaUnit": 6885, "rsv": 558, "walk": 541, "lunch": 168.8, "dinner": 212.7}], "issues": [{"id": 1, "date": "2月全体", "cat": "売上", "content": "売上2,045万円は全店最大規模（目標達成率107%）。さらなる成長余地あり", "pri": "medium", "status": "経過観察", "hypo": "規模優位を活かし土日の回転率・予約率向上でさらなる売上積み上げが可能"}, {"id": 2, "date": "2月全体", "cat": "客数", "content": "ebica客数2,674人は全店最多。予約システム活用度が高い", "pri": "low", "status": "経過観察", "hypo": "ebica予約率の高さを維持しつつ、ウォークイン客のebica誘導も強化できる"}, {"id": 3, "date": "2月全体", "cat": "商品", "content": "ランチ売上比率29.3%で全店上位。ランチ需要の活用が規模拡大の鍵", "pri": "medium", "status": "分析中", "hypo": "ランチメニューの拡充・単価アップで大規模店舗の強みをさらに発揮できる"}], "measures": [{"id": 1, "cat": "オペレーション", "hypo": "土日の回転率向上で売上2,500万円超えが可能", "measure": "週末限定2時間制の導入とスムーズな提供オペレーション構築", "owner": "担当者", "deadline": "4月末", "status": "計画中", "abTest": true, "result": "未実施", "resultColor": "#94a3b8"}, {"id": 2, "cat": "媒体", "hypo": "大型店舗の露出を強化することで新規客獲得数を増やせる", "measure": "グルメサイトのプレミアム掲載と季節限定キャンペーンの実施", "owner": "担当者", "deadline": "3月末", "status": "実施中", "abTest": false, "result": "検証中", "resultColor": "#d97706"}], "abTests": [{"id": 1, "name": "週末2時間制テスト", "pA": "時間制限なし", "pB": "週末ディナー2時間制導入", "metric": "週末売上（万円）", "rA": 2045, "rB": 0, "period": "4月実施予定", "status": "計画中", "winner": null, "note": "大規模店舗での回転率向上が売上に与える影響を測定する"}], "actions": [{"id": 1, "content": "週末2時間制オペレーション手順書の作成", "owner": "担当者", "deadline": "4月末", "done": false}, {"id": 2, "content": "グルメサイトプレミアム掲載の申込", "owner": "担当者", "deadline": "3月末", "done": true}, {"id": 3, "content": "春季キャンペーンのコンテンツ企画", "owner": "担当者", "deadline": "3月末", "done": false}]},
+  "月島もんじゃ こぼれや 本店": {"color": "#16a34a", "tag": "本店", "summary": {"sales": 6572800, "target": 6495027, "achievement": 101.2, "ebicaCust": 846, "posCust": 1784, "ebicaUnit": 7769, "posUnit": 3684, "discrepancy": 110.9, "lunchSales": 2345310, "dinnerSales": 4227490, "foodRatio": 57.3, "drinkRatio": 32.4, "costRate": 19.5, "lunchPct": 35.7, "dinnerPct": 64.3}, "weekData": [{"day": "月", "sales": 84.6, "customers": 212, "ebicaCust": 99, "unit": 4009, "ebicaUnit": 8454, "rsv": 99, "walk": 113, "lunch": 31.4, "dinner": 53.2}, {"day": "火", "sales": 61.2, "customers": 183, "ebicaCust": 86, "unit": 3314, "ebicaUnit": 7039, "rsv": 86, "walk": 97, "lunch": 20.6, "dinner": 40.5}, {"day": "水", "sales": 100.9, "customers": 254, "ebicaCust": 117, "unit": 4038, "ebicaUnit": 8604, "rsv": 117, "walk": 137, "lunch": 36.1, "dinner": 64.8}, {"day": "木", "sales": 77.7, "customers": 206, "ebicaCust": 100, "unit": 3818, "ebicaUnit": 7858, "rsv": 100, "walk": 106, "lunch": 21.5, "dinner": 56.2}, {"day": "金", "sales": 89.7, "customers": 261, "ebicaCust": 123, "unit": 3451, "ebicaUnit": 7313, "rsv": 123, "walk": 138, "lunch": 25.6, "dinner": 64.0}, {"day": "土", "sales": 129.5, "customers": 352, "ebicaCust": 169, "unit": 3684, "ebicaUnit": 7712, "rsv": 169, "walk": 183, "lunch": 50.1, "dinner": 79.4}, {"day": "日", "sales": 113.7, "customers": 316, "ebicaCust": 152, "unit": 3602, "ebicaUnit": 7552, "rsv": 152, "walk": 164, "lunch": 49.1, "dinner": 64.6}], "issues": [{"id": 1, "date": "2月全体", "cat": "客数", "content": "POS客数に対するebica乖離率110.9%。ウォークイン客がebica客数より多い", "pri": "high", "status": "分析中", "hypo": "ウォークイン客への来店時ebica登録誘導・次回予約促進でリピート率を向上できる"}, {"id": 2, "date": "2月全体", "cat": "商品", "content": "ランチ売上比率35.7%と高め。ランチ強化が有効な立地・客層", "pri": "medium", "status": "経過観察", "hypo": "ランチ限定メニューや平日割引で昼間の集客をさらに強化できる余地がある"}], "measures": [{"id": 1, "cat": "客数", "hypo": "ウォークイン客にebica登録を促すことでリピート率が向上する", "measure": "来店時にQRコード案内カードを配布、次回予約で割引クーポンを提供", "owner": "担当者", "deadline": "4月末", "status": "計画中", "abTest": false, "result": "未実施", "resultColor": "#94a3b8"}, {"id": 2, "cat": "フード", "hypo": "ランチセット強化で昼間の売上比率を40%まで引き上げられる", "measure": "平日ランチ限定「本店もんじゃセット」2,500円の設定とSNS告知", "owner": "担当者", "deadline": "3月末", "status": "実施中", "abTest": true, "result": "検証中", "resultColor": "#d97706"}], "abTests": [{"id": 1, "name": "ランチセット導入テスト", "pA": "既存ランチメニュー", "pB": "新「本店もんじゃセット」2,500円", "metric": "ランチ売上（万円）", "rA": 84, "rB": 0, "period": "3月実施中", "status": "実施中", "winner": null, "note": "新設ランチセットによるランチ売上改善効果を検証中。2週目のデータを待っている"}], "actions": [{"id": 1, "content": "ebica登録促進用QRコードカードの印刷", "owner": "担当者", "deadline": "4月末", "done": false}, {"id": 2, "content": "本店もんじゃランチセットのSNS告知投稿", "owner": "担当者", "deadline": "3月中旬", "done": true}, {"id": 3, "content": "ランチセット1週目の中間結果集計・報告", "owner": "担当者", "deadline": "3月末", "done": false}]},
+  "月島もんじゃ こぼれや 浅草": {"color": "#f59e0b", "tag": "浅草", "summary": {"sales": 14621724, "target": 9903166, "achievement": 147.6, "ebicaCust": 1878, "posCust": 4337, "ebicaUnit": 7786, "posUnit": 3371, "discrepancy": 130.9, "lunchSales": 6784704, "dinnerSales": 7837020, "foodRatio": 62.2, "drinkRatio": 29.1, "costRate": 19.0, "lunchPct": 46.4, "dinnerPct": 53.6}, "weekData": [{"day": "月", "sales": 191.9, "customers": 579, "ebicaCust": 272, "unit": 3266, "ebicaUnit": 7073, "rsv": 272, "walk": 307, "lunch": 94.5, "dinner": 97.4}, {"day": "火", "sales": 164.4, "customers": 506, "ebicaCust": 213, "unit": 3203, "ebicaUnit": 7714, "rsv": 213, "walk": 293, "lunch": 67.6, "dinner": 96.8}, {"day": "水", "sales": 198.2, "customers": 583, "ebicaCust": 253, "unit": 3394, "ebicaUnit": 7984, "rsv": 253, "walk": 330, "lunch": 87.0, "dinner": 111.1}, {"day": "木", "sales": 186.5, "customers": 531, "ebicaCust": 195, "unit": 3502, "ebicaUnit": 9552, "rsv": 195, "walk": 336, "lunch": 83.2, "dinner": 103.2}, {"day": "金", "sales": 176.9, "customers": 514, "ebicaCust": 208, "unit": 3428, "ebicaUnit": 8684, "rsv": 208, "walk": 306, "lunch": 66.0, "dinner": 110.9}, {"day": "土", "sales": 296.9, "customers": 872, "ebicaCust": 400, "unit": 3402, "ebicaUnit": 7419, "rsv": 400, "walk": 472, "lunch": 143.4, "dinner": 153.5}, {"day": "日", "sales": 247.5, "customers": 752, "ebicaCust": 337, "unit": 3276, "ebicaUnit": 7357, "rsv": 337, "walk": 415, "lunch": 136.7, "dinner": 110.8}], "issues": [{"id": 1, "date": "2月全体", "cat": "売上", "content": "目標達成率147.6%で全店トップ。観光需要による大幅超過達成", "pri": "low", "status": "経過観察", "hypo": "観光シーズンの波を活かした弾力的な予約管理・座席最大化が重要"}, {"id": 2, "date": "2月全体", "cat": "単価", "content": "POS客単価3,371円は全店最低。多くの客がいる割に単価が低い", "pri": "high", "status": "対策検討", "hypo": "観光客向けのセット・コースメニューを充実させることで客単価引き上げが可能"}, {"id": 3, "date": "2月全体", "cat": "客数", "content": "ウォークイン客2,459人はebica客数1,878人を大幅超過（乖離130.9%）", "pri": "medium", "status": "分析中", "hypo": "ウォークイン客へのebica登録促進・QRコード配布で次回予約に繋げられる"}], "measures": [{"id": 1, "cat": "単価", "hypo": "観光客向けコースメニュー設定で客単価を4,000円以上に引き上げられる", "measure": "「浅草観光コース」4,500円を設定。英語・中国語メニューも整備", "owner": "担当者", "deadline": "3月末", "status": "実施中", "abTest": true, "result": "検証中", "resultColor": "#d97706"}, {"id": 2, "cat": "客数", "hypo": "ウォークイン客へのebica登録促進でリピート率と予約率が上がる", "measure": "来店時QRコードカード配布とebica会員特典の案内を徹底", "owner": "担当者", "deadline": "4月末", "status": "計画中", "abTest": false, "result": "未実施", "resultColor": "#94a3b8"}], "abTests": [{"id": 1, "name": "観光コースメニュー設定", "pA": "通常メニューのみ（客単価3,371円）", "pB": "「浅草観光コース」4,500円設定", "metric": "客単価（円）", "rA": 3371, "rB": 0, "period": "3月実施中", "status": "実施中", "winner": null, "note": "観光客向けコースで客単価3,371円→4,500円への引き上げ効果を検証中"}], "actions": [{"id": 1, "content": "浅草観光コース多言語メニューの作成（英語・中国語）", "owner": "担当者", "deadline": "3月末", "done": false}, {"id": 2, "content": "ebica登録促進カード（英語版）の印刷", "owner": "担当者", "deadline": "4月末", "done": false}, {"id": 3, "content": "観光コース1週目の客単価データ集計", "owner": "担当者", "deadline": "3月末", "done": false}, {"id": 4, "content": "3月の予約枠最適化（閑散期対策）を確認", "owner": "担当者", "deadline": "3月中旬", "done": true}]},
+  "月島もんじゃ こぼれや 縁": {"color": "#0891b2", "tag": "縁", "summary": {"sales": 9731480, "target": 9300959, "achievement": 104.6, "ebicaCust": 1255, "posCust": 2598, "ebicaUnit": 7754, "posUnit": 3746, "discrepancy": 107.0, "lunchSales": 2162270, "dinnerSales": 7569210, "foodRatio": 57.8, "drinkRatio": 31.8, "costRate": 19.0, "lunchPct": 22.2, "dinnerPct": 77.8}, "weekData": [{"day": "月", "sales": 113.2, "customers": 300, "ebicaCust": 143, "unit": 3853, "ebicaUnit": 7778, "rsv": 143, "walk": 157, "lunch": 23.4, "dinner": 89.9}, {"day": "火", "sales": 92.5, "customers": 224, "ebicaCust": 115, "unit": 4158, "ebicaUnit": 8048, "rsv": 115, "walk": 109, "lunch": 0.0, "dinner": 92.5}, {"day": "水", "sales": 114.8, "customers": 293, "ebicaCust": 149, "unit": 4196, "ebicaUnit": 7780, "rsv": 149, "walk": 144, "lunch": 14.5, "dinner": 100.3}, {"day": "木", "sales": 97.3, "customers": 240, "ebicaCust": 102, "unit": 4069, "ebicaUnit": 9614, "rsv": 102, "walk": 138, "lunch": 0.0, "dinner": 97.3}, {"day": "金", "sales": 125.2, "customers": 270, "ebicaCust": 140, "unit": 4640, "ebicaUnit": 9017, "rsv": 140, "walk": 130, "lunch": 0.0, "dinner": 125.2}, {"day": "土", "sales": 204.8, "customers": 597, "ebicaCust": 280, "unit": 3474, "ebicaUnit": 7360, "rsv": 280, "walk": 317, "lunch": 70.5, "dinner": 134.3}, {"day": "日", "sales": 225.3, "customers": 674, "ebicaCust": 326, "unit": 3356, "ebicaUnit": 6999, "rsv": 326, "walk": 348, "lunch": 107.9, "dinner": 117.5}], "issues": [{"id": 1, "date": "2月全体", "cat": "商品", "content": "ディナー比率77.8%でディナー依存度が高い。ランチ売上22.2%", "pri": "medium", "status": "分析中", "hypo": "ランチタイムの集客策（限定メニュー・SNS告知）でバランスのとれた売上構成に改善できる"}, {"id": 2, "date": "2月全体", "cat": "客数", "content": "ebica乖離率107%でウォークインと予約がほぼ同数の構成", "pri": "low", "status": "経過観察", "hypo": "予約比率向上で計画的な仕込みと人員配置が可能になり、オペレーション効率が上がる"}], "measures": [{"id": 1, "cat": "フード", "hypo": "ランチ専用メニューを設定することでランチ比率30%まで改善できる", "measure": "縁ランチセット2,200円を設定し、SNS・ebicaページで告知", "owner": "担当者", "deadline": "4月末", "status": "計画中", "abTest": false, "result": "未実施", "resultColor": "#94a3b8"}], "abTests": [{"id": 1, "name": "ランチ告知SNSテスト", "pA": "SNS告知なし", "pB": "Instagram毎日ランチ告知", "metric": "月間ランチ客数（人）", "rA": 83, "rB": 0, "period": "3月実施予定", "status": "計画中", "winner": null, "note": "SNS告知によるランチ客数増加効果を4月末まで検証する"}], "actions": [{"id": 1, "content": "縁ランチセットのメニュー内容・価格確定", "owner": "担当者", "deadline": "4月末", "done": false}, {"id": 2, "content": "Instagram用ランチ写真の撮影", "owner": "担当者", "deadline": "3月末", "done": false}, {"id": 3, "content": "2月実績レポートの確認・共有", "owner": "担当者", "deadline": "3月中旬", "done": true}]},
+  "路地裏もんじゃ こぼれや 結": {"color": "#db2777", "tag": "結", "summary": {"sales": 5736740, "target": 5376615, "achievement": 106.7, "ebicaCust": 694, "posCust": 1384, "ebicaUnit": 8266, "posUnit": 4145, "discrepancy": 99.4, "lunchSales": 1509990, "dinnerSales": 4226750, "foodRatio": 55.5, "drinkRatio": 30.3, "costRate": 19.0, "lunchPct": 26.3, "dinnerPct": 73.7}, "weekData": [{"day": "月", "sales": 73.0, "customers": 154, "ebicaCust": 87, "unit": 4956, "ebicaUnit": 9289, "rsv": 87, "walk": 67, "lunch": 14.5, "dinner": 58.5}, {"day": "火", "sales": 46.7, "customers": 104, "ebicaCust": 50, "unit": 4497, "ebicaUnit": 9627, "rsv": 50, "walk": 54, "lunch": 0.0, "dinner": 46.7}, {"day": "水", "sales": 67.8, "customers": 161, "ebicaCust": 81, "unit": 4676, "ebicaUnit": 9140, "rsv": 81, "walk": 80, "lunch": 16.3, "dinner": 51.5}, {"day": "木", "sales": 54.0, "customers": 135, "ebicaCust": 68, "unit": 4037, "ebicaUnit": 8253, "rsv": 68, "walk": 67, "lunch": 0.0, "dinner": 54.0}, {"day": "金", "sales": 72.1, "customers": 142, "ebicaCust": 89, "unit": 5161, "ebicaUnit": 8290, "rsv": 89, "walk": 53, "lunch": 0.0, "dinner": 72.1}, {"day": "土", "sales": 133.7, "customers": 340, "ebicaCust": 169, "unit": 3910, "ebicaUnit": 7894, "rsv": 169, "walk": 171, "lunch": 58.3, "dinner": 75.4}, {"day": "日", "sales": 126.4, "customers": 348, "ebicaCust": 150, "unit": 3640, "ebicaUnit": 8387, "rsv": 150, "walk": 198, "lunch": 61.8, "dinner": 64.5}], "issues": [{"id": 1, "date": "2月全体", "cat": "単価", "content": "ebica客単価8,266円は全店2位の高単価。高単価維持が重要", "pri": "medium", "status": "経過観察", "hypo": "高単価客層のリピート率向上・口コミ強化でさらなる優良顧客の獲得が可能"}, {"id": 2, "date": "2月全体", "cat": "商品", "content": "ディナー比率73.7%でランチ売上が26.3%。ランチ強化の余地あり", "pri": "medium", "status": "分析中", "hypo": "ランチタイム活用策の強化で昼間の稼働率向上が期待できる"}, {"id": 3, "date": "2月全体", "cat": "売上", "content": "小規模店舗ながら達成率106.7%。効率的な運営が評価できる", "pri": "low", "status": "経過観察", "hypo": "現状の強みを維持しつつ、周辺施策（媒体露出・SNS）で認知拡大を図れる"}], "measures": [{"id": 1, "cat": "媒体", "hypo": "SNSでの認知拡大により路地裏という立地ハンデを克服できる", "measure": "Instagram・TikTokで「路地裏の隠れ家もんじゃ」コンセプトに月10投稿", "owner": "担当者", "deadline": "継続", "status": "実施中", "abTest": false, "result": "検証中", "resultColor": "#d97706"}, {"id": 2, "cat": "フード", "hypo": "ランチタイム強化で稼働率を向上させ売上底上げができる", "measure": "平日ランチ割引（10%オフ）を設定しグルメサイトにキャンペーン掲載", "owner": "担当者", "deadline": "4月末", "status": "計画中", "abTest": false, "result": "未実施", "resultColor": "#94a3b8"}], "abTests": [{"id": 1, "name": "SNS投稿頻度増加テスト", "pA": "週2回投稿（現状）", "pB": "週5回投稿（TikTok含む）", "metric": "月間ebica予約数（件）", "rA": 694, "rB": 0, "period": "3月実施中", "status": "実施中", "winner": null, "note": "「隠れ家」コンセプトのSNS投稿頻度増加による予約数向上を測定中"}], "actions": [{"id": 1, "content": "TikTokアカウントの開設と初投稿", "owner": "担当者", "deadline": "3月末", "done": false}, {"id": 2, "content": "「路地裏の隠れ家」コンテンツカレンダー作成", "owner": "担当者", "deadline": "3月末", "done": false}, {"id": 3, "content": "平日ランチ割引キャンペーンのグルメサイト掲載", "owner": "担当者", "deadline": "4月末", "done": false}, {"id": 4, "content": "2月実績の社内共有と3月目標設定", "owner": "担当者", "deadline": "3月中旬", "done": true}]}
+};
+
+// ===================================================
+//  STATE
+// ===================================================
+const STORE_NAMES = Object.keys(STORES);
+let currentStore = STORE_NAMES[0];
+let currentTab = 0;
+let currentChart = 'sales';
+let issueFilter = '全て';
+let measureFilter = '全て';
+
+const mutableData = {};
+STORE_NAMES.forEach(s => {
+  mutableData[s] = {
+    issues: STORES[s].issues.map(i=>({...i})),
+    actions: STORES[s].actions.map(a=>({...a})),
+  };
+});
+
+// ===================================================
+//  HELPERS
+// ===================================================
+const catColor = {売上:'#dc2626',単価:'#7c3aed',客数:'#0891b2',商品:'#16a34a',媒体:'#dc2626',フード:'#16a34a',ドリンク:'#0284c7',オペレーション:'#d97706'};
+const statusStyle = {
+  '分析中':['#fff7ed','#ea580c'],'対策検討':['#eff6ff','#2563eb'],'経過観察':['#f0fdf4','#16a34a'],
+  '実施中':['#f0f9ff','#0284c7'],'計画中':['#faf5ff','#7c3aed'],'完了':['#f0fdf4','#15803d'],'未実施':['#f8fafc','#94a3b8']
+};
+const priLabel = {high:'🔴 高',medium:'🟡 中',low:'🟢 低'};
+
+function badge(label,color,bg){return`<span class="badge" style="background:${bg||'#eff6ff'};color:${color||'#2563eb'}">${label}</span>`;}
+function fmt(n){return Math.round(n).toLocaleString('ja-JP');}
+function getSD(){return STORES[currentStore];}
+function getMD(){return mutableData[currentStore];}
+
+// ===================================================
+//  CHARTS (SVG)
+// ===================================================
+function makeSVGChart(data, key, color, fmtFn, maxOverride) {
+  const W=560,H=200,PL=58,PR=10,PT=15,PB=30;
+  const cW=W-PL-PR,cH=H-PT-PB;
+  const vals=data.map(d=>d[key]);
+  const maxV=maxOverride||Math.max(...vals)*1.15||1;
+  const gap=cW/data.length;
+  const bW=Math.floor(gap*0.52);
+  let bars='',labels='',grid='';
+  for(let i=0;i<=4;i++){
+    const y=PT+cH-(i/4)*cH;
+    grid+=`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" class="grid-line"/>`;
+    grid+=`<text x="${PL-4}" y="${y+4}" class="axis-text" text-anchor="end">${fmtFn(maxV*i/4)}</text>`;
+  }
+  data.forEach((d,i)=>{
+    const x=PL+gap*i+gap/2-bW/2;
+    const bH=Math.max(2,(d[key]/maxV)*cH);
+    bars+=`<rect x="${x}" y="${PT+cH-bH}" width="${bW}" height="${bH}" rx="4" fill="${color}" class="bar-rect"/>`;
+    labels+=`<text x="${PL+gap*i+gap/2}" y="${H-5}" class="axis-text" text-anchor="middle">${d.day}</text>`;
+  });
+  return`<svg width="100%" viewBox="0 0 ${W} ${H}" style="overflow:visible">${grid}${bars}${labels}</svg>`;
+}
+
+function makeStackedChart(data){
+  const W=560,H=170,PL=40,PR=10,PT=20,PB=28;
+  const cW=W-PL-PR,cH=H-PT-PB;
+  const maxV=Math.max(...data.map(d=>(d.rsv||0)+(d.walk||0)))*1.15||1;
+  const gap=cW/data.length;
+  const bW=Math.floor(gap*0.5);
+  let bars='',labels='',grid='';
+  for(let i=0;i<=3;i++){
+    const y=PT+cH-(i/3)*cH;
+    grid+=`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" class="grid-line"/>`;
+    grid+=`<text x="${PL-4}" y="${y+4}" class="axis-text" text-anchor="end">${Math.round(maxV*i/3)}</text>`;
+  }
+  data.forEach((d,i)=>{
+    const x=PL+gap*i+gap/2-bW/2;
+    const rH=Math.max(1,((d.rsv||0)/maxV)*cH);
+    const wH=Math.max(1,((d.walk||0)/maxV)*cH);
+    const base=PT+cH;
+    bars+=`<rect x="${x}" y="${base-rH-wH}" width="${bW}" height="${rH}" fill="#2563eb"/>`;
+    bars+=`<rect x="${x}" y="${base-wH}" width="${bW}" height="${wH}" fill="#93c5fd"/>`;
+    labels+=`<text x="${PL+gap*i+gap/2}" y="${H-3}" class="axis-text" text-anchor="middle">${d.day}</text>`;
+  });
+  const leg=`<rect x="${PL}" y="4" width="10" height="8" rx="2" fill="#2563eb"/><text x="${PL+14}" y="12" class="axis-text">ebica予約</text><rect x="${PL+76}" y="4" width="10" height="8" rx="2" fill="#93c5fd"/><text x="${PL+90}" y="12" class="axis-text">ウォークイン</text>`;
+  return`<svg width="100%" viewBox="0 0 ${W} ${H}" style="overflow:visible">${grid}${bars}${labels}${leg}</svg>`;
+}
+
+function makeBarChart(labels, vals, colors, fmtFn, H=180){
+  const W=520,PL=50,PR=10,PT=15,PB=30;
+  const cW=W-PL-PR,cH=H-PT-PB;
+  const maxV=Math.max(...vals)*1.15||1;
+  const gap=cW/labels.length;
+  const bW=Math.floor(gap*0.5);
+  let bars='',lbls='',grid='';
+  for(let i=0;i<=4;i++){
+    const y=PT+cH-(i/4)*cH;
+    grid+=`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" class="grid-line"/>`;
+    grid+=`<text x="${PL-4}" y="${y+4}" class="axis-text" text-anchor="end">${fmtFn(maxV*i/4)}</text>`;
+  }
+  labels.forEach((l,i)=>{
+    const x=PL+gap*i+gap/2-bW/2;
+    const bH=Math.max(2,(vals[i]/maxV)*cH);
+    bars+=`<rect x="${x}" y="${PT+cH-bH}" width="${bW}" height="${bH}" rx="3" fill="${colors[i%colors.length]}" class="bar-rect"/>`;
+    lbls+=`<text x="${PL+gap*i+gap/2}" y="${H-5}" class="axis-text" text-anchor="middle">${l}</text>`;
+  });
+  return`<svg width="100%" viewBox="0 0 ${W} ${H}" style="overflow:visible">${grid}${bars}${lbls}</svg>`;
+}
+
+// ===================================================
+//  STORE SWITCHING
+// ===================================================
+function switchStore(store){
+  currentStore=store;
+  document.querySelectorAll('.store-btn').forEach(b=>{
+    b.classList.remove('active');
+    b.style.borderBottomColor='transparent';
+    b.style.color='';
+  });
+  document.getElementById('sbtn-compare').classList.remove('active');
+  const isCompare = store==='compare';
+  document.getElementById('stepNav').classList.toggle('hidden',isCompare);
+  document.querySelectorAll('.content').forEach(el=>el.classList.add('hidden'));
+  document.getElementById('compareView').classList.toggle('hidden',!isCompare);
+  if(isCompare){
+    document.getElementById('sbtn-compare').classList.add('active');
+    renderCompare(); return;
+  }
+  const btn = document.getElementById('sbtn-'+store);
+  if(btn){
+    btn.classList.add('active');
+    const c = STORES[store].color;
+    btn.style.borderBottomColor=c;
+    btn.style.color=c;
+  }
+  document.getElementById('tab'+currentTab).classList.remove('hidden');
+  issueFilter='全て';measureFilter='全て';
+  renderAll();
+}
+
+// ===================================================
+//  TAB SWITCHING
+// ===================================================
+function switchTab(n,btn){
+  currentTab=n;
+  document.querySelectorAll('.content').forEach((el,i)=>el.classList.toggle('hidden',i!==n));
+  document.getElementById('compareView').classList.add('hidden');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(n===0) renderAnalysis();
+  if(n===1) renderIssues();
+  if(n===2) renderMeasures();
+  if(n===3) renderABTests();
+  if(n===4) renderActions();
+}
+
+function switchChart(key,btn){
+  currentChart=key;
+  document.querySelectorAll('.chart-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMainChart();
+}
+
+// ===================================================
+//  RENDER: ANALYSIS
+// ===================================================
+function renderAnalysis(){
+  const sd = getSD();
+  const sm = sd.summary;
+  const wd = sd.weekData;
+  const storeColor = sd.color;
+  const achColor = sm.achievement>=100?'#16a34a':'#dc2626';
+
+  // KPI cards (月次実績)
+  document.getElementById('kpiCards').innerHTML=`
+    <div class="kpi-card" style="border-top:3px solid ${storeColor}">
+      <div class="kpi-title">2月 月間売上</div>
+      <div class="kpi-value">¥${fmt(sm.sales/10000)}<span style="font-size:14px;font-weight:400">万</span></div>
+      <div class="kpi-change" style="color:${achColor}">
+        ${sm.achievement>=100?'▲':'▼'} 目標達成率 <strong>${sm.achievement}%</strong>
+      </div>
+      <div class="kpi-sub">目標: ¥${fmt(sm.target/10000)}万</div>
+    </div>
+    <div class="kpi-card" style="border-top:3px solid #06b6d4">
+      <div class="kpi-title">ebica 客数（正の客数）</div>
+      <div class="kpi-value">${fmt(sm.ebicaCust)}<span style="font-size:14px;font-weight:400">人</span></div>
+      <div class="kpi-change" style="color:#64748b">POS客数: ${fmt(sm.posCust)}人</div>
+      <div class="kpi-sub">ウォークイン: ${fmt(sm.posCust-sm.ebicaCust)}人</div>
+    </div>
+    <div class="kpi-card" style="border-top:3px solid #7c3aed">
+      <div class="kpi-title">ebica 客単価</div>
+      <div class="kpi-value">¥${fmt(sm.ebicaUnit)}</div>
+      <div class="kpi-change" style="color:#64748b">POS客単価: ¥${fmt(sm.posUnit)}</div>
+      <div class="kpi-sub">差額: ¥${fmt(sm.ebicaUnit-sm.posUnit)}（ebica≒2倍）</div>
+    </div>
+    <div class="kpi-card" style="border-top:3px solid #f59e0b">
+      <div class="kpi-title">原価率 / 粗利率</div>
+      <div class="kpi-value">${sm.costRate}<span style="font-size:14px;font-weight:400">%</span></div>
+      <div class="kpi-change" style="color:#16a34a">粗利率: ${(100-sm.costRate).toFixed(1)}%</div>
+      <div class="kpi-sub">F:${sm.foodRatio}% D:${sm.drinkRatio}%</div>
+    </div>
+  `;
+
+  renderMainChart();
+
+  // Pie chart (ランチ/ディナー)
+  const lp=sm.lunchPct, dp=sm.dinnerPct;
+  const PI=Math.PI, r=35, cx=45, cy=45;
+  const la=(lp/100)*2*PI;
+  const x1=cx+r*Math.sin(0), y1=cy-r*Math.cos(0);
+  const x2=cx+r*Math.sin(la), y2=cy-r*Math.cos(la);
+  const lg=lp>50?1:0;
+  document.getElementById('pieChart').innerHTML=`
+    <svg width="90" height="90" viewBox="0 0 90 90">
+      <path d="M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${lg} 1 ${x2} ${y2} Z" fill="${storeColor}" opacity=".85"/>
+      <path d="M ${cx} ${cy} L ${x2} ${y2} A ${r} ${r} 0 ${1-lg} 1 ${x1} ${y1} Z" fill="#1e3a8a" opacity=".85"/>
+    </svg>
+    <div>
+      <div class="pie-legend-item"><div class="pie-dot" style="background:${storeColor};opacity:.85"></div><span style="color:#64748b">ランチ</span><strong style="color:#1e293b;margin-left:4px">${lp}%</strong></div>
+      <div class="pie-legend-item"><div class="pie-dot" style="background:#1e3a8a;opacity:.85"></div><span style="color:#64748b">ディナー</span><strong style="color:#1e293b;margin-left:4px">${dp}%</strong></div>
+      <div style="font-size:10px;color:#94a3b8;margin-top:6px">L:¥${fmt(sm.lunchSales/10000)}万<br>D:¥${fmt(sm.dinnerSales/10000)}万</div>
+    </div>
+  `;
+
+  // ebica乖離カード
+  const disc=sm.discrepancy;
+  const discColor = disc>110?'#dc2626':disc>95?'#f59e0b':'#16a34a';
+  document.getElementById('discCard').innerHTML=`
+    <div class="card-title">ebica vs POS 乖離分析</div>
+    <div style="font-size:11px;color:#64748b;margin-bottom:8px">ウォークイン率（乖離率）＝ウォークイン÷ebica客数</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:4px">
+      <span style="font-size:12px;color:#475569">ebica客数</span>
+      <span style="font-size:14px;font-weight:700;color:#2563eb">${fmt(sm.ebicaCust)}人</span>
+    </div>
+    <div class="disc-bar-track">
+      <div class="disc-bar-fill" style="background:#2563eb;width:${Math.min(100,sm.ebicaCust/(sm.posCust||1)*100).toFixed(0)}%"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:8px;margin-bottom:4px">
+      <span style="font-size:12px;color:#475569">ウォークイン</span>
+      <span style="font-size:14px;font-weight:700;color:#93c5fd">${fmt(sm.posCust-sm.ebicaCust)}人</span>
+    </div>
+    <div class="disc-bar-track">
+      <div class="disc-bar-fill" style="background:#93c5fd;width:${Math.min(100,(sm.posCust-sm.ebicaCust)/(sm.posCust||1)*100).toFixed(0)}%"></div>
+    </div>
+    <div style="margin-top:10px;padding:8px;background:#f8fafc;border-radius:8px;font-size:11px">
+      <span style="color:#64748b">ウォークイン率：</span>
+      <span style="font-size:15px;font-weight:700;color:${discColor}">${disc}%</span>
+      <span style="color:#94a3b8;font-size:10px;margin-left:4px">${disc>110?'⚠️ウォークイン多':disc>95?'📊 バランス型':'✅予約主導型'}</span>
+    </div>
+  `;
+
+  document.getElementById('reservChart').innerHTML = makeStackedChart(wd);
+}
+
+function renderMainChart(){
+  const sd=getSD();
+  const cfg={
+    sales:{color:sd.color,fmtFn:v=>`${Math.round(v/10)}万`},
+    ebicaCust:{color:'#06b6d4',fmtFn:v=>`${Math.round(v)}人`},
+    ebicaUnit:{color:'#7c3aed',fmtFn:v=>v>0?`${Math.round(v/100)/10}k`:'0'},
+  }[currentChart];
+  document.getElementById('mainChart').innerHTML = makeSVGChart(sd.weekData, currentChart, cfg.color, cfg.fmtFn);
+}
+
+// ===================================================
+//  RENDER: ISSUES
+// ===================================================
+function filterIssues(f,btn){
+  issueFilter=f;
+  document.querySelectorAll('#tab1 .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderIssues();
+}
+
+function renderIssues(){
+  const list = getMD().issues.filter(i=>issueFilter==='全て'||i.cat===issueFilter);
+  const el=document.getElementById('issueList');
+  if(!list.length){el.innerHTML='<div style="text-align:center;padding:40px;color:#94a3b8">このカテゴリの課題はありません</div>';return;}
+  el.innerHTML=list.map(i=>{
+    const cc=catColor[i.cat]||'#64748b';
+    const [sbg,stxt]=statusStyle[i.status]||['#f8fafc','#94a3b8'];
+    const priLabel={high:'🔴 高',medium:'🟡 中',low:'🟢 低'};
+    return`<div class="issue-card" style="border-left-color:${cc}">
+      <div class="issue-meta">
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          ${badge(i.cat,cc,cc+'22')} <span style="font-size:11px;color:#94a3b8">${i.date}</span> <span style="font-size:11px">${priLabel[i.pri]||''}</span>
+        </div>
+        ${badge(i.status,stxt,sbg)}
+      </div>
+      <div class="issue-content">${i.content}</div>
+      ${i.hypo?`<div class="hypo-box"><strong style="color:#7c3aed">💡 仮説：</strong>${i.hypo}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function toggleIssueForm(){document.getElementById('issueForm').classList.toggle('hidden');}
+
+function addIssue(){
+  const content=document.getElementById('iContent').value.trim();
+  if(!content)return;
+  getMD().issues.push({
+    id:Date.now(), date:document.getElementById('iDate').value||'本日',
+    cat:document.getElementById('iCat').value, content,
+    pri:document.getElementById('iPri').value, status:document.getElementById('iStat').value,
+    hypo:document.getElementById('iHypo').value
+  });
+  ['iContent','iHypo','iDate'].forEach(id=>document.getElementById(id).value='');
+  toggleIssueForm(); renderIssues();
+}
+
+// ===================================================
+//  RENDER: MEASURES
+// ===================================================
+function filterMeasures(f,btn){
+  measureFilter=f;
+  document.querySelectorAll('#tab2 .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMeasures();
+}
+
+function renderMeasures(){
+  const sd=getSD();
+  const list=(measureFilter==='全て'?sd.measures:sd.measures.filter(m=>m.cat===measureFilter))
+    .sort((a,b)=>['実施中','計画中','完了'].indexOf(a.status)-['実施中','計画中','完了'].indexOf(b.status));
+  document.getElementById('measureStatusSummary').innerHTML=
+    `実施中 <strong style="color:#0284c7">${sd.measures.filter(m=>m.status==='実施中').length}</strong>　計画中 <strong style="color:#7c3aed">${sd.measures.filter(m=>m.status==='計画中').length}</strong>　完了 <strong style="color:#16a34a">${sd.measures.filter(m=>m.status==='完了').length}</strong>`;
+  document.getElementById('measureList').innerHTML=list.map(m=>{
+    const cc=catColor[m.cat]||'#64748b';
+    const [sbg,stxt]=statusStyle[m.status]||['#f8fafc','#94a3b8'];
+    const ri={'効果あり':'✅','検証中':'🔄','未実施':'⏸'};
+    const icon=Object.keys(ri).find(k=>m.result&&m.result.startsWith(k))||'⏸';
+    return`<div class="measure-card">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <div style="display:flex;gap:6px">${badge(m.cat,cc,cc+'22')} ${m.abTest?badge('A/Bテスト','#7c3aed','#f5f3ff'):''}</div>
+        ${badge(m.status,stxt,sbg)}
+      </div>
+      <div class="hypo-blue"><strong>💡 仮説：</strong>${m.hypo}</div>
+      <div class="measure-text">📋 ${m.measure}</div>
+      <div class="measure-footer">
+        <span style="color:#94a3b8">👤 ${m.owner}　📅 ${m.deadline}</span>
+        <span style="color:${m.resultColor};font-weight:600">${ri[icon]||'⏸'} ${m.result}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===================================================
+//  RENDER: A/B TESTS
+// ===================================================
+function renderABTests(){
+  const sd=getSD();
+  document.getElementById('abStatus').innerHTML=
+    `<span>実施中 <strong style="color:#0284c7">${sd.abTests.filter(t=>t.status==='実施中').length}</strong></span>
+     <span>計画中 <strong style="color:#7c3aed">${sd.abTests.filter(t=>t.status==='計画中').length}</strong></span>
+     <span>完了 <strong style="color:#16a34a">${sd.abTests.filter(t=>t.status==='完了').length}</strong></span>`;
+  document.getElementById('abList').innerHTML=sd.abTests.map(t=>{
+    const maxV=Math.max(t.rA,t.rB,1);
+    const aWins=t.winner==='A', bWins=t.winner==='B';
+    const noteClass=t.status==='完了'?'done':t.status==='実施中'?'ongoing':'plan';
+    return`<div class="ab-card">
+      <div class="ab-header">
+        <div><div class="ab-title">${t.name}</div><div class="ab-meta">📅 ${t.period}　📊 指標：${t.metric}</div></div>
+        ${badge(t.status,t.status==='完了'?'#15803d':t.status==='実施中'?'#0284c7':'#7c3aed',t.status==='完了'?'#f0fdf4':t.status==='実施中'?'#f0f9ff':'#f5f3ff')}
+      </div>
+      <div class="ab-grid">
+        <div class="ab-pattern ${aWins?'winner':''}">
+          <div style="display:flex;justify-content:space-between">${badge('A パターン','#3730a3','#e0e7ff')} ${aWins?'<span style="font-size:12px;color:#16a34a;font-weight:700">🏆 勝者</span>':''}</div>
+          <div class="ab-pattern-desc">${t.pA}</div>
+          <div class="ab-pattern-value">${t.rA.toLocaleString()}</div>
+          <div class="ab-bar-track"><div class="ab-bar-fill" style="background:${aWins?'#16a34a':'#3b82f6'};width:${t.rA>0?(t.rA/maxV*100).toFixed(0):50}%"></div></div>
+        </div>
+        <div class="ab-pattern ${bWins?'winner':''}">
+          <div style="display:flex;justify-content:space-between">${badge('B パターン','#7c3aed','#f5f3ff')} ${bWins?'<span style="font-size:12px;color:#16a34a;font-weight:700">🏆 勝者</span>':''}</div>
+          <div class="ab-pattern-desc">${t.pB}</div>
+          <div class="ab-pattern-value">${t.rB>0?t.rB.toLocaleString():'実施待ち'}</div>
+          <div class="ab-bar-track"><div class="ab-bar-fill" style="background:${bWins?'#16a34a':'#7c3aed'};width:${t.rB>0?(t.rB/maxV*100).toFixed(0):10}%"></div></div>
+        </div>
+      </div>
+      <div class="ab-note ${noteClass}">
+        ${t.status==='完了'?'✅':t.status==='実施中'?'🔄':'📋'} ${t.note}${t.winner?` → <strong>${t.winner}パターンを標準オペレーションへ実装</strong>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===================================================
+//  RENDER: ACTIONS
+// ===================================================
+function renderActions(){
+  const acts=getMD().actions;
+  const done=acts.filter(a=>a.done).length;
+  const pct=Math.round(done/Math.max(acts.length,1)*100);
+  document.getElementById('progressPct').textContent=pct+'%';
+  document.getElementById('progressBar').style.width=pct+'%';
+  document.getElementById('progressText').textContent=`${done} / ${acts.length} 完了`;
+  document.getElementById('actionList').innerHTML=acts.map(a=>`
+    <div class="action-item ${a.done?'done':'todo'}" onclick="toggleAction(${a.id})">
+      <input type="checkbox" class="cb" ${a.done?'checked':''} onclick="event.stopPropagation();toggleAction(${a.id})">
+      <span class="action-text">${a.content}</span>
+      <span class="action-owner">👤 ${a.owner}</span>
+      <span class="action-deadline">📅 ${a.deadline}</span>
+    </div>`).join('');
+}
+
+function toggleAction(id){
+  const a=getMD().actions.find(a=>a.id===id);
+  if(a) a.done=!a.done;
+  renderActions();
+}
+
+function addAction(){
+  const c=document.getElementById('newAction').value.trim();
+  if(!c)return;
+  getMD().actions.push({id:Date.now(),content:c,owner:document.getElementById('newOwner').value||'-',deadline:document.getElementById('newDeadline').value||'-',done:false});
+  ['newAction','newOwner','newDeadline'].forEach(id=>document.getElementById(id).value='');
+  renderActions();
+}
+
+// ===================================================
+//  RENDER: COMPARE
+// ===================================================
+function renderCompare(){
+  const stores = STORE_NAMES;
+  const colors = stores.map(s=>STORES[s].color);
+  const tags = stores.map(s=>STORES[s].tag);
+
+  const kpiData = stores.map(s=>{
+    const sm=STORES[s].summary;
+    return{name:s,tag:STORES[s].tag,color:STORES[s].color,
+      sales:sm.sales,target:sm.target,achievement:sm.achievement,
+      ebicaCust:sm.ebicaCust,ebicaUnit:sm.ebicaUnit,
+      posUnit:sm.posUnit,costRate:sm.costRate,discrepancy:sm.discrepancy};
+  });
+
+  // KPI cards (first 4 stores, then second row)
+  document.getElementById('compareKPI').innerHTML=kpiData.map(k=>`
+    <div class="card" style="border-top:3px solid ${k.color}">
+      <div class="compare-store-header">
+        <div class="store-dot" style="background:${k.color}"></div>
+        <span style="font-size:13px;font-weight:700;color:#1e293b">${k.name.replace('もんじゃ こぼれや ','').replace('路地裏','')}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">
+        <div style="background:#f8fafc;border-radius:6px;padding:8px">
+          <div style="font-size:9px;color:#64748b">月間売上</div>
+          <div style="font-size:14px;font-weight:700">¥${fmt(k.sales/10000)}万</div>
+        </div>
+        <div style="background:${k.achievement>=100?'#f0fdf4':'#fef2f2'};border-radius:6px;padding:8px">
+          <div style="font-size:9px;color:#64748b">達成率</div>
+          <div style="font-size:14px;font-weight:700;color:${k.achievement>=100?'#16a34a':'#dc2626'}">${k.achievement}%</div>
+        </div>
+        <div style="background:#f8fafc;border-radius:6px;padding:8px">
+          <div style="font-size:9px;color:#64748b">ebica客数</div>
+          <div style="font-size:14px;font-weight:700">${fmt(k.ebicaCust)}人</div>
+        </div>
+        <div style="background:#f8fafc;border-radius:6px;padding:8px">
+          <div style="font-size:9px;color:#64748b">ebica客単価</div>
+          <div style="font-size:14px;font-weight:700">¥${fmt(k.ebicaUnit)}</div>
+        </div>
+      </div>
+    </div>`).join('');
+
+  // Bar charts
+  document.getElementById('compareSalesChart').innerHTML = makeBarChart(tags, kpiData.map(k=>k.sales/10000), colors, v=>`${Math.round(v)}万`);
+  document.getElementById('compareUnitChart').innerHTML  = makeBarChart(tags, kpiData.map(k=>k.ebicaUnit), colors, v=>`${Math.round(v/100)/10}k`);
+  document.getElementById('compareAchievChart').innerHTML = makeBarChart(tags, kpiData.map(k=>k.achievement), colors, v=>`${Math.round(v)}%`);
+
+  // Ranking table
+  const metrics=[
+    {key:'sales',label:'月間売上',fmtFn:v=>`¥${fmt(v/10000)}万`,desc:'↑高いほど良い'},
+    {key:'achievement',label:'目標達成率',fmtFn:v=>`${v}%`,desc:'↑100%超が目標'},
+    {key:'ebicaCust',label:'ebica客数',fmtFn:v=>`${fmt(v)}人`,desc:'↑多いほど良い'},
+    {key:'ebicaUnit',label:'ebica客単価',fmtFn:v=>`¥${fmt(v)}`,desc:'↑高いほど良い'},
+    {key:'costRate',label:'原価率',fmtFn:v=>`${v}%`,desc:'↓低いほど良い',asc:true},
+    {key:'discrepancy',label:'ウォークイン率',fmtFn:v=>`${v}%`,desc:'参考値'},
+  ];
+  const medal=['🥇','🥈','🥉','4位','5位','6位','7位'];
+  let tableHTML=`<thead><tr><th>指標</th>${stores.map((s,i)=>`<th style="color:${colors[i]}">${tags[i]}</th>`).join('')}<th>注目点</th></tr></thead><tbody>`;
+  metrics.forEach(m=>{
+    const vals=kpiData.map(k=>k[m.key]);
+    const sorted=[...vals].sort((a,b)=>m.asc?(a-b):(b-a));
+    tableHTML+=`<tr><td style="font-weight:600;color:#1e293b;font-size:11px">${m.label}<br><span style="font-size:9px;color:#94a3b8">${m.desc}</span></td>`;
+    vals.forEach((v,i)=>{
+      const rank=sorted.indexOf(v);
+      const isBest=rank===0;
+      tableHTML+=`<td style="color:${isBest?colors[i]:'#1e293b'};font-weight:${isBest?700:400}">
+        ${isBest?medal[0]:rank===1?medal[1]:rank===2?medal[2]:''} ${m.fmtFn(v)}
+      </td>`;
+    });
+    // highlight best/worst store
+    const bestIdx=vals.indexOf(sorted[0]);
+    const worstIdx=vals.indexOf(sorted[sorted.length-1]);
+    tableHTML+=`<td style="font-size:11px;color:#64748b">${m.asc?`⚠️ ${tags[worstIdx]}が最高`:`🏆 ${tags[bestIdx]}がトップ`}</td></tr>`;
+  });
+  tableHTML+='</tbody>';
+  document.getElementById('rankTable').innerHTML=tableHTML;
+}
+
+// ===================================================
+//  RENDER ALL
+// ===================================================
+function renderAll(){
+  renderAnalysis();
+  renderIssues();
+  renderMeasures();
+  renderABTests();
+  renderActions();
+}
+
+// ===================================================
+//  INIT
+// ===================================================
+// Set initial store button style
+(function(){
+  const first = STORE_NAMES[0];
+  const btn = document.getElementById('sbtn-'+first);
+  if(btn){
+    btn.style.borderBottomColor=STORES[first].color;
+    btn.style.color=STORES[first].color;
+  }
+})();
+renderAll();
+</script>
+</body>
+</html>
