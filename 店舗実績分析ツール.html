@@ -38,7 +38,6 @@ textarea:focus{border-color:var(--s);}
 .btn-clr{background:#fee2e2;color:#dc2626;}.btn-clr:hover{background:#fecaca;}
 .btn-sv{background:#e0f2e9;color:#1a5c35;}.btn-sv:hover{background:#bbf7d0;}
 .btn-ex{background:#fef9c3;color:#713f12;}.btn-ex:hover{background:#fde68a;}
-.btn-im{background:#ede9fe;color:#4c1d95;}.btn-im:hover{background:#ddd6fe;}
 .btn-sm{padding:4px 10px;font-size:11.5px;border-radius:5px;}
 .ebx{background:#fee2e2;border:1px solid #fca5a5;border-radius:6px;padding:8px 12px;color:#dc2626;font-size:12px;margin-top:8px;display:none;}
 .sbadge{font-size:10.5px;color:#5CB85C;margin-left:5px;display:none;}
@@ -124,7 +123,6 @@ td.ctd{text-align:left;min-width:130px;}
 /* Toast */
 .toast{position:fixed;bottom:20px;right:20px;background:#1a5c35;color:#fff;padding:8px 15px;border-radius:7px;font-size:12.5px;font-weight:600;opacity:0;transition:opacity .25s;pointer-events:none;z-index:999;}
 .toast.show{opacity:1;}
-#fileImport{display:none;}
 /* Plan comparison */
 .pv-sale-ok{background:#C6F0D0!important;color:#1A4731;font-weight:bold;}
 .pv-sale-miss{background:#FFD6CC!important;color:#7B0000;font-weight:bold;}
@@ -140,16 +138,37 @@ td.ctd{text-align:left;min-width:130px;}
 .stbl-wrap table thead th{position:sticky;top:0;z-index:3;box-shadow:0 2px 3px rgba(0,0,0,.18);}
 @media print{.no-print{display:none!important;}body{background:#fff;}.card,.tcard,.sc{box-shadow:none;border:1px solid #ddd;}}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 <header>
   <div><h1>&#x1F3EA; 店舗実績分析ツール</h1><div class="sub">日別データを貼り付けて週次・月次の人件費率を分析（週区切り：月〜日）</div></div>
-  <div class="hbtns no-print">
+  <div class="hbtns no-print" style="align-items:center;gap:10px">
+    <span id="ghSyncStatus" style="font-size:10.5px;opacity:.85"></span>
     <button class="btn btn-ex btn-sm" onclick="exportData()">&#x1F4E4; エクスポート</button>
-    <button class="btn btn-im btn-sm" onclick="document.getElementById('fileImport').click()">&#x1F4E5; インポート</button>
-    <input type="file" id="fileImport" accept=".json" onchange="importData(event)">
+    <button class="btn btn-sm" onclick="openGhModal()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.4);font-size:11px" title="GitHub同期設定">⚙ 同期設定</button>
   </div>
 </header>
+
+<!-- GITHUB PAT MODAL -->
+<div id="ghModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:2000;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:10px;padding:24px 28px;max-width:480px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.25)">
+    <div style="font-size:15px;font-weight:700;color:#1F3864;margin-bottom:4px">⚙ GitHub 同期設定</div>
+    <div style="font-size:11px;color:#666;margin-bottom:14px;line-height:1.6">Personal Access Tokenを設定すると、サイトを開くと自動でデータを読み込み、分析・保存時に自動でGitHubへ書き込みます。<br>トークンはこのデバイスのみに保存され、他には送信されません。<br><br>取得方法: GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic) → <strong>repo</strong> 権限 → Generate</div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:10px;font-weight:700;color:#666;display:block;margin-bottom:4px">PERSONAL ACCESS TOKEN</label>
+      <input type="password" id="ghModalToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="width:100%;border:1.5px solid #ddd;border-radius:6px;padding:7px 10px;font-family:monospace;font-size:12.5px;outline:none">
+    </div>
+    <div style="display:flex;gap:8px;justify-content:space-between;align-items:center">
+      <button class="btn btn-clr btn-sm" onclick="clearGhToken()" style="font-size:11px">🗑 トークン削除</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-clr" onclick="closeGhModal()">キャンセル</button>
+        <button class="btn btn-p" onclick="saveGhModal()">保存して同期開始</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <div class="container">
 
@@ -309,9 +328,15 @@ function updateOverallReview(val){
     document.getElementById('storeNameInput').value=s.name||'';
     document.getElementById('managerInput').value=s.managerName||'';
     renderHistory();
-    // 最新月を自動表示（保存ファイルを開いたときすぐにデータが見えるように）
     var _mkeys=Object.keys(s.months||{}).sort();
     if(_mkeys.length>0){try{loadMonth(_mkeys[_mkeys.length-1]);}catch(e){console.error('startup loadMonth error:',e);showError('起動時のデータ読み込みに失敗しました：'+e.message);}}
+  }
+  // GitHub自動読み込み（トークンがあれば起動時に実行）
+  if(ghToken()){
+    ghSyncStatus('☁ 読み込み中…','rgba(255,255,255,.7)');
+    githubAutoLoad();
+  } else {
+    ghSyncStatus('⚙ 同期設定 →','rgba(255,200,80,.8)');
   }
 })();
 
@@ -558,13 +583,14 @@ function analyzeData(){
     renderAll(year,month,name,days,target);
     showSaveBadge();toast('分析完了・自動保存しました');
     setTimeout(function(){document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});},80);
+    githubSave();
   }catch(e){
     showError('表示中にエラーが発生しました：'+e.message);
     console.error('renderAll error:',e);
   }
 }
 
-function manualSave(){if(!activeStoreId||!activeYM){toast('先にデータを分析してください');return;}saveStorage();showSaveBadge();toast('保存しました');}
+function manualSave(){if(!activeStoreId||!activeYM){toast('先にデータを分析してください');return;}saveStorage();showSaveBadge();toast('保存しました');githubSave();}
 function showSaveBadge(){var b=document.getElementById('saveBadge');b.style.display='inline';setTimeout(function(){b.style.display='none';},2500);}
 
 function renderAll(year,month,name,days,target){
@@ -1091,25 +1117,89 @@ function renderSummaryPage(){
   document.getElementById('summaryContent').innerHTML=h;
 }
 
-// ── EXPORT / IMPORT ──
+// ── EXPORT (Excel) ──
 function exportData(){
-  var json=JSON.stringify(appData,null,2);var blob=new Blob([json],{type:'application/json'});
-  var url=URL.createObjectURL(blob);var a=document.createElement('a');
-  a.href=url;a.download='店舗実績データ_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);toast('エクスポートしました');
-}
+  if(!appData.stores||!appData.stores.length){toast('エクスポートするデータがありません');return;}
+  if(typeof XLSX==='undefined'){toast('Excelライブラリ読み込み中…再度お試しください');return;}
+  var wb=XLSX.utils.book_new();
 
-function importData(e){
-  var file=e.target.files[0];if(!file)return;
-  var reader=new FileReader();
-  reader.onload=function(ev){
-    try{var imp=JSON.parse(ev.target.result);if(!imp.stores)throw new Error('無効なフォーマット');
-      if(confirm('インポートすると現在のデータと統合されます。続けますか？')){
-        imp.stores.forEach(function(is){var ex=appData.stores.find(function(s){return s.name===is.name;});if(ex)Object.assign(ex.months,is.months);else appData.stores.push(is);});
-        saveStorage();renderTabs();renderHistory();toast('インポートしました（'+imp.stores.length+'店舗）');
-      }
-    }catch(err){alert('インポートに失敗しました：'+err.message);}
-    e.target.value='';
-  };reader.readAsText(file);
+  // ── Sheet1: 月次サマリー ──
+  var sumRows=[['店舗名','店長','年','月','目標人件費率(%)','月間売上(万)','平均達成率(%)','月間客数(人)','平均人件費率(%)','目標超過日数','総合振り返り']];
+  appData.stores.forEach(function(s){
+    var mkeys=Object.keys(s.months||{}).sort();
+    mkeys.forEach(function(ym){
+      var md=s.months[ym];
+      var days=md.days||[];
+      var lv=days.map(function(d){return d.laborRate;}).filter(function(v){return v!==null&&v!==undefined;});
+      var la=lv.length?lv.reduce(function(a,b){return a+b;},0)/lv.length:null;
+      var ts=days.reduce(function(s,d){return s+(d.sales||0);},0);
+      var tc=days.reduce(function(s,d){return s+(d.customers||0);},0);
+      var av=days.map(function(d){return d.achievement;}).filter(function(v){return v!==null&&v!==undefined;});
+      var aa=av.length?av.reduce(function(a,b){return a+b;},0)/av.length:null;
+      var od=lv.filter(function(v){return v>md.target;}).length;
+      sumRows.push([
+        s.name||'',s.managerName||'',md.year,md.month,md.target,
+        ts?parseFloat(ts.toFixed(2)):0,
+        aa?parseFloat(aa.toFixed(1)):null,
+        tc||0,
+        la?parseFloat(la.toFixed(2)):null,
+        od,
+        md.overallReview||''
+      ]);
+    });
+  });
+  var ws1=XLSX.utils.aoa_to_sheet(sumRows);
+  ws1['!cols']=[{wch:20},{wch:10},{wch:6},{wch:4},{wch:14},{wch:12},{wch:12},{wch:10},{wch:14},{wch:10},{wch:40}];
+  XLSX.utils.book_append_sheet(wb,ws1,'月次サマリー');
+
+  // ── Sheet2+: 店舗×月 日別データ ──
+  appData.stores.forEach(function(s){
+    var mkeys=Object.keys(s.months||{}).sort();
+    mkeys.forEach(function(ym){
+      var md=s.months[ym];
+      var pd=md.planDays||{};
+      var hasPlan=pd&&(Object.keys(pd.planSales||{}).length||Object.keys(pd.planLabor||{}).length||Object.keys(pd.planLaborRate||{}).length);
+      var hdr=['日','曜日','天気','売上(万)','達成率(%)','客数(人)','客単価(円)','原価率(%)','人件費率(%)','目標比(%)', '判定'];
+      if(hasPlan){hdr=hdr.concat(['売上予測(万)','売上差異(万)','人件費率予定(%)','人件費率差異(%)','人件費予定(万)','人件費実績(万)','人件費差異(万)']);}
+      hdr=hdr.concat(['主な原因','振り返り']);
+      var rows=[hdr];
+      var DOWS2=['日','月','火','水','木','金','土'];
+      (md.days||[]).forEach(function(d){
+        var wd=new Date(md.year,md.month-1,d.date).getDay();
+        var ratio=d.laborRate!==null&&md.target?(d.laborRate/md.target*100):null;
+        var judge=d.laborRate===null?'':ratio>=120||ratio<=80?'大幅超過':ratio>=115||ratio<=85?'目標超過':ratio>=110||ratio<=90?'要注意':'目標達成';
+        var row=[d.date,DOWS2[wd],d.weather||'',d.sales!==null?d.sales:null,d.achievement!==null?d.achievement:null,d.customers||null,d.unitPrice||null,d.costRate!==null?d.costRate:null,d.laborRate!==null?d.laborRate:null,ratio?parseFloat(ratio.toFixed(1)):null,judge];
+        if(hasPlan){
+          var ps=(pd.planSales||{})[d.date];var plRaw=(pd.planLabor||{})[d.date];var plr=(pd.planLaborRate||{})[d.date];
+          var pl=plRaw!==null&&plRaw!==undefined?Math.round(plRaw*1.1):null;
+          var pSale=ps!==null&&ps!==undefined?parseFloat((ps/10000).toFixed(2)):null;
+          var pLB=pl!==null?parseFloat((pl/10000).toFixed(2)):null;
+          var aLB=d.sales!==null&&d.laborRate!==null?parseFloat((d.sales*d.laborRate/100).toFixed(2)):null;
+          row=row.concat([
+            pSale,
+            pSale!==null&&d.sales!==null?parseFloat((d.sales-pSale).toFixed(2)):null,
+            plr!==null&&plr!==undefined?plr:null,
+            plr!==null&&d.laborRate!==null?parseFloat((d.laborRate-plr).toFixed(2)):null,
+            pLB,aLB,
+            pLB!==null&&aLB!==null?parseFloat((aLB-pLB).toFixed(2)):null
+          ]);
+        }
+        row=row.concat([d.cause||'',d.comment||'']);
+        rows.push(row);
+      });
+      var ws=XLSX.utils.aoa_to_sheet(rows);
+      var wchs=[{wch:4},{wch:4},{wch:4},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:12},{wch:8},{wch:8}];
+      if(hasPlan)wchs=wchs.concat([{wch:12},{wch:10},{wch:14},{wch:14},{wch:12},{wch:12},{wch:10}]);
+      wchs=wchs.concat([{wch:20},{wch:30}]);
+      ws['!cols']=wchs;
+      var sheetName=(s.name||'店舗').slice(0,15)+'_'+md.year+'年'+md.month+'月';
+      XLSX.utils.book_append_sheet(wb,ws,sheetName);
+    });
+  });
+
+  var fname='店舗実績データ_'+new Date().toISOString().slice(0,10)+'.xlsx';
+  XLSX.writeFile(wb,fname);
+  toast('Excelエクスポートしました');
 }
 
 // ── UTILS ──
@@ -1119,6 +1209,115 @@ function hideError(){document.getElementById('errorBox').style.display='none';}
 function clearInput(){document.getElementById('dataInput').value='';document.getElementById('parseInfo').textContent='';hideError();document.getElementById('results').style.display='none';activeYM=null;renderHistory();}
 var toastT=null;
 function toast(msg){var el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){el.classList.remove('show');},2200);}
+
+// ── GITHUB SYNC ──
+var GH_REPO='sk1-web/koboreya-report';
+var GH_FILE='shopkpi_data.json';
+var GH_BRANCH='main';
+var GH_PAT_KEY='shopKpiGitHubPAT';
+
+function ghToken(){return localStorage.getItem(GH_PAT_KEY)||'';}
+function ghSaveToken(v){v?localStorage.setItem(GH_PAT_KEY,v):localStorage.removeItem(GH_PAT_KEY);}
+
+function ghSyncStatus(msg,color){
+  var el=document.getElementById('ghSyncStatus');
+  if(!el)return;
+  el.textContent=msg;
+  el.style.color=color||'rgba(255,255,255,.8)';
+}
+
+// モーダル操作
+function openGhModal(){
+  var m=document.getElementById('ghModal');
+  var inp=document.getElementById('ghModalToken');
+  if(inp)inp.value=ghToken();
+  m.style.display='flex';
+  setTimeout(function(){if(inp)inp.focus();},80);
+}
+function closeGhModal(){document.getElementById('ghModal').style.display='none';}
+function clearGhToken(){
+  if(!confirm('保存済みのトークンを削除しますか？'))return;
+  ghSaveToken('');
+  var inp=document.getElementById('ghModalToken');if(inp)inp.value='';
+  ghSyncStatus('⚠ トークン未設定','rgba(255,200,80,.9)');
+  closeGhModal();
+}
+function saveGhModal(){
+  var inp=document.getElementById('ghModalToken');
+  var val=inp?inp.value.trim():'';
+  if(!val){alert('トークンを入力してください');return;}
+  ghSaveToken(val);
+  closeGhModal();
+  ghSyncStatus('☁ 同期中…','rgba(255,255,255,.7)');
+  githubAutoLoad().then(function(){githubSave();});
+}
+
+// 起動時の自動読み込み（確認ダイアログなし・サイレントマージ）
+async function githubAutoLoad(){
+  var token=ghToken();
+  if(!token)return;
+  var url='https://api.github.com/repos/'+GH_REPO+'/contents/'+GH_FILE+'?ref='+GH_BRANCH;
+  var headers={'Accept':'application/vnd.github.v3+json','Authorization':'Bearer '+token};
+  ghSyncStatus('☁ 読み込み中…','rgba(255,255,255,.7)');
+  try{
+    var resp=await fetch(url,{headers:headers});
+    if(!resp.ok){
+      if(resp.status===404){ghSyncStatus('☁ 初回保存待ち','rgba(255,200,80,.9)');return;}
+      throw new Error('HTTP '+resp.status);
+    }
+    var data=await resp.json();
+    var content=JSON.parse(atob(data.content.replace(/\n/g,'')));
+    if(!content.stores)return;
+    // サイレントマージ: GitHubのデータを優先（新しい月次データを取り込む）
+    var updated=false;
+    content.stores.forEach(function(is){
+      var ex=appData.stores.find(function(s){return s.name===is.name;});
+      if(ex){
+        Object.keys(is.months||{}).forEach(function(ym){
+          if(!ex.months[ym]){ex.months[ym]=is.months[ym];updated=true;}
+        });
+        if(is.managerName&&!ex.managerName){ex.managerName=is.managerName;updated=true;}
+      } else {
+        appData.stores.push(is);updated=true;
+      }
+    });
+    if(updated){
+      saveStorage();renderTabs();
+      if(activeStoreId){renderHistory();}
+      // 最新月を再表示
+      var _s=getStore(activeStoreId);
+      if(_s){var _mk=Object.keys(_s.months||{}).sort();if(_mk.length>0){try{loadMonth(_mk[_mk.length-1]);}catch(e){}}}
+    }
+    var now=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+    ghSyncStatus('☁ '+now+' 同期済み','rgba(255,255,255,.85)');
+  }catch(e){
+    ghSyncStatus('☁ 読込エラー','rgba(255,150,150,.9)');
+    console.warn('githubAutoLoad error:',e);
+  }
+}
+
+// 分析・保存時の自動書き込み
+async function githubSave(){
+  var token=ghToken();
+  if(!token)return;
+  var url='https://api.github.com/repos/'+GH_REPO+'/contents/'+GH_FILE;
+  var headers={'Accept':'application/vnd.github.v3+json','Authorization':'Bearer '+token,'Content-Type':'application/json'};
+  ghSyncStatus('☁ 保存中…','rgba(255,255,255,.7)');
+  var sha=null;
+  try{var gr=await fetch(url+'?ref='+GH_BRANCH,{headers:headers});if(gr.ok){var gd=await gr.json();sha=gd.sha;}}catch(e){}
+  var b64=btoa(unescape(encodeURIComponent(JSON.stringify(appData,null,2))));
+  var body={message:'店舗実績データ更新 '+new Date().toLocaleString('ja-JP'),content:b64,branch:GH_BRANCH};
+  if(sha)body.sha=sha;
+  try{
+    var resp=await fetch(url,{method:'PUT',headers:headers,body:JSON.stringify(body)});
+    if(!resp.ok){var err=await resp.json();throw new Error(err.message||'HTTP '+resp.status);}
+    var now=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+    ghSyncStatus('☁ '+now+' 保存済み','rgba(255,255,255,.85)');
+  }catch(e){
+    ghSyncStatus('☁ 保存エラー','rgba(255,150,150,.9)');
+    console.warn('githubSave error:',e);
+  }
+}
 </script>
 </body>
 </html>
