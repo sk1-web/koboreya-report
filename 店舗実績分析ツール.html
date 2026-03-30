@@ -429,9 +429,12 @@ function parseText(text){
   var lines=text.split('\n').map(function(l){return l.trim();}).filter(function(l){return l.length>0;});
   var days=[],cur=null,ef=null;
   var km={'売上':'sales','達成率':'achievement','客数':'customers','客単価':'unitPrice','原価率':'costRate','人件費率':'laborRate'};
+  // ラベルなし連続値形式の順序: 売上→達成率→客数→客単価→原価率→人件費率
+  var seqFields=['sales','achievement','customers','unitPrice','costRate','laborRate'];
+  var seqIdx=-1;
   for(var i=0;i<lines.length;i++){
     var ln=lines[i];
-    // 日付行の検出: "1 晴" 形式（天気あり）または "1" 形式（天気なし）
+    // 日付行の検出: "1 晴" "1 ☀️" 形式（天気あり）または "1" 形式（天気なし）
     var dm=ln.match(/^(\d{1,2})(?:\s+(.+))?$/);
     var isLabel=false;
     // 全角コロン「：」または半角コロン「:」でラベル検索
@@ -441,16 +444,19 @@ function parseText(text){
       if(cur)days.push(cur);
       var wx=dm[2]?dm[2].trim():'';
       cur={date:parseInt(dm[1],10),weather:wx,sales:null,achievement:null,customers:null,unitPrice:null,costRate:null,laborRate:null,cause:'',comment:''};
-      ef=null;continue;
+      ef=null;seqIdx=0;continue;
     }
     if(isLabel){
       var lbl2=ln.substring(0,ci);var val=ln.substring(ci+1).trim();
       var fld=km[lbl2];
       if(val&&cur){setV(cur,fld,val);ef=null;}  // ラベル：値 が同一行
       else{ef=fld;}  // 値は次の行
+      seqIdx=-1;  // ラベルモード：逐次モード無効
       continue;
     }
-    if(ef&&cur){setV(cur,ef,ln);ef=null;}
+    if(ef&&cur){setV(cur,ef,ln);ef=null;continue;}
+    // ラベルなし逐次モード: 日付後の値を順番に割り当て（売上→達成率→客数→客単価→原価率→人件費率）
+    if(cur&&seqIdx>=0&&seqIdx<seqFields.length){setV(cur,seqFields[seqIdx],ln);seqIdx++;}
   }
   if(cur)days.push(cur);return days;
 }
