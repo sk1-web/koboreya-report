@@ -471,7 +471,7 @@ function setV(d,f,s){s=s.trim();var m;
 var DOWS=['日','月','火','水','木','金','土'];
 function dow(y,mo,d){return new Date(y,mo-1,d).getDay();}
 function firstMonday(y,mo){var fd=dow(y,mo,1);if(fd===1)return 1;if(fd===0)return 2;return 9-fd;}
-function assignGroups(days,y,mo){var fm=firstMonday(y,mo);return days.map(function(d){var wd=dow(y,mo,d.date);var wg=d.date<fm?0:Math.ceil((d.date-fm+1)/7);return Object.assign({},d,{wd:wd,dn:DOWS[wd],wg:wg});});}
+function assignGroups(days,y,mo){var fm=firstMonday(y,mo);return (days||[]).filter(function(d){return d&&d.date!=null;}).map(function(d){var wd=dow(y,mo,d.date);var wg=d.date<fm?0:Math.ceil((d.date-fm+1)/7);return Object.assign({},d,{wd:wd,dn:DOWS[wd]||'',wg:wg});});}
 function groupByWk(days){var g={};days.forEach(function(d){if(!g[d.wg])g[d.wg]=[];g[d.wg].push(d);});return g;}
 function avg(arr,noAnom){var v=arr.filter(function(x){return x!==null&&x!==undefined;});if(noAnom)v=v.filter(function(x){return x<100;});if(!v.length)return null;return v.reduce(function(a,b){return a+b;},0)/v.length;}
 
@@ -1272,7 +1272,11 @@ async function githubAutoLoad(){
       throw new Error('HTTP '+resp.status);
     }
     var data=await resp.json();
-    var content=JSON.parse(atob(data.content.replace(/\n/g,'')));
+    var _b64=data.content.replace(/\n/g,'');
+    var _bin2=atob(_b64);
+    var _bytes2=new Uint8Array(_bin2.length);
+    for(var _i=0;_i<_bin2.length;_i++)_bytes2[_i]=_bin2.charCodeAt(_i);
+    var content=JSON.parse(new TextDecoder().decode(_bytes2));
     if(!content.stores)return;
     // サイレントマージ: GitHubのデータを優先（新しい月次データを取り込む）
     var updated=false;
@@ -1311,7 +1315,10 @@ async function githubSave(){
   ghSyncStatus('☁ 保存中…','rgba(255,255,255,.7)');
   var sha=null;
   try{var gr=await fetch(url+'?ref='+GH_BRANCH,{headers:headers});if(gr.ok){var gd=await gr.json();sha=gd.sha;}}catch(e){}
-  var b64=btoa(unescape(encodeURIComponent(JSON.stringify(appData,null,2))));
+  var _json=JSON.stringify(appData,null,2);
+  var _bytes=new TextEncoder().encode(_json);
+  var _bin=Array.from(_bytes,function(b){return String.fromCharCode(b);}).join('');
+  var b64=btoa(_bin);
   var body={message:'店舗実績データ更新 '+new Date().toLocaleString('ja-JP'),content:b64,branch:GH_BRANCH};
   if(sha)body.sha=sha;
   try{
