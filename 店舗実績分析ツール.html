@@ -316,6 +316,17 @@ function updateOverallReview(val){
   s.months[activeYM].overallReview=val;saveStorage();
 }
 
+// ── CAUSE GROUPS (複数選択対応) ──
+var CAUSE_GROUPS=[
+  {grp:'売上・集客系',      items:['客数減','単価減','キャンセル','団体変動']},
+  {grp:'シフト計画・設計系', items:['予測ミス','固定シフト過多','社員過多','シフトミス']},
+  {grp:'シフト運用・当日対応', items:['早上がり判断遅れ','急な欠勤/穴埋め','残業管理不備']},
+  {grp:'オペレーション・育成', items:['仕込み過多不足','教育時間増']},
+  {grp:'外部要因',          items:['天候/外部要因']}
+];
+// Flat array for backward-compat (analysis etc.)
+var CAUSES=CAUSE_GROUPS.reduce(function(a,g){return a.concat(g.items);},[]);
+
 (function(){
   loadStorage();
   var sel=document.getElementById('monthInput');
@@ -511,17 +522,6 @@ function lcLabel(v,t){
   if(r>=1.10||r<=0.90)return'&#x26A0;&#xFE0F; 要注意';
   return'&#x2705; 目標達成';
 }
-
-// ── CAUSE GROUPS (複数選択対応) ──
-var CAUSE_GROUPS=[
-  {grp:'売上・集客系',      items:['客数減','単価減','キャンセル','団体変動']},
-  {grp:'シフト計画・設計系', items:['予測ミス','固定シフト過多','社員過多','シフトミス']},
-  {grp:'シフト運用・当日対応', items:['早上がり判断遅れ','急な欠勤/穴埋め','残業管理不備']},
-  {grp:'オペレーション・育成', items:['仕込み過多不足','教育時間増']},
-  {grp:'外部要因',          items:['天候/外部要因']}
-];
-// Flat array for backward-compat (analysis etc.)
-var CAUSES=CAUSE_GROUPS.reduce(function(a,g){return a.concat(g.items);},[]);
 
 // Multi-select widget builder
 function makeCauseWidget(date,selectedStr){
@@ -1239,7 +1239,7 @@ var GH_REPO='sk1-web/koboreya-report';
 var GH_FILE='shopkpi_data.json';
 var GH_BRANCH='main';
 var GH_PAT_KEY='shopKpiGitHubPAT';
-var GH_DEFAULT_TOKEN='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';
+var GH_DEFAULT_TOKEN='';
 
 function ghToken(){return localStorage.getItem(GH_PAT_KEY)||'';}
 function ghSaveToken(v){v?localStorage.setItem(GH_PAT_KEY,v):localStorage.removeItem(GH_PAT_KEY);}
