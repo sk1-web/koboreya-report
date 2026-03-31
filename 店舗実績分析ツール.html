@@ -197,13 +197,12 @@ td.ctd{text-align:left;min-width:130px;}
   </div>
   <!-- 予実データ入力 -->
   <details class="plan-box no-print" id="planDetails" open>
-    <summary>📊 予実データ入力（任意）▼</summary>
+    <summary>📊 予実データ入力▼</summary>
     <div style="margin-top:9px">
-      <div style="font-size:11px;color:#666;margin-bottom:5px">シフト管理システムの月次データをそのまま貼り付けてください。<strong>売上予算・人件費・人件費率</strong>を自動抽出します。<br>手順：①下に貼り付け　②「📊 予実データを解析・保存」をクリック　③「📊 分析する」で結果に反映されます。</div>
+      <div style="font-size:11px;color:#666;margin-bottom:5px">シフト管理システムの月次データをそのまま貼り付けてください。<strong>売上予算・人件費・人件費率</strong>を自動抽出します。<br>日別データと合わせて「📊 分析する」をクリックしてください。</div>
       <textarea id="planInput" style="height:130px;font-size:11px" placeholder="1(日)&#10;2(月)&#10;...&#10;31(火)&#10;合計&#10;売上予算&#10;¥0&#10;...&#10;人件費&#10;¥91,710&#10;...&#10;人件費率&#10;-&#10;20.36%&#10;..."></textarea>
       <div class="pinfo" id="planParseInfo"></div>
       <div style="margin-top:7px;display:flex;gap:7px">
-        <button class="btn btn-ex btn-sm" onclick="parsePlanInput()">📊 予実データを解析・保存</button>
         <button class="btn btn-clr btn-sm" onclick="clearPlanInput()">🗑 クリア</button>
       </div>
     </div>
@@ -573,10 +572,15 @@ function analyzeData(){
   var name=document.getElementById('storeNameInput').value.trim();
   var mgr=document.getElementById('managerInput').value.trim();
   var text=document.getElementById('dataInput').value.trim();
+  var planText=document.getElementById('planInput').value.trim();
   hideError();
   if(!text){showError('日別データを貼り付けてください。');return;}
-  var parsed=parseText(text);if(!parsed.length){showError('データを解析できませんでした。');return;}
+  if(!planText){showError('予実データを貼り付けてください。');return;}
+  var parsed=parseText(text);if(!parsed.length){showError('日別データを解析できませんでした。');return;}
+  var pd=parsePlanText(planText);if(!pd){showError('予実データを解析できませんでした。フォーマットを確認してください。');return;}
   document.getElementById('parseInfo').textContent='✓ '+parsed.length+'日分のデータを読み込みました';
+  var pcnt=Object.keys(pd.planSales||pd.planLabor||pd.planLaborRate||{}).length;
+  document.getElementById('planParseInfo').textContent='✓ '+pcnt+'日分の予実データを解析しました';
   if(!name)name='店舗'+(appData.stores.length);
   document.getElementById('storeNameInput').value=name;
   if(!activeStoreId){var ns=getOrCreateStore(name);activeStoreId=ns.id;}
@@ -584,6 +588,7 @@ function analyzeData(){
   var days=assignGroups(parsed,year,month);
   saveMonth(activeStoreId,year,month,target,days.map(function(d){return Object.assign({},d);}));
   var ym=ym_key(year,month);activeYM=ym;showingSum=false;
+  savePlanDays(activeStoreId,activeYM,pd);
   try{renderTabs();renderHistory();}catch(e){console.warn('tab/history render error:',e);}
   try{
     renderAll(year,month,name,days,target);
