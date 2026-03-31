@@ -330,6 +330,8 @@ function updateOverallReview(val){
     var _mkeys=Object.keys(s.months||{}).sort();
     if(_mkeys.length>0){try{loadMonth(_mkeys[_mkeys.length-1]);}catch(e){console.error('startup loadMonth error:',e);showError('起動時のデータ読み込みに失敗しました：'+e.message);}}
   }
+  // デフォルトトークンが未設定の場合は自動設定
+  if(!ghToken()&&GH_DEFAULT_TOKEN)ghSaveToken(GH_DEFAULT_TOKEN);
   // GitHub自動読み込み（トークンがあれば起動時に実行）
   if(ghToken()){
     ghSyncStatus('☁ 読み込み中…','rgba(255,255,255,.7)');
@@ -410,8 +412,8 @@ function loadMonth(ym){
   document.getElementById('yearInput').value=md.year;document.getElementById('monthInput').value=md.month;document.getElementById('targetInput').value=md.target;
   document.getElementById('dataInput').value='';document.getElementById('parseInfo').textContent='（保存済みデータを表示中）';
   renderHistory();
-  var days=assignGroups(md.days,md.year,md.month);
   try{
+    var days=assignGroups(md.days,md.year,md.month);
     renderAll(md.year,md.month,s.name||'店舗',days,md.target);
     document.getElementById('summaryPage').style.display='none';
     renderTabs();
@@ -470,7 +472,18 @@ function setV(d,f,s){s=s.trim();var m;
 var DOWS=['日','月','火','水','木','金','土'];
 function dow(y,mo,d){return new Date(y,mo-1,d).getDay();}
 function firstMonday(y,mo){var fd=dow(y,mo,1);if(fd===1)return 1;if(fd===0)return 2;return 9-fd;}
-function assignGroups(days,y,mo){var fm=firstMonday(y,mo);return (days||[]).filter(function(d){return d&&d.date!=null;}).map(function(d){var wd=dow(y,mo,d.date);var wg=d.date<fm?0:Math.ceil((d.date-fm+1)/7);return Object.assign({},d,{wd:wd,dn:DOWS[wd]||'',wg:wg});});}
+function assignGroups(days,y,mo){
+  try{
+    var fm=firstMonday(y,mo);
+    return (days||[]).filter(function(d){return d&&typeof d==='object'&&d.date!=null&&typeof d.date==='number';}).map(function(d){
+      try{
+        var wd=dow(y,mo,d.date);
+        var wg=d.date<fm?0:Math.ceil((d.date-fm+1)/7);
+        return Object.assign({},d,{wd:(wd>=0&&wd<=6?wd:0),dn:DOWS[wd>=0&&wd<=6?wd:0]||'',wg:wg||0});
+      }catch(e){return Object.assign({},d,{wd:0,dn:'',wg:0});}
+    });
+  }catch(e){console.warn('assignGroups error:',e);return [];}
+}
 function groupByWk(days){var g={};days.forEach(function(d){if(!g[d.wg])g[d.wg]=[];g[d.wg].push(d);});return g;}
 function avg(arr,noAnom){var v=arr.filter(function(x){return x!==null&&x!==undefined;});if(noAnom)v=v.filter(function(x){return x<100;});if(!v.length)return null;return v.reduce(function(a,b){return a+b;},0)/v.length;}
 
@@ -1226,6 +1239,7 @@ var GH_REPO='sk1-web/koboreya-report';
 var GH_FILE='shopkpi_data.json';
 var GH_BRANCH='main';
 var GH_PAT_KEY='shopKpiGitHubPAT';
+var GH_DEFAULT_TOKEN='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';
 
 function ghToken(){return localStorage.getItem(GH_PAT_KEY)||'';}
 function ghSaveToken(v){v?localStorage.setItem(GH_PAT_KEY,v):localStorage.removeItem(GH_PAT_KEY);}
