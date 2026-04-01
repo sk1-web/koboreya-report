@@ -1318,7 +1318,7 @@ async function githubAutoLoad(){
   }
 }
 
-// ── GitHub保存（タイムスタンプ付き）──
+// ── GitHub保存（タイムスタンプ付き・SHAコンフリクト時リトライ）──
 async function githubSave(){
   var token=ghToken();
   if(!token)return;
@@ -1329,17 +1329,31 @@ async function githubSave(){
   ghSyncStatus('☁ 保存中…','rgba(255,255,255,.7)');
   appData._ts=Date.now();
   try{localStorage.setItem(SKEY,JSON.stringify(appData));}catch(e){}
-  var sha=null;
-  try{var gr=await fetch(url+'?ref='+GH_BRANCH,{headers:headers});if(gr.ok){var gd=await gr.json();sha=gd.sha;}}catch(e){}
-  var _json=JSON.stringify(appData,null,2);
-  var _bytes=new TextEncoder().encode(_json);
-  var _bin=Array.from(_bytes,function(b){return String.fromCharCode(b);}).join('');
-  var b64=btoa(_bin);
-  var body={message:'自動同期 '+new Date().toLocaleString('ja-JP'),content:b64,branch:GH_BRANCH};
-  if(sha)body.sha=sha;
-  try{
+  // SHAを取得してPUTする関数（リトライ用に分離）
+  async function _doSave(){
+    var sha=null;
+    try{var gr=await fetch(url+'?ref='+GH_BRANCH,{headers:headers});if(gr.ok){var gd=await gr.json();sha=gd.sha;}}catch(e){}
+    var _json=JSON.stringify(appData,null,2);
+    var _bytes=new TextEncoder().encode(_json);
+    var _bin=Array.from(_bytes,function(b){return String.fromCharCode(b);}).join('');
+    var b64=btoa(_bin);
+    var body={message:'自動同期 '+new Date().toLocaleString('ja-JP'),content:b64,branch:GH_BRANCH};
+    if(sha)body.sha=sha;
     var resp=await fetch(url,{method:'PUT',headers:headers,body:JSON.stringify(body)});
-    if(!resp.ok){var err=await resp.json();throw new Error(err.message||'HTTP '+resp.status);}
+    if(!resp.ok){var err=await resp.json().catch(function(){return{};});throw new Error('HTTP '+resp.status+(err.message?' ('+err.message+')':''));}
+  }
+  try{
+    try{
+      await _doSave();
+    }catch(e){
+      // 409/422はSHAコンフリクト → 1秒待って最新SHAで再試行
+      var code=e.message&&(e.message.indexOf('409')>=0||e.message.indexOf('422')>=0);
+      if(code){
+        ghSyncStatus('☁ 再試行中…','rgba(255,220,100,.9)');
+        await new Promise(function(r){setTimeout(r,1500);});
+        await _doSave();
+      }else{throw e;}
+    }
     var now=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
     ghSyncStatus('☁ '+now+' 保存済み','rgba(255,255,255,.85)');
   }catch(e){
