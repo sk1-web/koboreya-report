@@ -476,7 +476,7 @@
               "wg": 5
             }
           ],
-          "overallReview": "慧さん大好きです",
+          "overallReview": "",
           "planDays": {
             "planSales": {
               "1": 0,
@@ -1057,7 +1057,7 @@
               "wg": 5
             }
           ],
-          "overallReview": "",
+          "overallReview": "あいうえお\n",
           "planDays": {
             "planSales": {
               "1": 0,
@@ -4068,5 +4068,5 @@
       }
     }
   ],
-  "_ts": 1775033333522
+  "_ts": 1775036074753
 }
