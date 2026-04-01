@@ -316,11 +316,14 @@ var CAUSES=CAUSE_GROUPS.reduce(function(a,g){return a.concat(g.items);},[]);
 
 // ── GitHub設定（IIFEより前に定義必須）──
 var GH_REPO='sk1-web/koboreya-report';
-var GH_FILE='shopkpi_data.json';
 var GH_BRANCH='main';
 var GH_PAT_KEY='shopKpiGitHubPAT';
 var _ta='ghp_2k59S9XY3d72',_tb='cJvt7Gt15jXMKQnoCb149kvM';
 var GH_DEFAULT_TOKEN=_ta+_tb;
+// ── デバイス固有ID（端末ごとに専用ファイルを持ち書き込み競合をゼロにする）──
+var _devId=localStorage.getItem('kbr_did')||'';
+if(!_devId){_devId='d'+Date.now().toString(36)+Math.random().toString(36).substr(2,4);localStorage.setItem('kbr_did',_devId);}
+var GH_MYFILE='kbr_'+_devId+'.json'; // 自デバイス専用書き込みファイル
 function ghToken(){return GH_DEFAULT_TOKEN;}
 function ghSaveToken(v){}
 
@@ -1275,34 +1278,60 @@ function saveGhModal(){
   githubAutoLoad().then(function(){githubSave();});
 }
 
-// ── GitHub読み込み（タイムスタンプ比較で最新を優先）──
+// ── GitHub読み込み（全デバイスファイルを並列取得して月単位マージ）──
 async function githubAutoLoad(){
   var token=ghToken();
   if(!token)return;
-  var url='https://api.github.com/repos/'+GH_REPO+'/contents/'+GH_FILE+'?ref='+GH_BRANCH;
+  var apiBase='https://api.github.com/repos/'+GH_REPO;
   var headers={'Accept':'application/vnd.github.v3+json','Authorization':'Bearer '+token};
   ghSyncStatus('☁ 読み込み中…','rgba(255,255,255,.7)');
   try{
-    var resp=await fetch(url,{headers:headers});
-    if(!resp.ok){
-      if(resp.status===404){ghSyncStatus('☁ 初回保存待ち','rgba(255,200,80,.9)');return;}
-      throw new Error('HTTP '+resp.status);
-    }
-    var data=await resp.json();
-    var _b64=data.content.replace(/\n/g,'');
-    var _bin2=atob(_b64);
-    var _bytes2=new Uint8Array(_bin2.length);
-    for(var _i=0;_i<_bin2.length;_i++)_bytes2[_i]=_bin2.charCodeAt(_i);
-    var content=JSON.parse(new TextDecoder().decode(_bytes2));
-    if(!content.stores)return;
-    var ghTs=content._ts||0;
-    var localTs=appData._ts||0;
+    // リポジトリのファイル一覧を取得
+    var listResp=await fetch(apiBase+'/contents/?ref='+GH_BRANCH,{headers:headers});
+    if(!listResp.ok)throw new Error('HTTP '+listResp.status);
+    var files=await listResp.json();
+    // kbr_*.json（全デバイスファイル）＋旧形式ファイルを収集
+    var devFiles=files.filter(function(f){return /^kbr_[a-z0-9]+\.json$/i.test(f.name);});
+    var legacyFile=files.find(function(f){return f.name==='shopkpi_data.json';});
+    if(legacyFile)devFiles.push(legacyFile);
+    if(devFiles.length===0){ghSyncStatus('☁ 初回保存待ち','rgba(255,200,80,.9)');return;}
+    // 全ファイルを並列取得してデコード
+    var allContents=await Promise.all(devFiles.map(async function(f){
+      try{
+        var resp=await fetch(f.url,{headers:headers});
+        if(!resp.ok)return null;
+        var d=await resp.json();
+        var raw=atob(d.content.replace(/\n/g,''));
+        var bytes=new Uint8Array(raw.length);
+        for(var i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+        return JSON.parse(new TextDecoder().decode(bytes));
+      }catch(e){return null;}
+    }));
+    // 月単位マージ：各デバイスの最新データを統合
+    var merged={stores:[],_ts:0};
+    allContents.filter(Boolean).forEach(function(d){
+      if(!d||!d.stores)return;
+      d.stores.forEach(function(gs){
+        var ls=merged.stores.find(function(s){return s.id===gs.id;});
+        if(!ls){merged.stores.push(JSON.parse(JSON.stringify(gs)));}
+        else{
+          Object.keys(gs.months||{}).forEach(function(ym){
+            if(!ls.months[ym]){ls.months[ym]=JSON.parse(JSON.stringify(gs.months[ym]));}
+            else if((gs.months[ym]._ts||0)>(ls.months[ym]._ts||0)){
+              ls.months[ym]=JSON.parse(JSON.stringify(gs.months[ym]));
+            }
+          });
+          if(gs.managerName&&!ls.managerName)ls.managerName=gs.managerName;
+        }
+      });
+      if((d._ts||0)>merged._ts)merged._ts=d._ts||0;
+    });
     var now=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
-    if(ghTs>localTs){
-      // GitHubが新しい→全体を置換してUI更新
+    if(!merged.stores.length){ghSyncStatus('☁ 初回保存待ち','rgba(255,200,80,.9)');return;}
+    // マージ結果がローカルより新しければUIを更新
+    if((merged._ts||0)>(appData._ts||0)){
       var prevId=activeStoreId,prevYM=activeYM;
-      appData=content;
-      // saveStorageを内部的に呼ぶ（triggerAutoSave不要なので直接）
+      appData=merged;
       try{localStorage.setItem(SKEY,JSON.stringify(appData));}catch(e){}
       renderTabs();
       var restoreId=prevId&&getStore(prevId)?prevId:(appData.stores.length?appData.stores[0].id:null);
@@ -1316,7 +1345,7 @@ async function githubAutoLoad(){
         if(_ym){try{loadMonth(_ym);}catch(e){}}
       }
       ghSyncStatus('☁ '+now+' 更新しました','rgba(150,235,180,.95)');
-    } else {
+    }else{
       ghSyncStatus('☁ '+now+' 同期済み','rgba(255,255,255,.85)');
     }
   }catch(e){
@@ -1325,92 +1354,30 @@ async function githubAutoLoad(){
   }
 }
 
-// ── GitHub保存（月単位マージ＋最大3回リトライ・指数バックオフ）──
+// ── GitHub保存（自デバイス専用ファイルへの書き込み・競合ゼロ）──
 async function githubSave(){
   var token=ghToken();
   if(!token)return;
-  if(_ghSaving)return; // 二重保存防止
+  if(_ghSaving)return;
   _ghSaving=true;
-  var url='https://api.github.com/repos/'+GH_REPO+'/contents/'+GH_FILE;
+  // 自デバイス専用ファイルにのみ書き込む（他デバイスとの競合は構造上発生しない）
+  var url='https://api.github.com/repos/'+GH_REPO+'/contents/'+GH_MYFILE;
   var headers={'Accept':'application/vnd.github.v3+json','Authorization':'Bearer '+token,'Content-Type':'application/json'};
   ghSyncStatus('☁ 保存中…','rgba(255,255,255,.7)');
   appData._ts=Date.now();
   try{localStorage.setItem(SKEY,JSON.stringify(appData));}catch(e){}
-
-  // GitHubの最新内容を取得して月単位でマージ（コンフリクト解消用）
-  async function _fetchAndMerge(){
+  try{
+    // 自分のファイルの現在のSHAを取得（更新に必要）
     var sha=null;
-    try{
-      var gr=await fetch(url+'?ref='+GH_BRANCH,{headers:headers});
-      if(gr.ok){
-        var gd=await gr.json();
-        sha=gd.sha;
-        try{
-          var raw=atob(gd.content.replace(/\n/g,''));
-          var bytes=new Uint8Array(raw.length);
-          for(var i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
-          var ghData=JSON.parse(new TextDecoder().decode(bytes));
-          // 月単位マージ: タイムスタンプが新しい方を優先
-          if(ghData&&ghData.stores){
-            ghData.stores.forEach(function(gs){
-              var ls=appData.stores.find(function(s){return s.id===gs.id;});
-              if(!ls){appData.stores.push(JSON.parse(JSON.stringify(gs)));}
-              else{
-                Object.keys(gs.months||{}).forEach(function(ym){
-                  if(!ls.months[ym]){ls.months[ym]=JSON.parse(JSON.stringify(gs.months[ym]));}
-                  else if((gs.months[ym]._ts||0)>(ls.months[ym]._ts||0)){
-                    ls.months[ym]=JSON.parse(JSON.stringify(gs.months[ym]));
-                  }
-                });
-              }
-            });
-            appData._ts=Date.now();
-            try{localStorage.setItem(SKEY,JSON.stringify(appData));}catch(e){}
-          }
-        }catch(e){console.warn('merge parse error:',e);}
-      }
-    }catch(e){}
-    return sha;
-  }
-
-  // SHA取得のみ（初回保存用）
-  async function _fetchSha(){
-    try{var gr=await fetch(url+'?ref='+GH_BRANCH,{headers:headers});if(gr.ok){var gd=await gr.json();return gd.sha;}}catch(e){}
-    return null;
-  }
-
-  // 指定SHAでPUT
-  async function _put(sha){
+    try{var gr=await fetch(url+'?ref='+GH_BRANCH,{headers:headers});if(gr.ok){var gd=await gr.json();sha=gd.sha;}}catch(e){}
     var _json=JSON.stringify(appData,null,2);
     var _bytes=new TextEncoder().encode(_json);
     var _bin=Array.from(_bytes,function(b){return String.fromCharCode(b);}).join('');
     var b64=btoa(_bin);
-    var body={message:'自動同期 '+new Date().toLocaleString('ja-JP'),content:b64,branch:GH_BRANCH};
+    var body={message:'自動同期['+_devId+'] '+new Date().toLocaleString('ja-JP'),content:b64,branch:GH_BRANCH};
     if(sha)body.sha=sha;
     var resp=await fetch(url,{method:'PUT',headers:headers,body:JSON.stringify(body)});
-    if(!resp.ok){var err=await resp.json().catch(function(){return{};});throw new Error('HTTP '+resp.status+(err.message?' ('+err.message+')':''));}
-  }
-
-  try{
-    // 最大3回試行（初回→1.5秒後マージリトライ→3秒後マージリトライ）
-    var delays=[0,1500,3000];
-    var lastErr=null;
-    for(var i=0;i<delays.length;i++){
-      if(delays[i]>0){
-        ghSyncStatus('☁ 再試行中('+i+'/2)…','rgba(255,220,100,.9)');
-        await new Promise(function(r){setTimeout(r,delays[i]);});
-      }
-      try{
-        var sha=i===0?await _fetchSha():await _fetchAndMerge();
-        await _put(sha);
-        lastErr=null;
-        break;
-      }catch(e){
-        lastErr=e;
-        var isConflict=e.message&&(e.message.indexOf('409')>=0||e.message.indexOf('422')>=0);
-        if(!isConflict||i===delays.length-1)throw e;
-      }
-    }
+    if(!resp.ok){var err=await resp.json().catch(function(){return{};});throw new Error('HTTP '+resp.status);}
     var now=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
     ghSyncStatus('☁ '+now+' 保存済み','rgba(255,255,255,.85)');
   }catch(e){
@@ -1420,12 +1387,13 @@ async function githubSave(){
   _ghSaving=false;
 }
 
-// ── 定期ポーリング（60秒ごとに他デバイスの更新を確認）──
+// ── 定期ポーリング（120秒ごとに他デバイスの更新を確認）──
+// 10デバイス×(1リスト+10ファイルGET)×120s間隔 ≒ 3,300req/h（上限5,000以内）
 setInterval(function(){
   if(document.visibilityState==='visible'&&ghToken()&&!_ghSaving&&!_ghSaveTimer){
     githubAutoLoad();
   }
-},60000);
+},120000);
 </script>
 </body>
 </html>
