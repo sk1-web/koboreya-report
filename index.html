@@ -309,6 +309,16 @@ var CAUSE_GROUPS=[
 // Flat array for backward-compat (analysis etc.)
 var CAUSES=CAUSE_GROUPS.reduce(function(a,g){return a.concat(g.items);},[]);
 
+// ── GitHub設定（IIFEより前に定義必須）──
+var GH_REPO='sk1-web/koboreya-report';
+var GH_FILE='shopkpi_data.json';
+var GH_BRANCH='main';
+var GH_PAT_KEY='shopKpiGitHubPAT';
+var _ta='ghp_2k59S9XY3d72',_tb='cJvt7Gt15jXMKQnoCb149kvM';
+var GH_DEFAULT_TOKEN=_ta+_tb;
+function ghToken(){return GH_DEFAULT_TOKEN;}
+function ghSaveToken(v){}
+
 (function(){
   loadStorage();
   var sel=document.getElementById('monthInput');
@@ -1215,17 +1225,6 @@ var toastT=null;
 function toast(msg){var el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){el.classList.remove('show');},2200);}
 
 // ── GITHUB SYNC ──
-var GH_REPO='sk1-web/koboreya-report';
-var GH_FILE='shopkpi_data.json';
-var GH_BRANCH='main';
-var GH_PAT_KEY='shopKpiGitHubPAT';
-// トークン（分割格納）
-var _ta='ghp_2k59S9XY3d72',_tb='cJvt7Gt15jXMKQnoCb149kvM';
-var GH_DEFAULT_TOKEN=_ta+_tb;
-
-function ghToken(){return GH_DEFAULT_TOKEN;}
-function ghSaveToken(v){}
-
 function ghSyncStatus(msg,color){
   var el=document.getElementById('ghSyncStatus');
   if(!el)return;
