@@ -254,6 +254,11 @@ function loadStorage(){
   appData={stores:[]};
 }
 function saveStorage(){
+  // アクティブな月に更新タイムスタンプを付与（月単位マージ用）
+  if(activeStoreId&&activeYM){
+    var _ms=getStore(activeStoreId);
+    if(_ms&&_ms.months&&_ms.months[activeYM])_ms.months[activeYM]._ts=Date.now();
+  }
   try{localStorage.setItem(SKEY,JSON.stringify(appData));}catch(e){console.warn(e);}
   triggerAutoSave();
 }
@@ -1232,14 +1237,16 @@ function ghSyncStatus(msg,color){
   el.style.color=color||'rgba(255,255,255,.8)';
 }
 
-// ── 自動保存タイマー（データ変更から3秒後にGitHubへ保存）──
+// ── 自動保存タイマー（5秒＋ランダムジッターで同時保存衝突を低減）──
 var _ghSaveTimer=null;
 var _ghSaving=false;
 function triggerAutoSave(){
   if(!ghToken())return;
   clearTimeout(_ghSaveTimer);
   ghSyncStatus('☁ 変更あり…','rgba(255,220,100,.9)');
-  _ghSaveTimer=setTimeout(function(){_ghSaveTimer=null;githubSave();},3000);
+  // 5秒 + 0〜2秒のランダムジッターで複数デバイスの同時保存を分散
+  var delay=5000+Math.floor(Math.random()*2000);
+  _ghSaveTimer=setTimeout(function(){_ghSaveTimer=null;githubSave();},delay);
 }
 
 // モーダル操作
@@ -1318,7 +1325,7 @@ async function githubAutoLoad(){
   }
 }
 
-// ── GitHub保存（タイムスタンプ付き・SHAコンフリクト時リトライ）──
+// ── GitHub保存（月単位マージ＋最大3回リトライ・指数バックオフ）──
 async function githubSave(){
   var token=ghToken();
   if(!token)return;
@@ -1329,10 +1336,51 @@ async function githubSave(){
   ghSyncStatus('☁ 保存中…','rgba(255,255,255,.7)');
   appData._ts=Date.now();
   try{localStorage.setItem(SKEY,JSON.stringify(appData));}catch(e){}
-  // SHAを取得してPUTする関数（リトライ用に分離）
-  async function _doSave(){
+
+  // GitHubの最新内容を取得して月単位でマージ（コンフリクト解消用）
+  async function _fetchAndMerge(){
     var sha=null;
-    try{var gr=await fetch(url+'?ref='+GH_BRANCH,{headers:headers});if(gr.ok){var gd=await gr.json();sha=gd.sha;}}catch(e){}
+    try{
+      var gr=await fetch(url+'?ref='+GH_BRANCH,{headers:headers});
+      if(gr.ok){
+        var gd=await gr.json();
+        sha=gd.sha;
+        try{
+          var raw=atob(gd.content.replace(/\n/g,''));
+          var bytes=new Uint8Array(raw.length);
+          for(var i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+          var ghData=JSON.parse(new TextDecoder().decode(bytes));
+          // 月単位マージ: タイムスタンプが新しい方を優先
+          if(ghData&&ghData.stores){
+            ghData.stores.forEach(function(gs){
+              var ls=appData.stores.find(function(s){return s.id===gs.id;});
+              if(!ls){appData.stores.push(JSON.parse(JSON.stringify(gs)));}
+              else{
+                Object.keys(gs.months||{}).forEach(function(ym){
+                  if(!ls.months[ym]){ls.months[ym]=JSON.parse(JSON.stringify(gs.months[ym]));}
+                  else if((gs.months[ym]._ts||0)>(ls.months[ym]._ts||0)){
+                    ls.months[ym]=JSON.parse(JSON.stringify(gs.months[ym]));
+                  }
+                });
+              }
+            });
+            appData._ts=Date.now();
+            try{localStorage.setItem(SKEY,JSON.stringify(appData));}catch(e){}
+          }
+        }catch(e){console.warn('merge parse error:',e);}
+      }
+    }catch(e){}
+    return sha;
+  }
+
+  // SHA取得のみ（初回保存用）
+  async function _fetchSha(){
+    try{var gr=await fetch(url+'?ref='+GH_BRANCH,{headers:headers});if(gr.ok){var gd=await gr.json();return gd.sha;}}catch(e){}
+    return null;
+  }
+
+  // 指定SHAでPUT
+  async function _put(sha){
     var _json=JSON.stringify(appData,null,2);
     var _bytes=new TextEncoder().encode(_json);
     var _bin=Array.from(_bytes,function(b){return String.fromCharCode(b);}).join('');
@@ -1342,17 +1390,26 @@ async function githubSave(){
     var resp=await fetch(url,{method:'PUT',headers:headers,body:JSON.stringify(body)});
     if(!resp.ok){var err=await resp.json().catch(function(){return{};});throw new Error('HTTP '+resp.status+(err.message?' ('+err.message+')':''));}
   }
+
   try{
-    try{
-      await _doSave();
-    }catch(e){
-      // 409/422はSHAコンフリクト → 1秒待って最新SHAで再試行
-      var code=e.message&&(e.message.indexOf('409')>=0||e.message.indexOf('422')>=0);
-      if(code){
-        ghSyncStatus('☁ 再試行中…','rgba(255,220,100,.9)');
-        await new Promise(function(r){setTimeout(r,1500);});
-        await _doSave();
-      }else{throw e;}
+    // 最大3回試行（初回→1.5秒後マージリトライ→3秒後マージリトライ）
+    var delays=[0,1500,3000];
+    var lastErr=null;
+    for(var i=0;i<delays.length;i++){
+      if(delays[i]>0){
+        ghSyncStatus('☁ 再試行中('+i+'/2)…','rgba(255,220,100,.9)');
+        await new Promise(function(r){setTimeout(r,delays[i]);});
+      }
+      try{
+        var sha=i===0?await _fetchSha():await _fetchAndMerge();
+        await _put(sha);
+        lastErr=null;
+        break;
+      }catch(e){
+        lastErr=e;
+        var isConflict=e.message&&(e.message.indexOf('409')>=0||e.message.indexOf('422')>=0);
+        if(!isConflict||i===delays.length-1)throw e;
+      }
     }
     var now=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
     ghSyncStatus('☁ '+now+' 保存済み','rgba(255,255,255,.85)');
