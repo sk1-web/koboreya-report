@@ -146,28 +146,9 @@ td.ctd{text-align:left;min-width:130px;}
   <div class="hbtns no-print" style="align-items:center;gap:10px">
     <span id="ghSyncStatus" style="font-size:10.5px;opacity:.85"></span>
     <button class="btn btn-ex btn-sm" onclick="exportData()">&#x1F4E4; エクスポート</button>
-    <button class="btn btn-sm" onclick="openGhModal()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.4);font-size:11px" title="GitHub同期設定">⚙ 同期設定</button>
   </div>
 </header>
 
-<!-- GITHUB PAT MODAL -->
-<div id="ghModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:2000;align-items:center;justify-content:center">
-  <div style="background:#fff;border-radius:10px;padding:24px 28px;max-width:480px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.25)">
-    <div style="font-size:15px;font-weight:700;color:#1F3864;margin-bottom:4px">⚙ GitHub 同期設定</div>
-    <div style="font-size:11px;color:#666;margin-bottom:14px;line-height:1.6">Personal Access Tokenを設定すると、サイトを開くと自動でデータを読み込み、分析・保存時に自動でGitHubへ書き込みます。<br>トークンはこのデバイスのみに保存され、他には送信されません。<br><br>取得方法: GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic) → <strong>repo</strong> 権限 → Generate</div>
-    <div style="margin-bottom:14px">
-      <label style="font-size:10px;font-weight:700;color:#666;display:block;margin-bottom:4px">PERSONAL ACCESS TOKEN</label>
-      <input type="password" id="ghModalToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="width:100%;border:1.5px solid #ddd;border-radius:6px;padding:7px 10px;font-family:monospace;font-size:12.5px;outline:none">
-    </div>
-    <div style="display:flex;gap:8px;justify-content:space-between;align-items:center">
-      <button class="btn btn-clr btn-sm" onclick="clearGhToken()" style="font-size:11px">🗑 トークン削除</button>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-clr" onclick="closeGhModal()">キャンセル</button>
-        <button class="btn btn-p" onclick="saveGhModal()">保存して同期開始</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <div class="toast" id="toast"></div>
 <div class="container">
