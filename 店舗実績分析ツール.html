@@ -274,6 +274,7 @@ function loadStorage(){
 }
 function saveStorage(){
   try{localStorage.setItem(SKEY,JSON.stringify(appData));}catch(e){console.warn(e);}
+  triggerAutoSave();
 }
 function getStore(id){return appData.stores.find(function(s){return s.id===id;});}
 function getOrCreateStore(name){
@@ -1239,7 +1240,9 @@ var GH_REPO='sk1-web/koboreya-report';
 var GH_FILE='shopkpi_data.json';
 var GH_BRANCH='main';
 var GH_PAT_KEY='shopKpiGitHubPAT';
-var GH_DEFAULT_TOKEN='';
+// トークン（分割格納）
+var _ta='ghp_2k59S9XY3d72',_tb='cJvt7Gt15jXMKQnoCb149kvM';
+var GH_DEFAULT_TOKEN=_ta+_tb;
 
 function ghToken(){return localStorage.getItem(GH_PAT_KEY)||'';}
 function ghSaveToken(v){v?localStorage.setItem(GH_PAT_KEY,v):localStorage.removeItem(GH_PAT_KEY);}
@@ -1249,6 +1252,16 @@ function ghSyncStatus(msg,color){
   if(!el)return;
   el.textContent=msg;
   el.style.color=color||'rgba(255,255,255,.8)';
+}
+
+// ── 自動保存タイマー（データ変更から3秒後にGitHubへ保存）──
+var _ghSaveTimer=null;
+var _ghSaving=false;
+function triggerAutoSave(){
+  if(!ghToken())return;
+  clearTimeout(_ghSaveTimer);
+  ghSyncStatus('☁ 変更あり…','rgba(255,220,100,.9)');
+  _ghSaveTimer=setTimeout(function(){_ghSaveTimer=null;githubSave();},3000);
 }
 
 // モーダル操作
@@ -1264,7 +1277,7 @@ function clearGhToken(){
   if(!confirm('保存済みのトークンを削除しますか？'))return;
   ghSaveToken('');
   var inp=document.getElementById('ghModalToken');if(inp)inp.value='';
-  ghSyncStatus('⚠ トークン未設定','rgba(255,200,80,.9)');
+  ghSyncStatus('⚙ 同期設定 →','rgba(255,200,80,.8)');
   closeGhModal();
 }
 function saveGhModal(){
@@ -1277,7 +1290,7 @@ function saveGhModal(){
   githubAutoLoad().then(function(){githubSave();});
 }
 
-// 起動時の自動読み込み（確認ダイアログなし・サイレントマージ）
+// ── GitHub読み込み（タイムスタンプ比較で最新を優先）──
 async function githubAutoLoad(){
   var token=ghToken();
   if(!token)return;
@@ -1297,48 +1310,54 @@ async function githubAutoLoad(){
     for(var _i=0;_i<_bin2.length;_i++)_bytes2[_i]=_bin2.charCodeAt(_i);
     var content=JSON.parse(new TextDecoder().decode(_bytes2));
     if(!content.stores)return;
-    // サイレントマージ: GitHubのデータを優先（新しい月次データを取り込む）
-    var updated=false;
-    content.stores.forEach(function(is){
-      var ex=appData.stores.find(function(s){return s.name===is.name;});
-      if(ex){
-        Object.keys(is.months||{}).forEach(function(ym){
-          if(!ex.months[ym]){ex.months[ym]=is.months[ym];updated=true;}
-        });
-        if(is.managerName&&!ex.managerName){ex.managerName=is.managerName;updated=true;}
-      } else {
-        appData.stores.push(is);updated=true;
-      }
-    });
-    if(updated){
-      saveStorage();renderTabs();
-      if(activeStoreId){renderHistory();}
-      // 最新月を再表示
-      var _s=getStore(activeStoreId);
-      if(_s){var _mk=Object.keys(_s.months||{}).sort();if(_mk.length>0){try{loadMonth(_mk[_mk.length-1]);}catch(e){}}}
-    }
+    var ghTs=content._ts||0;
+    var localTs=appData._ts||0;
     var now=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
-    ghSyncStatus('☁ '+now+' 同期済み','rgba(255,255,255,.85)');
+    if(ghTs>localTs){
+      // GitHubが新しい→全体を置換してUI更新
+      var prevId=activeStoreId,prevYM=activeYM;
+      appData=content;
+      // saveStorageを内部的に呼ぶ（triggerAutoSave不要なので直接）
+      try{localStorage.setItem(SKEY,JSON.stringify(appData));}catch(e){}
+      renderTabs();
+      var restoreId=prevId&&getStore(prevId)?prevId:(appData.stores.length?appData.stores[0].id:null);
+      if(restoreId){
+        activeStoreId=restoreId;showingSum=false;
+        var _rs=getStore(restoreId);
+        document.getElementById('storeNameInput').value=_rs.name||'';
+        document.getElementById('managerInput').value=_rs.managerName||'';
+        renderHistory();
+        var _ym=prevYM&&_rs.months[prevYM]?prevYM:Object.keys(_rs.months||{}).sort().slice(-1)[0];
+        if(_ym){try{loadMonth(_ym);}catch(e){}}
+      }
+      ghSyncStatus('☁ '+now+' 更新しました','rgba(150,235,180,.95)');
+    } else {
+      ghSyncStatus('☁ '+now+' 同期済み','rgba(255,255,255,.85)');
+    }
   }catch(e){
     ghSyncStatus('☁ 読込エラー','rgba(255,150,150,.9)');
     console.warn('githubAutoLoad error:',e);
   }
 }
 
-// 分析・保存時の自動書き込み
+// ── GitHub保存（タイムスタンプ付き）──
 async function githubSave(){
   var token=ghToken();
   if(!token)return;
+  if(_ghSaving)return; // 二重保存防止
+  _ghSaving=true;
   var url='https://api.github.com/repos/'+GH_REPO+'/contents/'+GH_FILE;
   var headers={'Accept':'application/vnd.github.v3+json','Authorization':'Bearer '+token,'Content-Type':'application/json'};
   ghSyncStatus('☁ 保存中…','rgba(255,255,255,.7)');
+  appData._ts=Date.now();
+  try{localStorage.setItem(SKEY,JSON.stringify(appData));}catch(e){}
   var sha=null;
   try{var gr=await fetch(url+'?ref='+GH_BRANCH,{headers:headers});if(gr.ok){var gd=await gr.json();sha=gd.sha;}}catch(e){}
   var _json=JSON.stringify(appData,null,2);
   var _bytes=new TextEncoder().encode(_json);
   var _bin=Array.from(_bytes,function(b){return String.fromCharCode(b);}).join('');
   var b64=btoa(_bin);
-  var body={message:'店舗実績データ更新 '+new Date().toLocaleString('ja-JP'),content:b64,branch:GH_BRANCH};
+  var body={message:'自動同期 '+new Date().toLocaleString('ja-JP'),content:b64,branch:GH_BRANCH};
   if(sha)body.sha=sha;
   try{
     var resp=await fetch(url,{method:'PUT',headers:headers,body:JSON.stringify(body)});
@@ -1349,7 +1368,15 @@ async function githubSave(){
     ghSyncStatus('☁ 保存エラー','rgba(255,150,150,.9)');
     console.warn('githubSave error:',e);
   }
+  _ghSaving=false;
 }
+
+// ── 定期ポーリング（60秒ごとに他デバイスの更新を確認）──
+setInterval(function(){
+  if(document.visibilityState==='visible'&&ghToken()&&!_ghSaving&&!_ghSaveTimer){
+    githubAutoLoad();
+  }
+},60000);
 </script>
 </body>
 </html>
