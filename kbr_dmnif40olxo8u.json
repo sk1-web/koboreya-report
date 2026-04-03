@@ -3199,7 +3199,7 @@
               "costRate": 31.7,
               "laborRate": 15.7,
               "cause": "",
-              "comment": "",
+              "comment": "シフト枠増加していない",
               "wd": 4,
               "dn": "木",
               "wg": 3
@@ -3214,7 +3214,7 @@
               "costRate": 15.8,
               "laborRate": 14,
               "cause": "",
-              "comment": "",
+              "comment": "シフト枠増加していない",
               "wd": 5,
               "dn": "金",
               "wg": 3
@@ -3229,7 +3229,7 @@
               "costRate": 19.3,
               "laborRate": 14.8,
               "cause": "",
-              "comment": "",
+              "comment": "シフト枠増加していない",
               "wd": 6,
               "dn": "土",
               "wg": 3
@@ -3289,7 +3289,7 @@
               "costRate": 10.9,
               "laborRate": 13.7,
               "cause": "",
-              "comment": "",
+              "comment": "シフト枠増加していない",
               "wd": 3,
               "dn": "水",
               "wg": 4
@@ -3304,7 +3304,7 @@
               "costRate": 24.1,
               "laborRate": 14.9,
               "cause": "",
-              "comment": "",
+              "comment": "シフト枠増加していない",
               "wd": 4,
               "dn": "木",
               "wg": 4
@@ -3319,7 +3319,7 @@
               "costRate": 22.9,
               "laborRate": 14.9,
               "cause": "",
-              "comment": "",
+              "comment": "シフト枠増加していない",
               "wd": 5,
               "dn": "金",
               "wg": 4
@@ -3334,7 +3334,7 @@
               "costRate": 25.2,
               "laborRate": 15.2,
               "cause": "",
-              "comment": "",
+              "comment": "シフト枠増加していない",
               "wd": 6,
               "dn": "土",
               "wg": 4
@@ -3349,7 +3349,7 @@
               "costRate": 5.2,
               "laborRate": 15.2,
               "cause": "",
-              "comment": "",
+              "comment": "シフト枠増加していない",
               "wd": 0,
               "dn": "日",
               "wg": 4
@@ -3364,7 +3364,7 @@
               "costRate": 28.6,
               "laborRate": 9.7,
               "cause": "",
-              "comment": "",
+              "comment": "シフト枠増加していない",
               "wd": 1,
               "dn": "月",
               "wg": 5
@@ -3487,7 +3487,7 @@
               "31": 9.24
             }
           },
-          "_ts": 1775191992368
+          "_ts": 1775192044002
         }
       }
     },
@@ -4073,5 +4073,5 @@
       }
     }
   ],
-  "_ts": 1775191998961
+  "_ts": 1775192050773
 }
