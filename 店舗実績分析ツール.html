@@ -8,7 +8,7 @@
 :root{--p:#1F3864;--s:#2E5E8E;--over:#FF6B6B;--warn:#FFB347;--ok:#90D580;--unread:#FFF2CC;--zero:#EFEFEF;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;background:#f0f4f8;color:#1a1a2e;min-height:100vh;}
-header{background:var(--p);color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;}
+header{background:var(--p);color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
 header h1{font-size:16px;font-weight:bold;}
 header .sub{font-size:10.5px;opacity:.7;margin-top:2px;}
 .hbtns{display:flex;gap:7px;}
@@ -337,6 +337,8 @@ var CAUSE_GROUPS=[
 // Flat array for backward-compat (analysis etc.)
 var CAUSES=CAUSE_GROUPS.reduce(function(a,g){return a.concat(g.items);},[]);
 
+// ── 曜日配列（IIFEより前に定義必須：起動時loadMonth→assignGroupsで使用）──
+var DOWS=['日','月','火','水','木','金','土'];
 // ── GitHub設定（IIFEより前に定義必須）──
 var GH_REPO='sk1-web/koboreya-report';
 var GH_BRANCH='main';
@@ -505,7 +507,6 @@ function setV(d,f,s){s=s.trim();var m;
 }
 
 // ── WEEK GROUPING ──
-var DOWS=['日','月','火','水','木','金','土'];
 function dow(y,mo,d){return new Date(y,mo-1,d).getDay();}
 function firstMonday(y,mo){var fd=dow(y,mo,1);if(fd===1)return 1;if(fd===0)return 2;return 9-fd;}
 function assignGroups(days,y,mo){
@@ -746,15 +747,16 @@ function renderWeekly(days,target,month){
 
 // ── DAY-OF-WEEK AVERAGE TABLE ──
 function renderDowAvg(days,target){
+  var _DOWS=['日','月','火','水','木','金','土'];
   var order=[1,2,3,4,5,6,0];
-  var byDow=Array.from({length:7},function(){return [];});
-  days.forEach(function(d){if(d.wd>=0&&d.wd<=6)byDow[d.wd].push(d);});
+  var byDow=[[], [], [], [], [], [], []];
+  (days||[]).forEach(function(d){if(d&&typeof d.wd==='number'&&d.wd>=0&&d.wd<=6)byDow[d.wd].push(d);});
   var h='<table><thead><tr><th>曜日</th><th>日数</th><th>平均売上(万)</th><th>平均達成率</th><th>平均客数</th><th>平均客単価</th><th>平均人件費率</th><th>判定</th></tr></thead><tbody>';
   order.forEach(function(wi){
-    var gd=byDow[wi];
+    var gd=byDow[wi]||[];
     var cls=wi===0?'sunr':wi===6?'satr':'';
     var dc=wi===0?' class="dsun"':wi===6?' class="dsat"':'';
-    if(!gd.length){h+='<tr class="'+cls+'"><td'+dc+'>'+DOWS[wi]+'</td><td colspan="7" style="color:#ccc">─</td></tr>';return;}
+    if(!gd.length){h+='<tr class="'+cls+'"><td'+dc+'>'+_DOWS[wi]+'</td><td colspan="7" style="color:#ccc">─</td></tr>';return;}
     var sales=avg(gd.map(function(d){return d.sales;}),false);
     var ac=avg(gd.map(function(d){return d.achievement;}),false);
     var cu=avg(gd.map(function(d){return d.customers;}),false);
@@ -762,9 +764,9 @@ function renderDowAvg(days,target){
     var lv=gd.map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});
     var la=lv.length?lv.reduce(function(a,b){return a+b;},0)/lv.length:null;
     var l=lc(la,target);
-    var jc=la===null?'#888':(function(){var r=la/target;return r>=1.15||r<=0.85?'#CC0000':r>=1.10||r<=0.90?'#FF8800':'#5CB85C';})();
+    var jc=la===null?'#888':(function(){if(!target||target<=0)return'#888';var r=la/target;return r>=1.15||r<=0.85?'#CC0000':r>=1.10||r<=0.90?'#FF8800':'#5CB85C';})();
     h+='<tr class="'+cls+'">';
-    h+='<td'+dc+'><strong>'+DOWS[wi]+'</strong></td>';
+    h+='<td'+dc+'><strong>'+_DOWS[wi]+'</strong></td>';
     h+='<td>'+gd.length+'日</td>';
     h+='<td>'+(sales!==null?sales.toFixed(1):'&ndash;')+'</td>';
     h+='<td>'+(ac!==null?ac.toFixed(1)+'%':'&ndash;')+'</td>';
