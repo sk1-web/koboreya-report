@@ -98,9 +98,10 @@ tr.sunr td.l-anom,tr.satr td.l-anom{background:#FF0000!important;color:#fff!impo
 .cause-opt{display:flex;align-items:center;gap:7px;padding:5px 12px;font-size:11.5px;cursor:pointer;user-select:none;}
 .cause-opt:hover{background:#f0f4ff;}
 .cause-opt input[type=checkbox]{width:13px;height:13px;cursor:pointer;accent-color:var(--s);flex-shrink:0;}
-.ci{border:none;border-bottom:1.5px dashed #ccc;outline:none;font-size:11px;width:150px;background:transparent;padding:1px 3px;font-family:inherit;color:#333;}
-.ci:focus{border-bottom-color:var(--s);background:#f0f8ff;}
-.ci::placeholder{color:#bbb;}
+.ci{border:none;border-bottom:1.5px dashed #ccc;outline:none;font-size:11px;width:160px;background:transparent;padding:2px 4px;font-family:inherit;color:#333;border-radius:3px;transition:all .15s;}
+.ci:focus{border-bottom:1.5px solid var(--s);background:#eef4ff;color:#1a3080;}
+.ci.has-value{border-bottom:1.5px solid #6fa8dc;background:#e8f0fe;color:#1a3080;font-weight:600;}
+.ci::placeholder{color:#ccc;}
 td.ctd{text-align:left;min-width:130px;}
 /* Analysis */
 .ab{border-left:4px solid;border-radius:3px;padding:8px 12px;margin-bottom:8px;font-size:12px;}
@@ -136,6 +137,14 @@ td.ctd{text-align:left;min-width:130px;}
 .stbl-wrap{max-height:480px;overflow-y:auto;overflow-x:auto;border:1px solid #e8edf2;border-radius:6px;}
 .stbl-wrap table{width:100%;}
 .stbl-wrap table thead th{position:sticky;top:0;z-index:3;box-shadow:0 2px 3px rgba(0,0,0,.18);}
+/* Measures / feedback textareas */
+.measure-review{width:100%;min-height:70px;border:1.5px solid #ddd;border-radius:7px;padding:8px;font-size:12.5px;font-family:inherit;resize:vertical;outline:none;transition:border-color .15s;background:#fffdf5;}
+.measure-review:focus{border-color:#f59e0b;}
+.feedback-review{width:100%;min-height:70px;border:1.5px solid #ddd;border-radius:7px;padding:8px;font-size:12.5px;font-family:inherit;resize:vertical;outline:none;transition:border-color .15s;background:#f5fff8;}
+.feedback-review:focus{border-color:#22c55e;}
+/* Charts */
+.chart-wrap{background:#f8fafc;border-radius:8px;padding:12px 14px;margin-bottom:10px;overflow:hidden;}
+.chart-title{font-size:11px;font-weight:700;color:var(--s);margin-bottom:6px;}
 @media print{.no-print{display:none!important;}body{background:#fff;}.card,.tcard,.sc{box-shadow:none;border:1px solid #ddd;}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -145,7 +154,9 @@ td.ctd{text-align:left;min-width:130px;}
   <div><h1>&#x1F3EA; 店舗実績分析ツール</h1><div class="sub">日別データを貼り付けて週次・月次の人件費率を分析（週区切り：月〜日）</div></div>
   <div class="hbtns no-print" style="align-items:center;gap:10px">
     <span id="ghSyncStatus" style="font-size:10.5px;opacity:.85"></span>
+    <button class="btn btn-sv btn-sm" onclick="importData()">&#x1F4E5; インポート</button>
     <button class="btn btn-ex btn-sm" onclick="exportData()">&#x1F4E4; エクスポート</button>
+    <input type="file" id="importFile" accept=".xlsx" style="display:none" onchange="onImportFile(this)">
   </div>
 </header>
 
@@ -217,6 +228,8 @@ td.ctd{text-align:left;min-width:130px;}
     <div class="li"><div class="ld" style="background:#EFEFEF;border:1px solid #ccc"></div>売上&#x00a5;0</div>
   </div>
   <div class="tcard"><h3>&#x1F4C5; 週次サマリー（月〜日グループ）</h3><div id="weeklyTable"></div></div>
+  <div class="tcard"><h3>&#x1F4C6; 曜日別平均</h3><div id="dowAvgTable"></div></div>
+  <div class="tcard" id="chartsCard"><h3>&#x1F4C8; グラフ</h3><div id="chartsDiv"></div></div>
   <div class="tcard" id="planCompCard" style="display:none"><h3>&#x1F4CA; 予実比較　月間・週別サマリー</h3><div id="planCompDiv"></div></div>
   <div class="tcard">
     <h3>&#x1F4CB; 日別詳細　<span style="font-size:10.5px;color:#888;font-weight:normal">原因・コメントは自動保存されます　／　予実データ入力時は予実列も表示</span></h3>
@@ -226,6 +239,14 @@ td.ctd{text-align:left;min-width:130px;}
   <div class="tcard">
     <h3>&#x1F4DD; 総合振り返り</h3>
     <textarea class="ov-review" id="overallReview" placeholder="月全体の振り返りを記入してください（サマリーページにも表示されます）..." oninput="onOverallReviewChange()" onblur="onOverallReviewChange()"></textarea>
+  </div>
+  <div class="tcard">
+    <h3>&#x1F6E1; 来月の対策</h3>
+    <textarea class="measure-review" id="nextMeasures" placeholder="来月に向けた具体的な対策を記入してください..." oninput="onNextMeasuresChange()" onblur="onNextMeasuresChange()"></textarea>
+  </div>
+  <div class="tcard">
+    <h3>&#x1F4AC; フィードバック</h3>
+    <textarea class="feedback-review" id="feedbackField" placeholder="上長・本部からのフィードバックを記入してください..." oninput="onFeedbackChange()" onblur="onFeedbackChange()"></textarea>
   </div>
 </div>
 
@@ -245,6 +266,7 @@ var appData={stores:[]};
 var activeStoreId=null;
 var activeYM=null;
 var showingSum=false;
+var _autoLoad=false; // 自動更新中はスクロールを抑止
 
 function loadStorage(){
   try{
@@ -254,6 +276,11 @@ function loadStorage(){
   appData={stores:[]};
 }
 function saveStorage(){
+  // アクティブな月に更新タイムスタンプを付与（月単位マージ用）
+  if(activeStoreId&&activeYM){
+    var _ms=getStore(activeStoreId);
+    if(_ms&&_ms.months&&_ms.months[activeYM])_ms.months[activeYM]._ts=Date.now();
+  }
   try{localStorage.setItem(SKEY,JSON.stringify(appData));}catch(e){console.warn(e);}
   triggerAutoSave();
 }
@@ -275,7 +302,7 @@ function saveMonth(sid,year,month,target,days,planDays){
     days.forEach(function(d){if(cm[d.date])d.comment=cm[d.date];if(cc[d.date])d.cause=cc[d.date];});
   }
   var pd=planDays||(ex?ex.planDays:null)||null;
-  s.months[ym]={year:year,month:month,target:target,days:days,overallReview:(ex?ex.overallReview:''),planDays:pd};
+  s.months[ym]={year:year,month:month,target:target,days:days,overallReview:(ex?ex.overallReview:''),nextMeasures:(ex?ex.nextMeasures:''),feedback:(ex?ex.feedback:''),planDays:pd};
   saveStorage();
 }
 function savePlanDays(sid,ym,planDays){
@@ -309,6 +336,19 @@ var CAUSE_GROUPS=[
 // Flat array for backward-compat (analysis etc.)
 var CAUSES=CAUSE_GROUPS.reduce(function(a,g){return a.concat(g.items);},[]);
 
+// ── GitHub設定（IIFEより前に定義必須）──
+var GH_REPO='sk1-web/koboreya-report';
+var GH_BRANCH='main';
+var GH_PAT_KEY='shopKpiGitHubPAT';
+var _ta='ghp_2k59S9XY3d72',_tb='cJvt7Gt15jXMKQnoCb149kvM';
+var GH_DEFAULT_TOKEN=_ta+_tb;
+// ── デバイス固有ID（端末ごとに専用ファイルを持ち書き込み競合をゼロにする）──
+var _devId=localStorage.getItem('kbr_did')||'';
+if(!_devId){_devId='d'+Date.now().toString(36)+Math.random().toString(36).substr(2,4);localStorage.setItem('kbr_did',_devId);}
+var GH_MYFILE='kbr_'+_devId+'.json'; // 自デバイス専用書き込みファイル
+function ghToken(){return GH_DEFAULT_TOKEN;}
+function ghSaveToken(v){}
+
 (function(){
   loadStorage();
   var sel=document.getElementById('monthInput');
@@ -323,9 +363,7 @@ var CAUSES=CAUSE_GROUPS.reduce(function(a,g){return a.concat(g.items);},[]);
     var _mkeys=Object.keys(s.months||{}).sort();
     if(_mkeys.length>0){try{loadMonth(_mkeys[_mkeys.length-1]);}catch(e){console.error('startup loadMonth error:',e);showError('起動時のデータ読み込みに失敗しました：'+e.message);}}
   }
-  // デフォルトトークンが未設定の場合は自動設定
-  if(!ghToken()&&GH_DEFAULT_TOKEN)ghSaveToken(GH_DEFAULT_TOKEN);
-  // GitHub自動読み込み（トークンがあれば起動時に実行）
+  // GitHub自動読み込み（起動時に実行）
   if(ghToken()){
     ghSyncStatus('☁ 読み込み中…','rgba(255,255,255,.7)');
     githubAutoLoad();
@@ -387,6 +425,10 @@ function onTargetChange(){
   }
 }
 function onOverallReviewChange(){var v=document.getElementById('overallReview').value;updateOverallReview(v);}
+function updateNextMeasures(val){if(!activeStoreId||!activeYM)return;var s=getStore(activeStoreId);if(!s||!s.months[activeYM])return;s.months[activeYM].nextMeasures=val;saveStorage();triggerAutoSave();}
+function updateFeedback(val){if(!activeStoreId||!activeYM)return;var s=getStore(activeStoreId);if(!s||!s.months[activeYM])return;s.months[activeYM].feedback=val;saveStorage();triggerAutoSave();}
+function onNextMeasuresChange(){var v=document.getElementById('nextMeasures').value;updateNextMeasures(v);}
+function onFeedbackChange(){var v=document.getElementById('feedbackField').value;updateFeedback(v);}
 
 // ── HISTORY ──
 function renderHistory(){
@@ -410,7 +452,7 @@ function loadMonth(ym){
     renderAll(md.year,md.month,s.name||'店舗',days,md.target);
     document.getElementById('summaryPage').style.display='none';
     renderTabs();
-    setTimeout(function(){var r=document.getElementById('results');if(r)r.scrollIntoView({behavior:'smooth',block:'start'});},80);
+    if(!_autoLoad)setTimeout(function(){var r=document.getElementById('results');if(r)r.scrollIntoView({behavior:'smooth',block:'start'});},80);
   }catch(e){
     showError('保存データの表示中にエラーが発生しました：'+e.message);
     console.error('loadMonth renderAll error:',e);
@@ -588,7 +630,7 @@ function analyzeData(){
   try{
     renderAll(year,month,name,days,target);
     showSaveBadge();toast('分析完了・自動保存しました');
-    setTimeout(function(){document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});},80);
+    if(!_autoLoad)setTimeout(function(){document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});},80);
     githubSave();
   }catch(e){
     showError('表示中にエラーが発生しました：'+e.message);
@@ -604,8 +646,22 @@ function renderAll(year,month,name,days,target){
   document.getElementById('summaryPage').style.display='none';
   document.getElementById('resultsTitle').textContent=year+'年'+month+'月　実績分析　─　'+name;
   var planDays=null;
-  if(activeStoreId&&activeYM){var s=getStore(activeStoreId);if(s&&s.months[activeYM]){document.getElementById('overallReview').value=s.months[activeYM].overallReview||'';planDays=s.months[activeYM].planDays||null;}}
-  renderSumCards(days,target);renderWeekly(days,target,month);renderDaily(days,target,month,planDays);renderAnalysis(days,target,month);
+  if(activeStoreId&&activeYM){
+    var _s=getStore(activeStoreId);
+    if(_s&&_s.months[activeYM]){
+      var _md=_s.months[activeYM];
+      document.getElementById('overallReview').value=_md.overallReview||'';
+      document.getElementById('nextMeasures').value=_md.nextMeasures||'';
+      document.getElementById('feedbackField').value=_md.feedback||'';
+      planDays=_md.planDays||null;
+    }
+  }
+  renderSumCards(days,target);
+  renderWeekly(days,target,month);
+  renderDowAvg(days,target);
+  renderCharts(days,target);
+  renderDaily(days,target,month,planDays);
+  renderAnalysis(days,target,month);
   renderPlanComparison(days,target,month,planDays);
 }
 
@@ -656,6 +712,82 @@ function renderWeekly(days,target,month){
   var mjc=ml===null?'#888':(function(){if(!target||target<=0)return'#888';var r=ml/target;return r>=1.20||r<=0.80?'#CC0000':r>=1.15||r<=0.85?'#FF4444':r>=1.10||r<=0.90?'#FF8800':'#5CB85C';})();
   h+='<tr class="mrow"><td colspan="2"><strong>月次合計・平均</strong></td><td>'+days.length+'</td><td>'+ms.toFixed(1)+'</td><td>'+(ma!==null?ma.toFixed(1)+'%':'&ndash;')+'</td><td>'+mc.toLocaleString()+'人</td><td>&ndash;</td><td>'+mll.t+'<br><small style="font-weight:normal;color:#888">目標'+target+'%</small></td><td style="font-size:11.5px;color:'+mjc+'"><strong>'+mratio+'</strong><br><small style="font-weight:normal">('+mdiffStr+')</small></td><td style="font-size:11px">'+(ml!==null?lcLabel(ml,target):'&ndash;')+'</td></tr>';
   h+='</tbody></table>';document.getElementById('weeklyTable').innerHTML=h;
+}
+
+// ── DAY-OF-WEEK AVERAGE TABLE ──
+function renderDowAvg(days,target){
+  var order=[1,2,3,4,5,6,0];
+  var byDow=Array.from({length:7},function(){return [];});
+  days.forEach(function(d){if(d.wd>=0&&d.wd<=6)byDow[d.wd].push(d);});
+  var h='<table><thead><tr><th>曜日</th><th>日数</th><th>平均売上(万)</th><th>平均達成率</th><th>平均客数</th><th>平均客単価</th><th>平均人件費率</th><th>判定</th></tr></thead><tbody>';
+  order.forEach(function(wi){
+    var gd=byDow[wi];
+    var cls=wi===0?'sunr':wi===6?'satr':'';
+    var dc=wi===0?' class="dsun"':wi===6?' class="dsat"':'';
+    if(!gd.length){h+='<tr class="'+cls+'"><td'+dc+'>'+DOWS[wi]+'</td><td colspan="7" style="color:#ccc">─</td></tr>';return;}
+    var sales=avg(gd.map(function(d){return d.sales;}),false);
+    var ac=avg(gd.map(function(d){return d.achievement;}),false);
+    var cu=avg(gd.map(function(d){return d.customers;}),false);
+    var up=avg(gd.map(function(d){return d.unitPrice;}),false);
+    var lv=gd.map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});
+    var la=lv.length?lv.reduce(function(a,b){return a+b;},0)/lv.length:null;
+    var l=lc(la,target);
+    var jc=la===null?'#888':(function(){var r=la/target;return r>=1.15||r<=0.85?'#CC0000':r>=1.10||r<=0.90?'#FF8800':'#5CB85C';})();
+    h+='<tr class="'+cls+'">';
+    h+='<td'+dc+'><strong>'+DOWS[wi]+'</strong></td>';
+    h+='<td>'+gd.length+'日</td>';
+    h+='<td>'+(sales!==null?sales.toFixed(1):'&ndash;')+'</td>';
+    h+='<td>'+(ac!==null?ac.toFixed(1)+'%':'&ndash;')+'</td>';
+    h+='<td>'+(cu!==null?Math.round(cu)+'人':'&ndash;')+'</td>';
+    h+='<td>'+(up!==null?'&yen;'+Math.round(up).toLocaleString():'&ndash;')+'</td>';
+    h+='<td class="'+l.c+'"><strong>'+l.t+'</strong></td>';
+    h+='<td style="font-size:11px;font-weight:bold;color:'+jc+'">'+lcLabel(la,target)+'</td>';
+    h+='</tr>';
+  });
+  h+='</tbody></table>';
+  document.getElementById('dowAvgTable').innerHTML=h;
+}
+
+// ── CHARTS (SVG) ──
+function renderCharts(days,target){
+  var valid=days.filter(function(d){return d.laborRate!==null;});
+  if(!valid.length){document.getElementById('chartsDiv').innerHTML='<div style="color:#aaa;font-size:12px;padding:8px">データがありません</div>';return;}
+  // 日別人件費率バーチャート
+  var lr=valid.map(function(d){return d.laborRate;});
+  var lbls=valid.map(function(d){return d.date+'('+d.dn+')';});
+  var clrs=valid.map(function(d){var r=d.laborRate/target;return r>=1.20||r<=0.80?'#FF0000':r>=1.15||r<=0.85?'#FF6B6B':r>=1.10||r<=0.90?'#FFB347':'#90D580';});
+  var svg1=makeSvgBar(lbls,lr,clrs,150,target);
+  // 曜日別平均バーチャート
+  var order=[1,2,3,4,5,6,0];
+  var byDow=Array.from({length:7},function(){return [];});
+  days.forEach(function(d){if(d.wd>=0&&d.wd<=6)byDow[d.wd].push(d);});
+  var dlbls=order.map(function(wi){return DOWS[wi];});
+  var dvals=order.map(function(wi){var gd=byDow[wi];var lv=gd.map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});return lv.length?lv.reduce(function(a,b){return a+b;},0)/lv.length:null;});
+  var dclrs=dvals.map(function(v){if(v===null)return '#e5e7eb';var r=v/target;return r>=1.15||r<=0.85?'#FF6B6B':r>=1.10||r<=0.90?'#FFB347':'#90D580';});
+  var svg2=makeSvgBar(dlbls,dvals,dclrs,130,target);
+  document.getElementById('chartsDiv').innerHTML=
+    '<div class="chart-wrap"><div class="chart-title">&#x1F4CA; 日別 人件費率推移　（目標：'+target+'%）</div>'+svg1+'</div>'+
+    '<div class="chart-wrap"><div class="chart-title">&#x1F4C5; 曜日別 平均人件費率</div>'+svg2+'</div>';
+}
+function makeSvgBar(labels,values,colors,H,target){
+  var W=760,n=labels.length,pL=38,pR=8,pT=18,pB=28;
+  var cW=W-pL-pR,cH=H-pT-pB;
+  var mx=0;values.forEach(function(v){if(v!==null&&v>mx)mx=v;});
+  if(target&&target>mx)mx=target;mx=mx*1.2||1;
+  var bW=Math.max(5,Math.floor(cW/n*0.72));
+  var gap=(cW-bW*n)/(n+1);
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">';
+  // Gridlines
+  [0,25,50,75,100].forEach(function(p){var v=mx*p/100;var y=(pT+cH*(1-v/mx)).toFixed(1);svg+='<line x1="'+pL+'" y1="'+y+'" x2="'+(pL+cW)+'" y2="'+y+'" stroke="#e8edf2" stroke-width="1"/><text x="'+(pL-3)+'" y="'+(parseFloat(y)+3).toFixed(1)+'" font-size="7.5" text-anchor="end" fill="#aaa">'+v.toFixed(1)+'</text>';});
+  // Target line
+  if(target){var ty=(pT+cH*(1-target/mx)).toFixed(1);svg+='<line x1="'+pL+'" y1="'+ty+'" x2="'+(pL+cW)+'" y2="'+ty+'" stroke="#FF6B6B" stroke-width="1.5" stroke-dasharray="5,3"/><text x="'+(pL+4)+'" y="'+(parseFloat(ty)-3).toFixed(1)+'" font-size="7.5" fill="#FF6B6B">目標'+target+'%</text>';}
+  // Bars & labels
+  values.forEach(function(v,i){
+    var x=(pL+gap+i*(bW+gap)).toFixed(1);
+    if(v!==null){var bh=Math.max(2,(v/mx)*cH);var y=(pT+cH-bh).toFixed(1);svg+='<rect x="'+x+'" y="'+y+'" width="'+bW+'" height="'+bh.toFixed(1)+'" fill="'+(colors[i]||'#2E5E8E')+'" rx="2"/>';if(bW>=10&&bh>12)svg+='<text x="'+(parseFloat(x)+bW/2).toFixed(1)+'" y="'+(parseFloat(y)-2.5).toFixed(1)+'" font-size="7" text-anchor="middle" fill="#333">'+v.toFixed(1)+'</text>';}
+    if(n<=20||i%Math.ceil(n/20)===0){var lbl=String(labels[i]);svg+='<text x="'+(parseFloat(x)+bW/2).toFixed(1)+'" y="'+(pT+cH+14).toFixed(1)+'" font-size="7.5" text-anchor="middle" fill="#555" transform="rotate(-30,'+(parseFloat(x)+bW/2).toFixed(1)+','+(pT+cH+14).toFixed(1)+')">'+(lbl.length>6?lbl.slice(0,6):lbl)+'</text>';}
+  });
+  svg+='</svg>';return svg;
 }
 
 // ── DAILY TABLE ──
@@ -747,15 +879,15 @@ function renderDaily(days,target,month,planDays){
       h+='<td class="'+dlbc+'" style="font-size:11px">'+(pLB!==null&&aLB!==null?dw(aLB,pLB):'&ndash;')+'</td>';
     }
     h+='<td>'+makeCauseWidget(d.date,cause)+'</td>'+
-       '<td class="ctd"><input type="text" class="ci" placeholder="コメント..." value="'+esc(comment)+'" data-date="'+d.date+'" oninput="onCmt(this)" onblur="onCmtBlur(this)"></td>'+
+       '<td class="ctd"><input type="text" class="ci'+(comment?' has-value':'')+'" placeholder="コメント..." value="'+esc(comment)+'" data-date="'+d.date+'" oninput="onCmt(this)" onblur="onCmtBlur(this)"></td>'+
        '</tr>';
   });
   h+='</tbody></table>';
   document.getElementById('dailyTable').innerHTML='<div class="stbl-wrap">'+h+'</div>';
 }
 var cmtTimer=null;
-function onCmt(el){clearTimeout(cmtTimer);var d=parseInt(el.dataset.date,10),v=el.value;cmtTimer=setTimeout(function(){updateDayField(d,'comment',v);},500);}
-function onCmtBlur(el){clearTimeout(cmtTimer);updateDayField(parseInt(el.dataset.date,10),'comment',el.value);}
+function onCmt(el){clearTimeout(cmtTimer);el.value.trim()?el.classList.add('has-value'):el.classList.remove('has-value');var d=parseInt(el.dataset.date,10),v=el.value;cmtTimer=setTimeout(function(){updateDayField(d,'comment',v);},500);}
+function onCmtBlur(el){clearTimeout(cmtTimer);el.value.trim()?el.classList.add('has-value'):el.classList.remove('has-value');updateDayField(parseInt(el.dataset.date,10),'comment',el.value);}
 
 // ── CAUSE → IMPROVEMENT ACTION MAP ──
 var CAUSE_ACTIONS={
@@ -946,7 +1078,7 @@ function parsePlanInput(){
     renderPlanComparison(days,md.target,md.month,pd);
     // Scroll to plan comparison
     var pc=document.getElementById('planCompCard');
-    if(pc)setTimeout(function(){pc.scrollIntoView({behavior:'smooth',block:'start'});},80);
+    if(pc&&!_autoLoad)setTimeout(function(){pc.scrollIntoView({behavior:'smooth',block:'start'});},80);
   }
 }
 function clearPlanInput(){document.getElementById('planInput').value='';document.getElementById('planParseInfo').textContent='';}
@@ -1103,17 +1235,26 @@ function renderSummaryPage(){
   });
   h+='</tbody></table></div></div>';
 
-  // Overall reviews
-  h+='<div class="sum-section"><h2>&#x1F4DD; 各店舗 総合振り返り（'+year+'年'+month+'月）</h2>';
+  // Overall reviews + measures + feedback
+  h+='<div class="sum-section"><h2>&#x1F4DD; 各店舗 総合振り返り・対策・フィードバック（'+year+'年'+month+'月）</h2>';
   var hasAny=false;
   appData.stores.forEach(function(s){
     var md=s.months&&s.months[ym]?s.months[ym]:null;
     var rev=md&&md.overallReview?md.overallReview.trim():'';
-    if(rev||md){
+    var meas=md&&md.nextMeasures?md.nextMeasures.trim():'';
+    var fb=md&&md.feedback?md.feedback.trim():'';
+    if(rev||meas||fb||md){
       hasAny=true;
       h+='<div class="store-review-card"><div class="srname">'+esc(s.name||'─')+(s.managerName?' / 店長：'+esc(s.managerName):'')+'</div>';
+      h+='<div style="font-size:10.5px;font-weight:700;color:#2E5E8E;margin:6px 0 2px">📝 総合振り返り</div>';
       if(rev){h+='<div class="srtext">'+esc(rev)+'</div>';}
-      else{h+='<div style="color:#bbb;font-size:11.5px;font-style:italic">振り返り未記入</div>';}
+      else{h+='<div style="color:#bbb;font-size:11.5px;font-style:italic">未記入</div>';}
+      h+='<div style="font-size:10.5px;font-weight:700;color:#b45309;margin:8px 0 2px">🛡 来月の対策</div>';
+      if(meas){h+='<div class="srtext" style="background:#fffdf5;border-left:3px solid #f59e0b">'+esc(meas)+'</div>';}
+      else{h+='<div style="color:#bbb;font-size:11.5px;font-style:italic">未記入</div>';}
+      h+='<div style="font-size:10.5px;font-weight:700;color:#166534;margin:8px 0 2px">💬 フィードバック</div>';
+      if(fb){h+='<div class="srtext" style="background:#f5fff8;border-left:3px solid #22c55e">'+esc(fb)+'</div>';}
+      else{h+='<div style="color:#bbb;font-size:11.5px;font-style:italic">未記入</div>';}
       h+='</div>';
     }
   });
@@ -1130,7 +1271,7 @@ function exportData(){
   var wb=XLSX.utils.book_new();
 
   // ── Sheet1: 月次サマリー ──
-  var sumRows=[['店舗名','店長','年','月','目標人件費率(%)','月間売上(万)','平均達成率(%)','月間客数(人)','平均人件費率(%)','目標超過日数','総合振り返り']];
+  var sumRows=[['店舗名','店長','年','月','目標人件費率(%)','月間売上(万)','平均達成率(%)','月間客数(人)','平均人件費率(%)','目標超過日数','総合振り返り','来月の対策','フィードバック']];
   appData.stores.forEach(function(s){
     var mkeys=Object.keys(s.months||{}).sort();
     mkeys.forEach(function(ym){
@@ -1150,12 +1291,14 @@ function exportData(){
         tc||0,
         la?parseFloat(la.toFixed(2)):null,
         od,
-        md.overallReview||''
+        md.overallReview||'',
+        md.nextMeasures||'',
+        md.feedback||''
       ]);
     });
   });
   var ws1=XLSX.utils.aoa_to_sheet(sumRows);
-  ws1['!cols']=[{wch:20},{wch:10},{wch:6},{wch:4},{wch:14},{wch:12},{wch:12},{wch:10},{wch:14},{wch:10},{wch:40}];
+  ws1['!cols']=[{wch:20},{wch:10},{wch:6},{wch:4},{wch:14},{wch:12},{wch:12},{wch:10},{wch:14},{wch:10},{wch:40},{wch:40},{wch:40}];
   XLSX.utils.book_append_sheet(wb,ws1,'月次サマリー');
 
   // ── Sheet2+: 店舗×月 日別データ ──
@@ -1208,6 +1351,97 @@ function exportData(){
   toast('Excelエクスポートしました');
 }
 
+// ── IMPORT (Excel) ──
+function importData(){
+  if(typeof XLSX==='undefined'){toast('Excelライブラリ読み込み中…再度お試しください');return;}
+  document.getElementById('importFile').value='';
+  document.getElementById('importFile').click();
+}
+function onImportFile(input){
+  if(!input.files||!input.files[0])return;
+  var file=input.files[0];
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var data=new Uint8Array(e.target.result);
+      var wb=XLSX.read(data,{type:'array'});
+      // Parse 月次サマリー sheet for overallReview / nextMeasures / feedback
+      var sumSheet=wb.Sheets['月次サマリー'];
+      var sumData=sumSheet?XLSX.utils.sheet_to_json(sumSheet,{header:1,defval:''}):[[]];
+      // Header row: 店舗名,店長,年,月,目標人件費率,月間売上,平均達成率,月間客数,平均人件費率,目標超過日数,総合振り返り,来月の対策,フィードバック
+      var COL_SN=0,COL_MG=1,COL_Y=2,COL_M=3,COL_TG=4,COL_REV=10,COL_MSR=11,COL_FB=12;
+      var importedMonths=0,importedStores=0;
+      for(var ri=1;ri<sumData.length;ri++){
+        var row=sumData[ri];
+        var sname=String(row[COL_SN]||'').trim();
+        var mgr=String(row[COL_MG]||'').trim();
+        var year=parseInt(row[COL_Y],10);
+        var month=parseInt(row[COL_M],10);
+        var target=parseFloat(row[COL_TG])||0;
+        var rev=String(row[COL_REV]||'').trim();
+        var msr=String(row[COL_MSR]||'').trim();
+        var fb2=String(row[COL_FB]||'').trim();
+        if(!sname||isNaN(year)||isNaN(month))continue;
+        var ym=ym_key(year,month);
+        // Find or create store
+        var s=appData.stores.find(function(x){return x.name===sname;});
+        if(!s){s={id:'s'+Date.now()+'_'+ri,name:sname,managerName:mgr,months:{}};appData.stores.push(s);importedStores++;}
+        if(!s.months)s.months={};
+        if(!s.months[ym])s.months[ym]={year:year,month:month,target:target,days:[],overallReview:'',nextMeasures:'',feedback:'',planDays:null};
+        if(rev)s.months[ym].overallReview=rev;
+        if(msr)s.months[ym].nextMeasures=msr;
+        if(fb2)s.months[ym].feedback=fb2;
+        if(target)s.months[ym].target=target;
+        importedMonths++;
+      }
+      // Parse daily sheets (SheetName pattern: 店舗名_YYYY年M月)
+      var DOWS2=['日','月','火','水','木','金','土'];
+      wb.SheetNames.forEach(function(sn){
+        if(sn==='月次サマリー')return;
+        var sh=wb.Sheets[sn];
+        if(!sh)return;
+        var rows=XLSX.utils.sheet_to_json(sh,{header:1,defval:''});
+        if(rows.length<2)return;
+        var hdr=rows[0].map(function(h){return String(h||'').trim();});
+        var iDate=hdr.indexOf('日'),iSales=hdr.indexOf('売上(万)'),iAch=hdr.indexOf('達成率(%)'),iCust=hdr.indexOf('客数(人)'),iUnit=hdr.indexOf('客単価(円)'),iCost=hdr.indexOf('原価率(%)'),iLR=hdr.indexOf('人件費率(%)'),iWth=hdr.indexOf('天気'),iCause=hdr.indexOf('主な原因'),iCmt=hdr.indexOf('振り返り');
+        // Derive store+year+month from sheet name (e.g. "店舗A_2025年4月")
+        var m2=sn.match(/^(.+)_(\d{4})年(\d{1,2})月$/);
+        if(!m2)return;
+        var snm=m2[1],yr2=parseInt(m2[2]),mo2=parseInt(m2[3]);
+        var ym2=ym_key(yr2,mo2);
+        var s2=appData.stores.find(function(x){return x.name===snm;});
+        if(!s2){s2={id:'s'+Date.now()+'_'+snm,name:snm,managerName:'',months:{}};appData.stores.push(s2);}
+        if(!s2.months)s2.months={};
+        if(!s2.months[ym2])s2.months[ym2]={year:yr2,month:mo2,target:0,days:[],overallReview:'',nextMeasures:'',feedback:'',planDays:null};
+        var days2=[];
+        for(var ri2=1;ri2<rows.length;ri2++){
+          var r=rows[ri2];
+          var dt=parseInt(r[iDate],10);if(isNaN(dt)||dt<1||dt>31)continue;
+          var sl=iSales>=0?parseFloat(r[iSales]):null;
+          var ac=iAch>=0?parseFloat(r[iAch]):null;
+          var cu=iCust>=0?parseInt(r[iCust],10):null;
+          var up=iUnit>=0?parseInt(r[iUnit],10):null;
+          var cr=iCost>=0?parseFloat(r[iCost]):null;
+          var lr=iLR>=0?parseFloat(r[iLR]):null;
+          var wt=iWth>=0?String(r[iWth]||'').trim():'';
+          var ca=iCause>=0?String(r[iCause]||'').trim():'';
+          var cm2=iCmt>=0?String(r[iCmt]||'').trim():'';
+          days2.push({date:dt,sales:isNaN(sl)?null:sl,achievement:isNaN(ac)?null:ac,customers:isNaN(cu)?null:cu,unitPrice:isNaN(up)?null:up,costRate:isNaN(cr)?null:cr,laborRate:isNaN(lr)?null:lr,weather:wt,cause:ca,comment:cm2});
+        }
+        if(days2.length)s2.months[ym2].days=days2;
+      });
+      saveStorage();
+      triggerAutoSave();
+      renderTabs();
+      toast('インポート完了（'+importedMonths+'件の月次データを読み込みました）');
+    }catch(err){
+      console.error('Import error:',err);
+      toast('インポートエラー：'+err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
 // ── UTILS ──
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function showError(m){var e=document.getElementById('errorBox');e.textContent=m;e.style.display='block';}
@@ -1217,17 +1451,6 @@ var toastT=null;
 function toast(msg){var el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){el.classList.remove('show');},2200);}
 
 // ── GITHUB SYNC ──
-var GH_REPO='sk1-web/koboreya-report';
-var GH_FILE='shopkpi_data.json';
-var GH_BRANCH='main';
-var GH_PAT_KEY='shopKpiGitHubPAT';
-// トークン（分割格納）
-var _ta='ghp_2k59S9XY3d72',_tb='cJvt7Gt15jXMKQnoCb149kvM';
-var GH_DEFAULT_TOKEN=_ta+_tb;
-
-function ghToken(){return localStorage.getItem(GH_PAT_KEY)||'';}
-function ghSaveToken(v){v?localStorage.setItem(GH_PAT_KEY,v):localStorage.removeItem(GH_PAT_KEY);}
-
 function ghSyncStatus(msg,color){
   var el=document.getElementById('ghSyncStatus');
   if(!el)return;
@@ -1235,14 +1458,16 @@ function ghSyncStatus(msg,color){
   el.style.color=color||'rgba(255,255,255,.8)';
 }
 
-// ── 自動保存タイマー（データ変更から3秒後にGitHubへ保存）──
+// ── 自動保存タイマー（5秒＋ランダムジッターで同時保存衝突を低減）──
 var _ghSaveTimer=null;
 var _ghSaving=false;
 function triggerAutoSave(){
   if(!ghToken())return;
   clearTimeout(_ghSaveTimer);
   ghSyncStatus('☁ 変更あり…','rgba(255,220,100,.9)');
-  _ghSaveTimer=setTimeout(function(){_ghSaveTimer=null;githubSave();},3000);
+  // 5秒 + 0〜2秒のランダムジッターで複数デバイスの同時保存を分散
+  var delay=5000+Math.floor(Math.random()*2000);
+  _ghSaveTimer=setTimeout(function(){_ghSaveTimer=null;githubSave();},delay);
 }
 
 // モーダル操作
@@ -1271,34 +1496,60 @@ function saveGhModal(){
   githubAutoLoad().then(function(){githubSave();});
 }
 
-// ── GitHub読み込み（タイムスタンプ比較で最新を優先）──
+// ── GitHub読み込み（全デバイスファイルを並列取得して月単位マージ）──
 async function githubAutoLoad(){
   var token=ghToken();
   if(!token)return;
-  var url='https://api.github.com/repos/'+GH_REPO+'/contents/'+GH_FILE+'?ref='+GH_BRANCH;
+  var apiBase='https://api.github.com/repos/'+GH_REPO;
   var headers={'Accept':'application/vnd.github.v3+json','Authorization':'Bearer '+token};
   ghSyncStatus('☁ 読み込み中…','rgba(255,255,255,.7)');
   try{
-    var resp=await fetch(url,{headers:headers});
-    if(!resp.ok){
-      if(resp.status===404){ghSyncStatus('☁ 初回保存待ち','rgba(255,200,80,.9)');return;}
-      throw new Error('HTTP '+resp.status);
-    }
-    var data=await resp.json();
-    var _b64=data.content.replace(/\n/g,'');
-    var _bin2=atob(_b64);
-    var _bytes2=new Uint8Array(_bin2.length);
-    for(var _i=0;_i<_bin2.length;_i++)_bytes2[_i]=_bin2.charCodeAt(_i);
-    var content=JSON.parse(new TextDecoder().decode(_bytes2));
-    if(!content.stores)return;
-    var ghTs=content._ts||0;
-    var localTs=appData._ts||0;
+    // リポジトリのファイル一覧を取得
+    var listResp=await fetch(apiBase+'/contents/?ref='+GH_BRANCH,{headers:headers});
+    if(!listResp.ok)throw new Error('HTTP '+listResp.status);
+    var files=await listResp.json();
+    // kbr_*.json（全デバイスファイル）＋旧形式ファイルを収集
+    var devFiles=files.filter(function(f){return /^kbr_[a-z0-9]+\.json$/i.test(f.name);});
+    var legacyFile=files.find(function(f){return f.name==='shopkpi_data.json';});
+    if(legacyFile)devFiles.push(legacyFile);
+    if(devFiles.length===0){ghSyncStatus('☁ 初回保存待ち','rgba(255,200,80,.9)');return;}
+    // 全ファイルを並列取得してデコード
+    var allContents=await Promise.all(devFiles.map(async function(f){
+      try{
+        var resp=await fetch(f.url,{headers:headers});
+        if(!resp.ok)return null;
+        var d=await resp.json();
+        var raw=atob(d.content.replace(/\n/g,''));
+        var bytes=new Uint8Array(raw.length);
+        for(var i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+        return JSON.parse(new TextDecoder().decode(bytes));
+      }catch(e){return null;}
+    }));
+    // 月単位マージ：各デバイスの最新データを統合
+    var merged={stores:[],_ts:0};
+    allContents.filter(Boolean).forEach(function(d){
+      if(!d||!d.stores)return;
+      d.stores.forEach(function(gs){
+        var ls=merged.stores.find(function(s){return s.id===gs.id;});
+        if(!ls){merged.stores.push(JSON.parse(JSON.stringify(gs)));}
+        else{
+          Object.keys(gs.months||{}).forEach(function(ym){
+            if(!ls.months[ym]){ls.months[ym]=JSON.parse(JSON.stringify(gs.months[ym]));}
+            else if((gs.months[ym]._ts||0)>(ls.months[ym]._ts||0)){
+              ls.months[ym]=JSON.parse(JSON.stringify(gs.months[ym]));
+            }
+          });
+          if(gs.managerName&&!ls.managerName)ls.managerName=gs.managerName;
+        }
+      });
+      if((d._ts||0)>merged._ts)merged._ts=d._ts||0;
+    });
     var now=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
-    if(ghTs>localTs){
-      // GitHubが新しい→全体を置換してUI更新
+    if(!merged.stores.length){ghSyncStatus('☁ 初回保存待ち','rgba(255,200,80,.9)');return;}
+    // マージ結果がローカルより新しければUIを更新
+    if((merged._ts||0)>(appData._ts||0)){
       var prevId=activeStoreId,prevYM=activeYM;
-      appData=content;
-      // saveStorageを内部的に呼ぶ（triggerAutoSave不要なので直接）
+      appData=merged;
       try{localStorage.setItem(SKEY,JSON.stringify(appData));}catch(e){}
       renderTabs();
       var restoreId=prevId&&getStore(prevId)?prevId:(appData.stores.length?appData.stores[0].id:null);
@@ -1309,10 +1560,10 @@ async function githubAutoLoad(){
         document.getElementById('managerInput').value=_rs.managerName||'';
         renderHistory();
         var _ym=prevYM&&_rs.months[prevYM]?prevYM:Object.keys(_rs.months||{}).sort().slice(-1)[0];
-        if(_ym){try{loadMonth(_ym);}catch(e){}}
+        if(_ym){try{_autoLoad=true;loadMonth(_ym);}catch(e){}finally{setTimeout(function(){_autoLoad=false;},200);}}
       }
       ghSyncStatus('☁ '+now+' 更新しました','rgba(150,235,180,.95)');
-    } else {
+    }else{
       ghSyncStatus('☁ '+now+' 同期済み','rgba(255,255,255,.85)');
     }
   }catch(e){
@@ -1321,28 +1572,30 @@ async function githubAutoLoad(){
   }
 }
 
-// ── GitHub保存（タイムスタンプ付き）──
+// ── GitHub保存（自デバイス専用ファイルへの書き込み・競合ゼロ）──
 async function githubSave(){
   var token=ghToken();
   if(!token)return;
-  if(_ghSaving)return; // 二重保存防止
+  if(_ghSaving)return;
   _ghSaving=true;
-  var url='https://api.github.com/repos/'+GH_REPO+'/contents/'+GH_FILE;
+  // 自デバイス専用ファイルにのみ書き込む（他デバイスとの競合は構造上発生しない）
+  var url='https://api.github.com/repos/'+GH_REPO+'/contents/'+GH_MYFILE;
   var headers={'Accept':'application/vnd.github.v3+json','Authorization':'Bearer '+token,'Content-Type':'application/json'};
   ghSyncStatus('☁ 保存中…','rgba(255,255,255,.7)');
   appData._ts=Date.now();
   try{localStorage.setItem(SKEY,JSON.stringify(appData));}catch(e){}
-  var sha=null;
-  try{var gr=await fetch(url+'?ref='+GH_BRANCH,{headers:headers});if(gr.ok){var gd=await gr.json();sha=gd.sha;}}catch(e){}
-  var _json=JSON.stringify(appData,null,2);
-  var _bytes=new TextEncoder().encode(_json);
-  var _bin=Array.from(_bytes,function(b){return String.fromCharCode(b);}).join('');
-  var b64=btoa(_bin);
-  var body={message:'自動同期 '+new Date().toLocaleString('ja-JP'),content:b64,branch:GH_BRANCH};
-  if(sha)body.sha=sha;
   try{
+    // 自分のファイルの現在のSHAを取得（更新に必要）
+    var sha=null;
+    try{var gr=await fetch(url+'?ref='+GH_BRANCH,{headers:headers});if(gr.ok){var gd=await gr.json();sha=gd.sha;}}catch(e){}
+    var _json=JSON.stringify(appData,null,2);
+    var _bytes=new TextEncoder().encode(_json);
+    var _bin=Array.from(_bytes,function(b){return String.fromCharCode(b);}).join('');
+    var b64=btoa(_bin);
+    var body={message:'自動同期['+_devId+'] '+new Date().toLocaleString('ja-JP'),content:b64,branch:GH_BRANCH};
+    if(sha)body.sha=sha;
     var resp=await fetch(url,{method:'PUT',headers:headers,body:JSON.stringify(body)});
-    if(!resp.ok){var err=await resp.json();throw new Error(err.message||'HTTP '+resp.status);}
+    if(!resp.ok){var err=await resp.json().catch(function(){return{};});throw new Error('HTTP '+resp.status);}
     var now=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
     ghSyncStatus('☁ '+now+' 保存済み','rgba(255,255,255,.85)');
   }catch(e){
@@ -1352,12 +1605,13 @@ async function githubSave(){
   _ghSaving=false;
 }
 
-// ── 定期ポーリング（60秒ごとに他デバイスの更新を確認）──
+// ── 定期ポーリング（120秒ごとに他デバイスの更新を確認）──
+// 10デバイス×(1リスト+10ファイルGET)×120s間隔 ≒ 3,300req/h（上限5,000以内）
 setInterval(function(){
   if(document.visibilityState==='visible'&&ghToken()&&!_ghSaving&&!_ghSaveTimer){
     githubAutoLoad();
   }
-},60000);
+},120000);
 </script>
 </body>
 </html>
