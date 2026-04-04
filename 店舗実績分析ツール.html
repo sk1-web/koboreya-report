@@ -756,7 +756,7 @@ function renderCharts(days,target){
   var lr=valid.map(function(d){return d.laborRate;});
   var lbls=valid.map(function(d){return d.date+'('+d.dn+')';});
   var clrs=valid.map(function(d){var r=d.laborRate/target;return r>=1.20||r<=0.80?'#FF0000':r>=1.15||r<=0.85?'#FF6B6B':r>=1.10||r<=0.90?'#FFB347':'#90D580';});
-  var svg1=makeSvgBar(lbls,lr,clrs,150,target);
+  var svg1=makeSvgBar(lbls,lr,clrs,170,target);
   // 曜日別平均バーチャート
   var order=[1,2,3,4,5,6,0];
   var byDow=Array.from({length:7},function(){return [];});
@@ -770,7 +770,7 @@ function renderCharts(days,target){
     '<div class="chart-wrap"><div class="chart-title">&#x1F4C5; 曜日別 平均人件費率</div>'+svg2+'</div>';
 }
 function makeSvgBar(labels,values,colors,H,target){
-  var W=760,n=labels.length,pL=38,pR=8,pT=18,pB=28;
+  var W=760,n=labels.length,pL=38,pR=8,pT=18,pB=n>20?38:28;
   var cW=W-pL-pR,cH=H-pT-pB;
   var mx=0;values.forEach(function(v){if(v!==null&&v>mx)mx=v;});
   if(target&&target>mx)mx=target;mx=mx*1.2||1;
@@ -785,7 +785,7 @@ function makeSvgBar(labels,values,colors,H,target){
   values.forEach(function(v,i){
     var x=(pL+gap+i*(bW+gap)).toFixed(1);
     if(v!==null){var bh=Math.max(2,(v/mx)*cH);var y=(pT+cH-bh).toFixed(1);svg+='<rect x="'+x+'" y="'+y+'" width="'+bW+'" height="'+bh.toFixed(1)+'" fill="'+(colors[i]||'#2E5E8E')+'" rx="2"/>';if(bW>=10&&bh>12)svg+='<text x="'+(parseFloat(x)+bW/2).toFixed(1)+'" y="'+(parseFloat(y)-2.5).toFixed(1)+'" font-size="7" text-anchor="middle" fill="#333">'+v.toFixed(1)+'</text>';}
-    if(n<=20||i%Math.ceil(n/20)===0){var lbl=String(labels[i]);svg+='<text x="'+(parseFloat(x)+bW/2).toFixed(1)+'" y="'+(pT+cH+14).toFixed(1)+'" font-size="7.5" text-anchor="middle" fill="#555" transform="rotate(-30,'+(parseFloat(x)+bW/2).toFixed(1)+','+(pT+cH+14).toFixed(1)+')">'+(lbl.length>6?lbl.slice(0,6):lbl)+'</text>';}
+    {var lbl=String(labels[i]);var fs=n>25?6.5:7.5;svg+='<text x="'+(parseFloat(x)+bW/2).toFixed(1)+'" y="'+(pT+cH+13).toFixed(1)+'" font-size="'+fs+'" text-anchor="end" fill="#555" transform="rotate(-45,'+(parseFloat(x)+bW/2).toFixed(1)+','+(pT+cH+13).toFixed(1)+')">'+(lbl.length>7?lbl.slice(0,7):lbl)+'</text>';}
   });
   svg+='</svg>';return svg;
 }
