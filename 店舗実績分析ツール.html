@@ -152,8 +152,9 @@ td.ctd{text-align:left;min-width:130px;}
 <body>
 <header>
   <div><h1>&#x1F3EA; 店舗実績分析ツール</h1><div class="sub">日別データを貼り付けて週次・月次の人件費率を分析（週区切り：月〜日）</div></div>
-  <div class="hbtns no-print" style="align-items:center;gap:10px">
+  <div class="hbtns no-print" style="align-items:center;gap:7px">
     <span id="ghSyncStatus" style="font-size:10.5px;opacity:.85"></span>
+    <button class="btn btn-sv btn-sm" id="headerSaveBtn" onclick="manualSave()" style="background:#27ae60;color:#fff;font-weight:700;display:none">&#x1F4BE; 保存<span id="headerSaveBadge" style="display:none;margin-left:4px">✓</span></button>
     <button class="btn btn-sv btn-sm" onclick="importData()">&#x1F4E5; インポート</button>
     <button class="btn btn-ex btn-sm" onclick="exportData()">&#x1F4E4; エクスポート</button>
     <input type="file" id="importFile" accept=".xlsx" style="display:none" onchange="onImportFile(this)">
@@ -201,7 +202,7 @@ td.ctd{text-align:left;min-width:130px;}
   </details>
   <div class="row" style="margin-top:12px">
     <button class="btn btn-p" onclick="analyzeData()">&#x1F4CA; 分析する</button>
-    <button class="btn btn-sv" onclick="manualSave()">&#x1F4BE; 保存<span class="sbadge" id="saveBadge"> &#x2713; 保存済み</span></button>
+    <button class="btn btn-sv" onclick="manualSave()" style="background:#27ae60;color:#fff;font-weight:700">&#x1F4BE; 今すぐ保存<span class="sbadge" id="saveBadge"> &#x2713; 保存済み</span></button>
     <button class="btn btn-clr" onclick="clearInput()">&#x1F5D1; クリア</button>
   </div>
   <div class="ebx" id="errorBox"></div>
@@ -638,12 +639,41 @@ function analyzeData(){
   }
 }
 
-function manualSave(){if(!activeStoreId||!activeYM){toast('先にデータを分析してください');return;}saveStorage();showSaveBadge();toast('保存しました');githubSave();}
-function showSaveBadge(){var b=document.getElementById('saveBadge');b.style.display='inline';setTimeout(function(){b.style.display='none';},2500);}
+function flushAllInputs(){
+  // 日別コメント・原因の未フラッシュ分をDOMから強制コミット
+  clearTimeout(cmtTimer);
+  document.querySelectorAll('input.ci[data-date]').forEach(function(el){
+    var d=parseInt(el.dataset.date,10);
+    var v=el.value;
+    updateDayField(d,'comment',v);
+  });
+  // 総合振り返り・来月対策・フィードバック
+  var ov=document.getElementById('overallReview');if(ov)updateOverallReview(ov.value);
+  var nm=document.getElementById('nextMeasures');if(nm)updateNextMeasures(nm.value);
+  var fb=document.getElementById('feedbackField');if(fb)updateFeedback(fb.value);
+}
+function manualSave(){
+  if(!activeStoreId||!activeYM){toast('先にデータを分析してください');return;}
+  flushAllInputs();
+  saveStorage();
+  showSaveBadge();
+  toast('💾 保存しました');
+  githubSave();
+}
+function showSaveBadge(){
+  // 分析エリア内バッジ
+  var b=document.getElementById('saveBadge');if(b){b.style.display='inline';setTimeout(function(){b.style.display='none';},2500);}
+  // ヘッダーバッジ
+  var hb=document.getElementById('headerSaveBadge');if(hb){hb.style.display='inline';setTimeout(function(){hb.style.display='none';},2500);}
+}
+function showHeaderSaveBtn(show){
+  var btn=document.getElementById('headerSaveBtn');if(btn)btn.style.display=show?'':'none';
+}
 
 function renderAll(year,month,name,days,target){
   document.getElementById('results').style.display='block';
   document.getElementById('summaryPage').style.display='none';
+  showHeaderSaveBtn(true);
   document.getElementById('resultsTitle').textContent=year+'年'+month+'月　実績分析　─　'+name;
   var planDays=null;
   if(activeStoreId&&activeYM){
