@@ -579,6 +579,8 @@ function lcLabel(v,t){
   if(r>=1.10||r<=0.90)return'&#x26A0;&#xFE0F; 要注意';
   return'&#x2705; 目標達成';
 }
+// 休店日判定: 売上が null または 0 の日は平均計算から除外
+function isOpen(d){return d.sales!==null && d.sales!==0;}
 
 // Multi-select widget builder
 function makeCauseWidget(date,selectedStr){
@@ -729,20 +731,22 @@ function renderAll(year,month,name,days,target){
 
 // ── SUMMARY CARDS ──
 function renderSumCards(days,target){
-  var lv=days.map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});
+  var openDays=days.filter(isOpen);
+  var lv=openDays.map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});
   var ma=lv.length?lv.reduce(function(a,b){return a+b;},0)/lv.length:null;
   var od=lv.filter(function(v){return v>target;}).length;
   var ts=days.reduce(function(s,d){return s+(d.sales||0);},0);
   var tc=days.reduce(function(s,d){return s+(d.customers||0);},0);
-  var aa=avg(days.map(function(d){return d.achievement;}),false);
+  var aa=avg(openDays.map(function(d){return d.achievement;}),false);
   var ll=ma===null?'&ndash;':lcLabel(ma,target);
   var lclr=ma===null?'#888':(function(){var r=ma/target;return r>=1.20||r<=0.80?'#CC0000':r>=1.15||r<=0.85?'#FF4444':r>=1.10||r<=0.90?'#FF8800':'#5CB85C';})();
+  var openCnt=openDays.length;
   document.getElementById('sumCards').innerHTML=
     mksc('月平均 人件費率',ma!==null?ma.toFixed(1)+'%':'&ndash;',ll+'&thinsp;目標'+target+'%',lclr)+
-    mksc('目標超過日数',od+'日','全'+lv.length+'日中',od>0?'#FF4444':'#5CB85C')+
-    mksc('月間売上合計',ts.toFixed(1)+'<small style="font-size:12px">万円</small>',days.length+'日間','#333')+
+    mksc('目標超過日数',od+'日','営業'+openCnt+'日中',od>0?'#FF4444':'#5CB85C')+
+    mksc('月間売上合計',ts.toFixed(1)+'<small style="font-size:12px">万円</small>','営業'+openCnt+'日','#333')+
     mksc('月間客数',tc.toLocaleString()+'<small style="font-size:12px">人</small>','月間合計','#333')+
-    mksc('平均達成率',aa!==null?aa.toFixed(1)+'%':'&ndash;','月間平均',aa===null?'#888':aa>=100?'#5CB85C':'#FF4444');
+    mksc('平均達成率',aa!==null?aa.toFixed(1)+'%':'&ndash;','月間平均（営業日）',aa===null?'#888':aa>=100?'#5CB85C':'#FF4444');
 }
 function mksc(l,v,s,c){return '<div class="sc"><div class="lb">'+l+'</div><div class="vl" style="color:'+c+'">'+v+'</div><div class="sb">'+s+'</div></div>';}
 
@@ -755,24 +759,28 @@ function renderWeekly(days,target,month){
     var mn=Math.min.apply(null,gd.map(function(d){return d.date;}));var mx=Math.max.apply(null,gd.map(function(d){return d.date;}));
     var rng=mn===mx?(month+'/'+mn):(month+'/'+mn+'~'+month+'/'+mx);
     var sales=gd.reduce(function(s,d){return s+(d.sales||0);},0);
-    var ac=avg(gd.map(function(d){return d.achievement;}),false);var cu=avg(gd.map(function(d){return d.customers;}),false);
-    var up=avg(gd.map(function(d){return d.unitPrice;}),false);
-    var lv=gd.map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});
+    var ogd=gd.filter(isOpen);
+    var ac=avg(ogd.map(function(d){return d.achievement;}),false);var cu=avg(ogd.map(function(d){return d.customers;}),false);
+    var up=avg(ogd.map(function(d){return d.unitPrice;}),false);
+    var lv=ogd.map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});
     var la=lv.length?lv.reduce(function(a,b){return a+b;},0)/lv.length:null;
     var l=lc(la,target);var jt=la===null?'&ndash;':lcLabel(la,target);
     var jc=la===null?'#888':(function(){if(!target||target<=0)return'#888';var r=la/target;return r>=1.20||r<=0.80?'#CC0000':r>=1.15||r<=0.85?'#FF4444':r>=1.10||r<=0.90?'#FF8800':'#5CB85C';})();
     var ratio=la!==null&&target&&target>0?(la/target*100).toFixed(1)+'%':'&ndash;';
     var diff=la!==null&&target&&target>0?la-target:null;var diffStr=diff!==null?(diff>=0?'+':'')+diff.toFixed(1)+'%':'&ndash;';
-    h+='<tr><td><strong>'+lbl+'</strong></td><td>'+rng+'</td><td>'+gd.length+'</td><td>'+sales.toFixed(1)+'</td><td>'+(ac!==null?ac.toFixed(1)+'%':'&ndash;')+'</td><td>'+(cu!==null?Math.round(cu)+'人':'&ndash;')+'</td><td>'+(up!==null?'&yen;'+Math.round(up).toLocaleString():'&ndash;')+'</td><td class="'+l.c+'"><strong>'+l.t+'</strong><br><small style="font-weight:normal;color:#888">目標'+target+'%</small></td><td class="'+l.c+'" style="font-size:11.5px"><strong>'+ratio+'</strong><br><small style="font-weight:normal">('+diffStr+')</small></td><td style="color:'+jc+';font-weight:bold;font-size:11px">'+jt+'</td></tr>';
+    var dayLbl=ogd.length<gd.length?ogd.length+'<small style="color:#aaa;font-size:9px">/'+gd.length+'</small>':String(gd.length);
+    h+='<tr><td><strong>'+lbl+'</strong></td><td>'+rng+'</td><td>'+dayLbl+'</td><td>'+sales.toFixed(1)+'</td><td>'+(ac!==null?ac.toFixed(1)+'%':'&ndash;')+'</td><td>'+(cu!==null?Math.round(cu)+'人':'&ndash;')+'</td><td>'+(up!==null?'&yen;'+Math.round(up).toLocaleString():'&ndash;')+'</td><td class="'+l.c+'"><strong>'+l.t+'</strong><br><small style="font-weight:normal;color:#888">目標'+target+'%</small></td><td class="'+l.c+'" style="font-size:11.5px"><strong>'+ratio+'</strong><br><small style="font-weight:normal">('+diffStr+')</small></td><td style="color:'+jc+';font-weight:bold;font-size:11px">'+jt+'</td></tr>';
   });
-  var al=days.map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});
+  var openAll=days.filter(isOpen);
+  var al=openAll.map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});
   var ml=al.length?al.reduce(function(a,b){return a+b;},0)/al.length:null;var mll=lc(ml,target);
   var ms=days.reduce(function(s,d){return s+(d.sales||0);},0);var mc=days.reduce(function(s,d){return s+(d.customers||0);},0);
-  var ma=avg(days.map(function(d){return d.achievement;}),false);
+  var ma=avg(openAll.map(function(d){return d.achievement;}),false);
   var mratio=ml!==null&&target&&target>0?(ml/target*100).toFixed(1)+'%':'&ndash;';
   var mdiff=ml!==null&&target&&target>0?ml-target:null;var mdiffStr=mdiff!==null?(mdiff>=0?'+':'')+mdiff.toFixed(1)+'%':'&ndash;';
   var mjc=ml===null?'#888':(function(){if(!target||target<=0)return'#888';var r=ml/target;return r>=1.20||r<=0.80?'#CC0000':r>=1.15||r<=0.85?'#FF4444':r>=1.10||r<=0.90?'#FF8800':'#5CB85C';})();
-  h+='<tr class="mrow"><td colspan="2"><strong>月次合計・平均</strong></td><td>'+days.length+'</td><td>'+ms.toFixed(1)+'</td><td>'+(ma!==null?ma.toFixed(1)+'%':'&ndash;')+'</td><td>'+mc.toLocaleString()+'人</td><td>&ndash;</td><td>'+mll.t+'<br><small style="font-weight:normal;color:#888">目標'+target+'%</small></td><td style="font-size:11.5px;color:'+mjc+'"><strong>'+mratio+'</strong><br><small style="font-weight:normal">('+mdiffStr+')</small></td><td style="font-size:11px">'+(ml!==null?lcLabel(ml,target):'&ndash;')+'</td></tr>';
+  var mDayLbl=openAll.length<days.length?openAll.length+'<small style="color:#aaa;font-size:9px">/'+days.length+'</small>':String(days.length);
+  h+='<tr class="mrow"><td colspan="2"><strong>月次合計・平均</strong></td><td>'+mDayLbl+'</td><td>'+ms.toFixed(1)+'</td><td>'+(ma!==null?ma.toFixed(1)+'%':'&ndash;')+'</td><td>'+mc.toLocaleString()+'人</td><td>&ndash;</td><td>'+mll.t+'<br><small style="font-weight:normal;color:#888">目標'+target+'%</small></td><td style="font-size:11.5px;color:'+mjc+'"><strong>'+mratio+'</strong><br><small style="font-weight:normal">('+mdiffStr+')</small></td><td style="font-size:11px">'+(ml!==null?lcLabel(ml,target):'&ndash;')+'</td></tr>';
   h+='</tbody></table>';document.getElementById('weeklyTable').innerHTML=h;
 }
 
@@ -785,20 +793,22 @@ function renderDowAvg(days,target){
   var h='<table><thead><tr><th>曜日</th><th>日数</th><th>平均売上(万)</th><th>平均達成率</th><th>平均客数</th><th>平均客単価</th><th>平均人件費率</th><th>判定</th></tr></thead><tbody>';
   order.forEach(function(wi){
     var gd=byDow[wi]||[];
+    var ogd=gd.filter(isOpen);
     var cls=wi===0?'sunr':wi===6?'satr':'';
     var dc=wi===0?' class="dsun"':wi===6?' class="dsat"':'';
     if(!gd.length){h+='<tr class="'+cls+'"><td'+dc+'>'+_DOWS[wi]+'</td><td colspan="7" style="color:#ccc">─</td></tr>';return;}
-    var sales=avg(gd.map(function(d){return d.sales;}),false);
-    var ac=avg(gd.map(function(d){return d.achievement;}),false);
-    var cu=avg(gd.map(function(d){return d.customers;}),false);
-    var up=avg(gd.map(function(d){return d.unitPrice;}),false);
-    var lv=gd.map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});
+    var sales=avg(ogd.map(function(d){return d.sales;}),false);
+    var ac=avg(ogd.map(function(d){return d.achievement;}),false);
+    var cu=avg(ogd.map(function(d){return d.customers;}),false);
+    var up=avg(ogd.map(function(d){return d.unitPrice;}),false);
+    var lv=ogd.map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});
     var la=lv.length?lv.reduce(function(a,b){return a+b;},0)/lv.length:null;
     var l=lc(la,target);
     var jc=la===null?'#888':(function(){if(!target||target<=0)return'#888';var r=la/target;return r>=1.15||r<=0.85?'#CC0000':r>=1.10||r<=0.90?'#FF8800':'#5CB85C';})();
+    var dayLbl=ogd.length<gd.length?ogd.length+'<small style="color:#aaa;font-size:9px">/'+gd.length+'</small>':String(gd.length);
     h+='<tr class="'+cls+'">';
     h+='<td'+dc+'><strong>'+_DOWS[wi]+'</strong></td>';
-    h+='<td>'+gd.length+'日</td>';
+    h+='<td>'+dayLbl+'日</td>';
     h+='<td>'+(sales!==null?sales.toFixed(1):'&ndash;')+'</td>';
     h+='<td>'+(ac!==null?ac.toFixed(1)+'%':'&ndash;')+'</td>';
     h+='<td>'+(cu!==null?Math.round(cu)+'人':'&ndash;')+'</td>';
@@ -813,17 +823,17 @@ function renderDowAvg(days,target){
 
 // ── CHARTS (SVG) ──
 function renderCharts(days,target){
-  var valid=days.filter(function(d){return d.laborRate!==null;});
+  var valid=days.filter(function(d){return isOpen(d)&&d.laborRate!==null;});
   if(!valid.length){document.getElementById('chartsDiv').innerHTML='<div style="color:#aaa;font-size:12px;padding:8px">データがありません</div>';return;}
   // 日別人件費率バーチャート
   var lr=valid.map(function(d){return d.laborRate;});
   var lbls=valid.map(function(d){return d.date+'('+d.dn+')';});
   var clrs=valid.map(function(d){var r=d.laborRate/target;return r>=1.20||r<=0.80?'#FF0000':r>=1.15||r<=0.85?'#FF6B6B':r>=1.10||r<=0.90?'#FFB347':'#90D580';});
   var svg1=makeSvgBar(lbls,lr,clrs,170,target);
-  // 曜日別平均バーチャート
+  // 曜日別平均バーチャート（休店日除外）
   var order=[1,2,3,4,5,6,0];
   var byDow=Array.from({length:7},function(){return [];});
-  days.forEach(function(d){if(d.wd>=0&&d.wd<=6)byDow[d.wd].push(d);});
+  days.filter(isOpen).forEach(function(d){if(d.wd>=0&&d.wd<=6)byDow[d.wd].push(d);});
   var dlbls=order.map(function(wi){return DOWS[wi];});
   var dvals=order.map(function(wi){var gd=byDow[wi];var lv=gd.map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});return lv.length?lv.reduce(function(a,b){return a+b;},0)/lv.length:null;});
   var dclrs=dvals.map(function(v){if(v===null)return '#e5e7eb';var r=v/target;return r>=1.15||r<=0.85?'#FF6B6B':r>=1.10||r<=0.90?'#FFB347':'#90D580';});
@@ -960,8 +970,9 @@ function renderAnalysis(days,target,month){
     var gd=g[gk];var lbl=gk===0?'月初単日':'第'+gk+'週';
     var mn=Math.min.apply(null,gd.map(function(d){return d.date;}));var mx=Math.max.apply(null,gd.map(function(d){return d.date;}));
     var rng=mn===mx?(month+'/'+mn):(month+'/'+mn+'~'+month+'/'+mx);
-    // All valid days included in average
-    var lv=gd.map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});
+    // 休店日を除いた営業日のみで平均計算
+    var ogd=gd.filter(isOpen);
+    var lv=ogd.map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});
     var la=lv.length?lv.reduce(function(a,b){return a+b;},0)/lv.length:null;
     if(la===null)return;
     var r=target&&target>0?la/target:1;
@@ -977,8 +988,8 @@ function renderAnalysis(days,target,month){
   });
   var h='';
 
-  // 大幅超過週
-  var anomDays=days.filter(function(d){return d.laborRate!==null&&isAnom(d.laborRate,target);});
+  // 大幅超過週（休店日除外）
+  var anomDays=days.filter(function(d){return isOpen(d)&&d.laborRate!==null&&isAnom(d.laborRate,target);});
   if(anomDays.length){
     h+='<div class="ab anom"><div class="ab-t">&#x1F6A8; 大幅超過の日（目標比 ≥120% または ≤80%）</div>';
     anomDays.forEach(function(d){
@@ -1151,7 +1162,7 @@ function renderPlanComparison(days,target,month,planDays){
   var mLBA=days.reduce(function(s,d){return s+(d.sales!==null&&d.laborRate!==null?d.sales*d.laborRate/100:0);},0);
   var allPLR=days.map(function(d){return plr[d.date]!==undefined?plr[d.date]:null;}).filter(function(v){return v!==null;});
   var mLRS=allPLR.length?allPLR.reduce(function(a,b){return a+b;},0)/allPLR.length:null;
-  var allALR=days.map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});
+  var allALR=days.filter(isOpen).map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});
   var mLRA=allALR.length?allALR.reduce(function(a,b){return a+b;},0)/allALR.length:null;
   var h='';
   // ── KPI サマリーカード ──
@@ -1199,7 +1210,7 @@ function renderPlanComparison(days,target,month,planDays){
     var wLBA=wLBAvals.length?wLBAvals.reduce(function(a,b){return a+b;},0):null;
     var wLRSvals=gd.map(function(d){return plr[d.date]!==undefined?plr[d.date]:null;}).filter(function(v){return v!==null;});
     var wLRS=wLRSvals.length?wLRSvals.reduce(function(a,b){return a+b;},0)/wLRSvals.length:null;
-    var wLRAvals=gd.map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});
+    var wLRAvals=gd.filter(isOpen).map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});
     var wLRA=wLRAvals.length?wLRAvals.reduce(function(a,b){return a+b;},0)/wLRAvals.length:null;
     var wsc=saleCls(wPA,wPS);var wlrc=lrCls(wLRA,wLRS);var wlbc=lbCls(wLBA,wLBS);
     h+='<tr><td><strong>'+lbl+'</strong></td><td style="white-space:nowrap;font-size:11px">'+rng+'</td>';
@@ -1254,11 +1265,12 @@ function renderSummaryPage(){
     }
     var days=assignGroups(md.days,md.year,md.month);
     var target=md.target;
-    var al=days.map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});
+    var openDays=days.filter(isOpen);
+    var al=openDays.map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});
     var ml=al.length?al.reduce(function(a,b){return a+b;},0)/al.length:null;
     var mll=lc(ml,target);
     var ms=days.reduce(function(s,d){return s+(d.sales||0);},0);
-    var ma=avg(days.map(function(d){return d.achievement;}),false);
+    var ma=avg(openDays.map(function(d){return d.achievement;}),false);
     var jt=ml===null?'&ndash;':lcLabel(ml,target);
     var jc=ml===null?'#888':(function(){if(!target||target<=0)return'#888';var r=ml/target;return r>=1.20||r<=0.80?'#CC0000':r>=1.15||r<=0.85?'#FF4444':r>=1.10||r<=0.90?'#FF8800':'#5CB85C';})();
     h+='<tr><td style="font-weight:bold;text-align:left">'+esc(s.name||'─')+'</td>';
@@ -1269,7 +1281,8 @@ function renderSummaryPage(){
     for(var wi=1;wi<=maxWeeks;wi++){
       var gd=g[wi]||[];
       if(!gd.length){h+='<td style="color:#ccc">─</td>';continue;}
-      var lv=gd.map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});
+      var ogdW=gd.filter(isOpen);
+      var lv=ogdW.map(function(d){return d.laborRate;}).filter(function(v){return v!==null;});
       var la=lv.length?lv.reduce(function(a,b){return a+b;},0)/lv.length:null;
       var wl=lc(la,target);
       h+='<td class="'+wl.c+'">'+wl.t+'</td>';
