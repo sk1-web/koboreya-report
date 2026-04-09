@@ -272,9 +272,9 @@ var _autoLoad=false; // 自動更新中はスクロールを抑止
 function loadStorage(){
   try{
     var r=localStorage.getItem(SKEY);
-    if(r){appData=JSON.parse(r);if(!appData.stores)appData.stores=[];return;}
+    if(r){appData=JSON.parse(r);if(!appData.stores)appData.stores=[];if(!appData.deletedStores)appData.deletedStores=[];return;}
   }catch(e){}
-  appData={stores:[]};
+  appData={stores:[],deletedStores:[]};
 }
 function saveStorage(){
   // アクティブな月に更新タイムスタンプを付与（月単位マージ用）
@@ -311,7 +311,17 @@ function savePlanDays(sid,ym,planDays){
   s.months[ym].planDays=planDays;saveStorage();
 }
 function deleteMonth(sid,ym){var s=getStore(sid);if(s&&s.months)delete s.months[ym];saveStorage();}
-function deleteStore(sid){appData.stores=appData.stores.filter(function(s){return s.id!==sid;});saveStorage();}
+function deleteStore(sid){
+  var now=Date.now();
+  appData.stores=appData.stores.filter(function(s){return s.id!==sid;});
+  if(!appData.deletedStores)appData.deletedStores=[];
+  // 既存エントリを更新 or 追加
+  var ex=appData.deletedStores.find(function(d){return d.id===sid;});
+  if(ex){ex._ts=now;}else{appData.deletedStores.push({id:sid,_ts:now});}
+  // 上限100件（肥大化防止）
+  if(appData.deletedStores.length>100)appData.deletedStores=appData.deletedStores.slice(-100);
+  saveStorage();
+}
 function ym_key(y,m){return y+'-'+(m<10?'0':'')+m;}
 
 function updateDayField(date,field,value){
@@ -1585,10 +1595,22 @@ async function githubAutoLoad(){
       }catch(e){return null;}
     }));
     // 月単位マージ：各デバイスの最新データを統合
-    var merged={stores:[],_ts:0};
+    var merged={stores:[],deletedStores:[],_ts:0};
+    // 全デバイスの削除ログを収集（id→最新削除タイムスタンプ）
+    var allDeleted={};
+    allContents.filter(Boolean).forEach(function(d){
+      (d.deletedStores||[]).forEach(function(del){
+        if(!allDeleted[del.id]||del._ts>allDeleted[del.id])allDeleted[del.id]=del._ts;
+      });
+    });
     allContents.filter(Boolean).forEach(function(d){
       if(!d||!d.stores)return;
       d.stores.forEach(function(gs){
+        // 削除ログに存在し、かつ月データより削除が新しい場合はスキップ
+        if(allDeleted[gs.id]){
+          var storeMaxTs=Math.max.apply(null,Object.values(gs.months||{}).map(function(m){return m._ts||0;}).concat([0]));
+          if(allDeleted[gs.id]>=storeMaxTs)return;
+        }
         var ls=merged.stores.find(function(s){return s.id===gs.id;});
         if(!ls){merged.stores.push(JSON.parse(JSON.stringify(gs)));}
         else{
@@ -1603,6 +1625,8 @@ async function githubAutoLoad(){
       });
       if((d._ts||0)>merged._ts)merged._ts=d._ts||0;
     });
+    // 削除ログを merged に保持（上限100件）
+    merged.deletedStores=Object.entries(allDeleted).map(function(e){return {id:e[0],_ts:e[1]};}).slice(-100);
     var now=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
     if(!merged.stores.length){ghSyncStatus('☁ 初回保存待ち','rgba(255,200,80,.9)');return;}
     // マージ結果がローカルより新しければUIを更新
