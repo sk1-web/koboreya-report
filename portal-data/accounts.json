@@ -369,5 +369,30 @@
       }
     ],
     "birthday": "1996-01-01"
+  },
+  {
+    "id": "u1775836843264",
+    "name": "山田",
+    "store": "本店",
+    "role": "staff",
+    "pwHash": "bcb15f821479b4d5772bd0ca866c00ad5f926e3580720659cc80d39c9d09802a",
+    "birthday": "2026-04-21",
+    "personalityType": "action",
+    "personalityScores": {
+      "action": 4,
+      "support": 1,
+      "planner": 4,
+      "creator": 1
+    },
+    "points": 0.1,
+    "activityLog": [
+      {
+        "ts": "2026-04-10T16:00:43.271Z",
+        "delta": 0.1,
+        "reason": "ページ閲覧:accounts"
+      }
+    ],
+    "trainingProgress": {},
+    "createdAt": "2026-04-10T16:00:43.264Z"
   }
 ]
