@@ -5,7 +5,7 @@
     "store": "本部",
     "role": "admin",
     "pwHash": "c3ffb432b7d6c06cffedcce3590d42feb28953e758111a55e063f63ff70bb1c3",
-    "points": 4.6,
+    "points": 4.699999999999999,
     "activityLog": [
       {
         "ts": "2026-04-10T01:43:02.362Z",
@@ -236,6 +236,11 @@
         "ts": "2026-04-10T15:13:14.662Z",
         "delta": 0.1,
         "reason": "ページ閲覧:commit-store"
+      },
+      {
+        "ts": "2026-04-10T15:13:18.461Z",
+        "delta": 0.1,
+        "reason": "ページ閲覧:mgmt-game"
       }
     ],
     "birthday": "1996-01-01"
