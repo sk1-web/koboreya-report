@@ -8,5 +8,20 @@
     "name": "",
     "ratings": {},
     "text": "あああ"
+  },
+  {
+    "time": "2026/04/10 23:59",
+    "store": "本店",
+    "cat": "service",
+    "addr": "店長",
+    "anon": false,
+    "name": "ああああああ",
+    "ratings": {
+      "smile": 3,
+      "guidance": 3,
+      "care": 3,
+      "sendoff": 3
+    },
+    "text": "あああああ"
   }
 ]
