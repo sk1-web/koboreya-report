@@ -13,6 +13,14 @@
         "total": 10,
         "passed": false
       }
+    ],
+    "special_quiz-fire": [
+      {
+        "ts": "2026-04-10T19:55:55.536Z",
+        "score": 6,
+        "total": 10,
+        "passed": false
+      }
     ]
   }
 }
