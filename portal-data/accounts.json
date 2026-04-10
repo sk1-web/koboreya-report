@@ -384,7 +384,7 @@
       "planner": 4,
       "creator": 1
     },
-    "points": 2.0000000000000004,
+    "points": 2.1000000000000005,
     "activityLog": [
       {
         "ts": "2026-04-10T16:00:43.271Z",
@@ -485,6 +485,11 @@
         "ts": "2026-04-10T19:49:05.179Z",
         "delta": 0.1,
         "reason": "ページ閲覧:accounts"
+      },
+      {
+        "ts": "2026-04-10T19:49:22.502Z",
+        "delta": 0.1,
+        "reason": "ページ閲覧:manuals"
       }
     ],
     "trainingProgress": {},
