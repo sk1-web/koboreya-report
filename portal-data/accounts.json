@@ -5,7 +5,7 @@
     "store": "本部",
     "role": "admin",
     "pwHash": "926664cf6747093c9dd47d91d749b740b6db2ecdadb771426273b98cb8f680c0",
-    "points": 0.2,
+    "points": 0.30000000000000004,
     "activityLog": [
       {
         "ts": "2026-04-10T01:43:02.362Z",
@@ -14,6 +14,11 @@
       },
       {
         "ts": "2026-04-10T01:43:02.364Z",
+        "delta": 0.1,
+        "reason": "ページ閲覧:accounts"
+      },
+      {
+        "ts": "2026-04-10T01:43:10.112Z",
         "delta": 0.1,
         "reason": "ページ閲覧:accounts"
       }
