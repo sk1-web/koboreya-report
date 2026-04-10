@@ -5,7 +5,7 @@
     "store": "本部",
     "role": "admin",
     "pwHash": "c3ffb432b7d6c06cffedcce3590d42feb28953e758111a55e063f63ff70bb1c3",
-    "points": 2.500000000000001,
+    "points": 2.700000000000001,
     "activityLog": [
       {
         "ts": "2026-04-10T01:43:02.362Z",
@@ -131,6 +131,16 @@
         "ts": "2026-04-10T02:27:55.838Z",
         "delta": 0.1,
         "reason": "ページ閲覧:job-board"
+      },
+      {
+        "ts": "2026-04-10T02:31:24.640Z",
+        "delta": 0.1,
+        "reason": "ログイン"
+      },
+      {
+        "ts": "2026-04-10T02:31:24.649Z",
+        "delta": 0.1,
+        "reason": "ページ閲覧:accounts"
       }
     ],
     "birthday": "1996-01-01"
