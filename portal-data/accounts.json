@@ -5,7 +5,7 @@
     "store": "本部",
     "role": "admin",
     "pwHash": "c3ffb432b7d6c06cffedcce3590d42feb28953e758111a55e063f63ff70bb1c3",
-    "points": 2.0000000000000004,
+    "points": 2.2000000000000006,
     "activityLog": [
       {
         "ts": "2026-04-10T01:43:02.362Z",
@@ -106,6 +106,16 @@
         "ts": "2026-04-10T02:27:38.713Z",
         "delta": 0.1,
         "reason": "ページ閲覧:meyasu"
+      },
+      {
+        "ts": "2026-04-10T02:27:39.322Z",
+        "delta": 0.1,
+        "reason": "ページ閲覧:interview-req"
+      },
+      {
+        "ts": "2026-04-10T02:27:40.080Z",
+        "delta": 0.1,
+        "reason": "ページ閲覧:reviews-ops"
       }
     ],
     "birthday": "1996-01-01"
