@@ -5,7 +5,7 @@
     "store": "本部",
     "role": "admin",
     "pwHash": "c3ffb432b7d6c06cffedcce3590d42feb28953e758111a55e063f63ff70bb1c3",
-    "points": 2.800000000000001,
+    "points": 3.4000000000000017,
     "activityLog": [
       {
         "ts": "2026-04-10T01:43:02.362Z",
@@ -146,6 +146,36 @@
         "ts": "2026-04-10T02:31:29.063Z",
         "delta": 0.1,
         "reason": "ページ閲覧:manuals"
+      },
+      {
+        "ts": "2026-04-10T02:31:51.065Z",
+        "delta": 0.1,
+        "reason": "ページ閲覧:hiring"
+      },
+      {
+        "ts": "2026-04-10T02:32:03.869Z",
+        "delta": 0.1,
+        "reason": "ページ閲覧:store-progress"
+      },
+      {
+        "ts": "2026-04-10T02:32:11.777Z",
+        "delta": 0.1,
+        "reason": "ページ閲覧:store-contacts"
+      },
+      {
+        "ts": "2026-04-10T02:32:27.154Z",
+        "delta": 0.1,
+        "reason": "ページ閲覧:store-rules"
+      },
+      {
+        "ts": "2026-04-10T02:32:34.361Z",
+        "delta": 0.1,
+        "reason": "ページ閲覧:store-rules"
+      },
+      {
+        "ts": "2026-04-10T02:32:37.702Z",
+        "delta": 0.1,
+        "reason": "ページ閲覧:store-schedule"
       }
     ],
     "birthday": "1996-01-01"
