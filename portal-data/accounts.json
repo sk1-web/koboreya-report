@@ -4,8 +4,8 @@
     "name": "久野　慧",
     "store": "本部",
     "role": "admin",
-    "pwHash": "eac458e398a9e64b403ddabf3322d2e79dfbad65312e5e134fdd688937786109",
-    "points": 7.19999999999999,
+    "pwHash": "c3ffb432b7d6c06cffedcce3590d42feb28953e758111a55e063f63ff70bb1c3",
+    "points": 7.39999999999999,
     "activityLog": [
       {
         "ts": "2026-04-10T01:43:02.362Z",
@@ -366,6 +366,16 @@
         "ts": "2026-04-10T16:00:03.661Z",
         "delta": 0.1,
         "reason": "ページ閲覧:mgmt-game"
+      },
+      {
+        "ts": "2026-04-11T05:46:27.539Z",
+        "delta": 0.1,
+        "reason": "ログイン"
+      },
+      {
+        "ts": "2026-04-11T05:46:27.545Z",
+        "delta": 0.1,
+        "reason": "ページ閲覧:accounts"
       }
     ],
     "birthday": "1996-01-01"
