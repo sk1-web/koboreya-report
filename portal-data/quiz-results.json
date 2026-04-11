@@ -21,6 +21,14 @@
         "total": 10,
         "passed": false
       }
+    ],
+    "manual_初級": [
+      {
+        "ts": "2026-04-11T01:15:29.351Z",
+        "score": 6,
+        "total": 10,
+        "passed": false
+      }
     ]
   }
 }
