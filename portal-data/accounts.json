@@ -5,7 +5,7 @@
     "store": "本部",
     "role": "admin",
     "pwHash": "c3ffb432b7d6c06cffedcce3590d42feb28953e758111a55e063f63ff70bb1c3",
-    "points": 10.29999999999998,
+    "points": 8.999999999999984,
     "activityLog": [
       {
         "ts": "2026-04-10T01:43:02.362Z",
@@ -453,74 +453,9 @@
         "reason": "ページ閲覧:elearning"
       },
       {
-        "ts": "2026-04-11T13:35:47.142Z",
+        "ts": "2026-04-11T13:39:55.511Z",
         "delta": 0.1,
         "reason": "ページ閲覧:accounts"
-      },
-      {
-        "ts": "2026-04-11T13:35:48.696Z",
-        "delta": 0.1,
-        "reason": "ページ閲覧:edu-schedule"
-      },
-      {
-        "ts": "2026-04-11T13:35:49.451Z",
-        "delta": 0.1,
-        "reason": "ページ閲覧:manuals"
-      },
-      {
-        "ts": "2026-04-11T13:35:57.464Z",
-        "delta": 0.1,
-        "reason": "ページ閲覧:edu-schedule"
-      },
-      {
-        "ts": "2026-04-11T13:35:58.303Z",
-        "delta": 0.1,
-        "reason": "ページ閲覧:manuals"
-      },
-      {
-        "ts": "2026-04-11T13:36:00.849Z",
-        "delta": 0.1,
-        "reason": "ページ閲覧:elearning"
-      },
-      {
-        "ts": "2026-04-11T13:36:09.998Z",
-        "delta": 0.1,
-        "reason": "ページ閲覧:manuals"
-      },
-      {
-        "ts": "2026-04-11T13:36:12.334Z",
-        "delta": 0.1,
-        "reason": "ページ閲覧:elearning"
-      },
-      {
-        "ts": "2026-04-11T13:36:14.704Z",
-        "delta": 0.1,
-        "reason": "ページ閲覧:manuals"
-      },
-      {
-        "ts": "2026-04-11T13:36:16.405Z",
-        "delta": 0.1,
-        "reason": "ページ閲覧:elearning"
-      },
-      {
-        "ts": "2026-04-11T13:36:19.793Z",
-        "delta": 0.1,
-        "reason": "ページ閲覧:manuals"
-      },
-      {
-        "ts": "2026-04-11T13:36:21.919Z",
-        "delta": 0.1,
-        "reason": "ページ閲覧:elearning"
-      },
-      {
-        "ts": "2026-04-11T13:36:23.792Z",
-        "delta": 0.1,
-        "reason": "ページ閲覧:manuals"
-      },
-      {
-        "ts": "2026-04-11T13:36:25.750Z",
-        "delta": 0.1,
-        "reason": "ページ閲覧:elearning"
       }
     ],
     "birthday": "1996-01-01"
