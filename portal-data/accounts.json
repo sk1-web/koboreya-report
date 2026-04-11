@@ -5,7 +5,7 @@
     "store": "本部",
     "role": "admin",
     "pwHash": "c3ffb432b7d6c06cffedcce3590d42feb28953e758111a55e063f63ff70bb1c3",
-    "points": 8.999999999999984,
+    "points": 9.099999999999984,
     "activityLog": [
       {
         "ts": "2026-04-10T01:43:02.362Z",
@@ -456,6 +456,11 @@
         "ts": "2026-04-11T13:39:55.511Z",
         "delta": 0.1,
         "reason": "ページ閲覧:accounts"
+      },
+      {
+        "ts": "2026-04-11T13:39:57.581Z",
+        "delta": 0.1,
+        "reason": "ページ閲覧:manuals"
       }
     ],
     "birthday": "1996-01-01"
