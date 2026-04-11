@@ -12,6 +12,12 @@
         "score": 3,
         "total": 10,
         "passed": false
+      },
+      {
+        "ts": "2026-04-11T01:16:36.272Z",
+        "score": 1,
+        "total": 10,
+        "passed": false
       }
     ],
     "special_quiz-fire": [
