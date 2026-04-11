@@ -384,7 +384,7 @@
       "planner": 4,
       "creator": 1
     },
-    "points": 2.600000000000001,
+    "points": 5.700000000000001,
     "activityLog": [
       {
         "ts": "2026-04-10T16:00:43.271Z",
@@ -515,9 +515,20 @@
         "ts": "2026-04-11T01:16:05.294Z",
         "delta": 0.1,
         "reason": "ページ閲覧:manuals"
+      },
+      {
+        "ts": "2026-04-11T01:16:36.275Z",
+        "delta": 3,
+        "reason": "🧼 衛生管理テスト受講"
+      },
+      {
+        "ts": "2026-04-11T01:16:41.198Z",
+        "delta": 0.1,
+        "reason": "ページ閲覧:accounts"
       }
     ],
     "trainingProgress": {},
-    "createdAt": "2026-04-10T16:00:43.264Z"
+    "createdAt": "2026-04-10T16:00:43.264Z",
+    "quiz_special_quiz-hygiene": "2026-04-11T01:16:36.274Z"
   }
 ]
