@@ -167,8 +167,9 @@ td.ctd{text-align:left;min-width:130px;}
 <header>
   <div><h1>&#x1F3EA; 店舗実績分析ツール</h1><div class="sub">日別データを貼り付けて週次・月次の人件費率を分析（週区切り：月〜日）</div></div>
   <div class="hbtns no-print" style="align-items:center;gap:7px">
-    <span id="ghSyncStatus" style="font-size:10.5px;opacity:.85"></span>
+    <span id="ghSyncStatus" style="font-size:10.5px;opacity:.85;cursor:pointer" onclick="openGhModal()" title="同期設定を開く"></span>
     <button class="btn btn-sv btn-sm" id="headerSaveBtn" onclick="manualSave()" style="background:#27ae60;color:#fff;font-weight:700;display:none">&#x1F4BE; 保存<span id="headerSaveBadge" style="display:none;margin-left:4px">✓</span></button>
+    <button class="btn btn-sv btn-sm" onclick="openGhModal()" style="background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.35);font-size:13px;padding:4px 8px" title="GitHub同期設定">&#x2699;&#xFE0F;</button>
     <button class="btn btn-sv btn-sm" onclick="importData()">&#x1F4E5; インポート</button>
     <button class="btn btn-ex btn-sm" onclick="exportData()">&#x1F4E4; エクスポート</button>
     <input type="file" id="importFile" accept=".xlsx" style="display:none" onchange="onImportFile(this)">
@@ -411,14 +412,12 @@ var CAUSE_ACTIONS={
 var GH_REPO='sk1-web/koboreya-report';
 var GH_BRANCH='main';
 var GH_PAT_KEY='shopKpiGitHubPAT';
-var _ta='ghp_2k59S9XY3d72',_tb='cJvt7Gt15jXMKQnoCb149kvM';
-var GH_DEFAULT_TOKEN=_ta+_tb;
 // ── デバイス固有ID（端末ごとに専用ファイルを持ち書き込み競合をゼロにする）──
 var _devId=localStorage.getItem('kbr_did')||'';
 if(!_devId){_devId='d'+Date.now().toString(36)+Math.random().toString(36).substr(2,4);localStorage.setItem('kbr_did',_devId);}
 var GH_MYFILE='kbr_'+_devId+'.json'; // 自デバイス専用書き込みファイル
-function ghToken(){return GH_DEFAULT_TOKEN;}
-function ghSaveToken(v){}
+function ghToken(){return localStorage.getItem(GH_PAT_KEY)||'';}
+function ghSaveToken(v){if(v)localStorage.setItem(GH_PAT_KEY,v.trim());else localStorage.removeItem(GH_PAT_KEY);}
 
 (function(){
   loadStorage();
@@ -439,7 +438,8 @@ function ghSaveToken(v){}
     ghSyncStatus('☁ 読み込み中…','rgba(255,255,255,.7)');
     githubAutoLoad();
   } else {
-    ghSyncStatus('','');
+    // トークン未設定 → 設定を促す
+    ghSyncStatus('⚙ 同期設定が必要 →クリック','rgba(255,200,80,.95)');
   }
 })();
 
@@ -1619,7 +1619,16 @@ async function githubAutoLoad(){
   try{
     // リポジトリのファイル一覧を取得
     var listResp=await fetch(apiBase+'/contents/?ref='+GH_BRANCH,{headers:headers});
-    if(!listResp.ok)throw new Error('HTTP '+listResp.status);
+    if(!listResp.ok){
+      if(listResp.status===401||listResp.status===403){
+        ghSyncStatus('⚠ トークン期限切れ','rgba(255,100,100,.95)');
+        var errEl=document.getElementById('ghModalError');
+        if(errEl){errEl.textContent='⚠ トークンが無効または期限切れです（HTTP '+listResp.status+'）。新しいトークンを入力してください。';errEl.style.display='block';}
+        openGhModal();
+        return;
+      }
+      throw new Error('HTTP '+listResp.status);
+    }
     var files=await listResp.json();
     // kbr_*.json（全デバイスファイル）＋旧形式ファイルを収集
     var devFiles=files.filter(function(f){return /^kbr_[a-z0-9]+\.json$/i.test(f.name);});
@@ -1722,7 +1731,17 @@ async function githubSave(){
     var body={message:'自動同期['+_devId+'] '+new Date().toLocaleString('ja-JP'),content:b64,branch:GH_BRANCH};
     if(sha)body.sha=sha;
     var resp=await fetch(url,{method:'PUT',headers:headers,body:JSON.stringify(body)});
-    if(!resp.ok){var err=await resp.json().catch(function(){return{};});throw new Error('HTTP '+resp.status);}
+    if(!resp.ok){
+      if(resp.status===401||resp.status===403){
+        ghSyncStatus('⚠ トークン期限切れ','rgba(255,100,100,.95)');
+        var errEl=document.getElementById('ghModalError');
+        if(errEl){errEl.textContent='⚠ トークンが無効または期限切れです（HTTP '+resp.status+'）。新しいトークンを入力してください。';errEl.style.display='block';}
+        openGhModal();
+        _ghSaving=false;
+        return;
+      }
+      var err=await resp.json().catch(function(){return{};});throw new Error('HTTP '+resp.status);
+    }
     var now=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
     ghSyncStatus('☁ '+now+' 保存済み','rgba(255,255,255,.85)');
   }catch(e){
@@ -1740,5 +1759,31 @@ setInterval(function(){
   }
 },120000);
 </script>
+
+<!-- GitHub設定モーダル -->
+<div id="ghModal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.5);align-items:center;justify-content:center" onclick="if(event.target===this)closeGhModal()">
+  <div style="background:#fff;border-radius:16px;padding:28px 28px 22px;max-width:500px;width:93%;box-shadow:0 8px 40px rgba(0,0,0,.25);animation:dcmIn .18s ease">
+    <div style="font-size:18px;margin-bottom:6px">⚙️ GitHub同期設定</div>
+    <p style="font-size:12px;color:#64748b;margin-bottom:16px;line-height:1.6">Personal Access Tokenを設定すると、スマートフォン・PC など複数デバイスでデータが自動同期されます。</p>
+    <div id="ghModalError" style="display:none;background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;font-size:12.5px;color:#dc2626;margin-bottom:14px;line-height:1.5"></div>
+    <label style="font-size:11px;font-weight:700;color:#555;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">GitHub Personal Access Token</label>
+    <input id="ghModalToken" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="width:100%;border:1.5px solid #ddd;border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:4px;font-family:monospace;outline:none" onfocus="this.style.borderColor='#2E5E8E'" onblur="this.style.borderColor='#ddd'">
+    <div style="font-size:11px;color:#94a3b8;margin-bottom:18px;line-height:1.7;background:#f8fafc;border-radius:8px;padding:10px 12px;margin-top:8px">
+      📌 <b>トークンの作り方（一度だけ設定すれば OK）</b><br>
+      1. <a href="https://github.com/settings/tokens" target="_blank" style="color:#2563eb;text-decoration:underline">github.com/settings/tokens</a> を開く<br>
+      2. 「Generate new token」→「Generate new token <b>(classic)</b>」<br>
+      3. スコープ: <b>repo</b> にチェック ✓<br>
+      4. Expiration（有効期限）: <b>No expiration</b> を選択 ← <span style="color:#dc2626;font-weight:700">ここが重要！</span><br>
+      5. 生成されたトークンをここに貼り付けて「保存」
+    </div>
+    <div style="display:flex;gap:8px;justify-content:space-between;align-items:center">
+      <button onclick="clearGhToken()" style="padding:8px 14px;border:1.5px solid #fca5a5;background:#fff;color:#ef4444;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600">🗑 削除</button>
+      <div style="display:flex;gap:8px">
+        <button onclick="closeGhModal()" style="padding:8px 16px;border:1.5px solid #cbd5e1;background:#f8fafc;color:#475569;border-radius:8px;font-size:12px;cursor:pointer">キャンセル</button>
+        <button onclick="saveGhModal()" style="padding:8px 20px;border:none;background:#1F3864;color:#fff;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">保存して同期</button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
