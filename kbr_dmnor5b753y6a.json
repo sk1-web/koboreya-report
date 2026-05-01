@@ -578,7 +578,7 @@
               "31": 12.08
             }
           },
-          "_ts": 1775575019220,
+          "_ts": 1775751506832,
           "nextMeasures": "",
           "feedback": ""
         }
@@ -3491,7 +3491,9 @@
               "31": 9.24
             }
           },
-          "_ts": 1775200787632
+          "_ts": 1775712770461,
+          "nextMeasures": "",
+          "feedback": ""
         }
       }
     },
@@ -4076,7 +4078,124 @@
           "_ts": 1775197795577
         }
       }
+    },
+    {
+      "id": "s1775575019220",
+      "name": "動作確認テスト店",
+      "managerName": "",
+      "months": {
+        "2026-03": {
+          "year": 2026,
+          "month": 3,
+          "target": 20,
+          "days": [
+            {
+              "date": 1,
+              "weather": "☀️",
+              "sales": 50,
+              "achievement": 100,
+              "customers": 100,
+              "unitPrice": 5000,
+              "costRate": 30,
+              "laborRate": 18,
+              "cause": "",
+              "comment": "",
+              "wd": 0,
+              "dn": "日",
+              "wg": 0
+            },
+            {
+              "date": 2,
+              "weather": "☀️",
+              "sales": 0,
+              "achievement": 0,
+              "customers": 0,
+              "unitPrice": 0,
+              "costRate": 0,
+              "laborRate": 0,
+              "cause": "",
+              "comment": "",
+              "wd": 1,
+              "dn": "月",
+              "wg": 1
+            },
+            {
+              "date": 3,
+              "weather": "☀️",
+              "sales": 60,
+              "achievement": 120,
+              "customers": 120,
+              "unitPrice": 5000,
+              "costRate": 30,
+              "laborRate": 22,
+              "cause": "",
+              "comment": "",
+              "wd": 2,
+              "dn": "火",
+              "wg": 1
+            },
+            {
+              "date": 4,
+              "weather": "☀️",
+              "sales": 0,
+              "achievement": 0,
+              "customers": 0,
+              "unitPrice": 0,
+              "costRate": 0,
+              "laborRate": 0,
+              "cause": "",
+              "comment": "",
+              "wd": 3,
+              "dn": "水",
+              "wg": 1
+            },
+            {
+              "date": 5,
+              "weather": "☀️",
+              "sales": 40,
+              "achievement": 80,
+              "customers": 80,
+              "unitPrice": 5000,
+              "costRate": 30,
+              "laborRate": 20,
+              "cause": "",
+              "comment": "",
+              "wd": 4,
+              "dn": "木",
+              "wg": 1
+            }
+          ],
+          "overallReview": "",
+          "nextMeasures": "",
+          "feedback": "",
+          "planDays": {
+            "planSales": {
+              "1": 500000,
+              "2": 500000,
+              "3": 500000,
+              "4": 500000,
+              "5": 500000
+            },
+            "planLabor": {
+              "1": 100000,
+              "2": 100000,
+              "3": 100000,
+              "4": 100000,
+              "5": 100000
+            },
+            "planLaborRate": {
+              "1": 20,
+              "2": 20,
+              "3": 20,
+              "4": 20,
+              "5": 20
+            }
+          },
+          "_ts": 1775604861853
+        }
+      }
     }
   ],
-  "_ts": 1775720870892
+  "_ts": 1777658591037,
+  "deletedStores": []
 }
